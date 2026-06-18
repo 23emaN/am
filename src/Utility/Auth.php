@@ -11,10 +11,51 @@ use Throwable;
 class Auth
 {
 
+    public static function bearerToken(): string
+    {
+
+        $header = '';
+
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+
+            $header = $_SERVER['HTTP_AUTHORIZATION'];
+
+        } elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+
+            $header = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+
+        } elseif (function_exists('getallheaders')) {
+
+            foreach (getallheaders() as $name => $value) {
+
+                if (strcasecmp($name, 'Authorization') === 0) {
+
+                    $header = $value;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+        if (preg_match('/Bearer\s+(\S+)/i', $header, $matches)) {
+
+            return trim($matches[1]);
+
+        }
+
+        return '';
+
+    }
+
     public static function requireUserToken(): object
     {
 
-        if (! isset($_SESSION['access_token'])) {
+        $jwt = self::bearerToken();
+
+        if ($jwt === '') {
 
             Response::json(0, 'Unauthorized', null);
 
@@ -40,7 +81,7 @@ class Auth
 
         try {
 
-            $token = JWT::decode($_SESSION['access_token'], new Key($secretKey, 'HS256'));
+            $token = JWT::decode($jwt, new Key($secretKey, 'HS256'));
 
         } catch (Throwable $exception) {
 
@@ -92,8 +133,6 @@ class Auth
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (! $row) {
-
-            unset($_SESSION['access_token']);
 
             Response::json(0, 'User revoked', null);
 

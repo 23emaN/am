@@ -1,5 +1,9 @@
-RewriteEngine On
-
-RewriteCond %{REQUEST_FILENAME} !-d 
-RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteEngine On
+
+# ส่ง header Authorization (Bearer token) ต่อให้ PHP อ่านได้ผ่าน $_SERVER['HTTP_AUTHORIZATION']
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule (.*) $1.php [L]
