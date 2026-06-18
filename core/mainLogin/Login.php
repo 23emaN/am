@@ -1,11 +1,5 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-
-    session_start();
-
-}
-
 use App\Database\Connection;
 use App\Utility\Response;
 use Dotenv\Dotenv;
@@ -145,17 +139,7 @@ if ($row_login) {
 
             $jwt_token = JWT::encode($payload, $secret, 'HS256');
 
-            $_SESSION['access_token'] = $jwt_token;
-
-            if (isset($_SESSION['access_token'])) {
-
-                Response::json(1, 'เข้าสู่ระบบสำเร็จ', null);
-
-            } else {
-
-                Response::json(0, 'เกิดข้อผิดพลาดในการสร้างเซสชัน', null);
-
-            }
+            Response::json(1, 'เข้าสู่ระบบสำเร็จ', ['access_token' => $jwt_token]);
 
         } else {
 
