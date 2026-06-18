@@ -1,0 +1,27 @@
+:root {
+    --font-sans-serif: 'Kanit', sans-serif;
+}
+
+html, body {
+    font-family: var(--font-sans-serif) !important;
+}
+
+input, button, select, textarea {
+    font-family: var(--font-sans-serif) !important;
+}
+
+.ri-refresh-line {
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item .page-link.active {
+    background-color: #605dff;
+    border-color: #605dff;
+    color: #fff;
+    z-index: 0 !important;
+}
