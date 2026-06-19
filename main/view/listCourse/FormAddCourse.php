@@ -3,175 +3,472 @@
     require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
     $raw = file_get_contents("php://input");
-
     $data = json_decode($raw, true);
 
-    $list_data = $data["list_data"] ?? [];
-
+    // รองรับทั้งรูปแบบใหม่ (groups/types) และเก่า (list_data = groups)
+    $groups = $data["groups"] ?? $data["list_data"] ?? [];
+    $types  = $data["types"]  ?? [];
 ?>
 <style>
-    /* บังคับให้ช่องกรอกเป็นสีขาวและเอาสีเทาออก */
-.form-control {
-    background-color: #ffffff !important;
-}
-
-/* กรณีต้องการให้เวลา Focus แล้วยังเป็นสีขาวอยู่ */
-.form-control:focus {
-    background-color: #ffffff !important;
-}
-
-/* ปรับความสูงของ Select2 ให้มีขนาด 38px เท่ากับ input ช่องอื่น */
-.select2-container .select2-selection--single {
-    height: 38px !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 0.375rem !important;
-    background-color: #ffffff !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: 36px !important;
-    padding-left: 0.75rem !important;
-    color: var(--bs-body-color) !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__placeholder {
-    color: #6c757d !important;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 36px !important;
-}
+    .form-control, .form-select { background-color: #ffffff !important; }
+    .form-control:focus, .form-select:focus { background-color: #ffffff !important; }
+    .select2-container .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0.375rem !important;
+        background-color: #ffffff !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px !important; padding-left: 0.75rem !important; color: var(--bs-body-color) !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #6c757d !important; }
+    .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px !important; }
+    /* Quill ต้องมี height ชัดเจน เพราะ .ql-container ใช้ height:100% */
+    #editor_course_detail { height: 280px; background:#fff; }
+    .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    /* ช่อง disabled ให้เป็นสีเทา (override .form-control สีขาวด้านบน) */
+    .form-control:disabled, .form-select:disabled, .form-control[readonly] { background-color: #e9ecef !important; }
+    /* ตัวสร้างรหัสหลักสูตร — แสดงแนวนอนบรรทัดเดียว เลื่อนในช่องได้ถ้ายาวเกิน */
+    .code-builder .cb-row { border: 1px solid #ced4da; border-radius: .375rem; padding: 6px 6px; min-height: 38px; background:#fff; flex-wrap: nowrap !important; overflow: hidden; gap: 0 !important; }
+    .code-builder .cb-seg-text { border:0; outline:0; flex:0 0 auto; width:1ch; min-width:1ch; padding:2px 0; background:transparent; box-sizing:content-box; }
+    .code-builder .cb-seg-text.cb-seg-last { flex:1 1 40px !important; width:auto !important; min-width:40px; }
+    .code-builder .cb-seg-year { border:0; outline:0; flex:0 0 auto; min-width:0; width:auto; padding:2px 0; background:#fff; cursor:pointer; }
+    .code-builder .cb-seg-quarter { flex:0 0 auto; width:34px; min-width:34px; text-align:center; padding:2px 1px; background:#e9ecef !important; }
 </style>
 
 <div class="card bg-white border-0 rounded-3 mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-0">
         <h2 class="mb-0">เพิ่มคอร์สเรียนใหม่</h2>
     </div>
-    <div class="px-4 mb-3"> <div class="alert alert-success mb-0" role="alert">
-        คุณสามารถเพิ่มข้อมูลบทเรียนและข้อสอบได้หลังจากเพิ่มคอร์สเรียน
+    <div class="px-4 mb-3">
+        <div class="alert alert-success mb-0" role="alert">
+            คุณสามารถเพิ่มข้อมูลบทเรียนและข้อสอบได้หลังจากเพิ่มคอร์สเรียน
+        </div>
     </div>
-</div>
+
     <div class="card-body p-4">
         <form id="formAddCourse" enctype="multipart/form-data">
-            <!-- ข้อมูลทั่วไป -->
-            <h5 class="mb-3 border-bottom pb-2">ข้อมูลทั่วไป</h5>
-            <div class="row g-3 mb-4">
 
+            <!-- ===== ข้อมูลทั่วไป ===== -->
+            <h4 class="mb-3 fw-bold">ข้อมูลทั่วไป</h4>
+            <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                    <label for="course_name" class="form-label fw-medium">รูปหน้าปก<span class="text-danger">*</span></label>
-                     <input type="file" class="form-control" id="course_cover_image" name="course_cover_image" accept="image/*">
+                    <label for="course_cover_image" class="form-label fw-medium">รูปหน้าปก <span class="text-danger">*</span></label>
+                    <input type="file" class="form-control" id="course_cover_image" name="course_cover_image" accept="image/*">
                 </div>
-
                 <div class="col-md-8">
-                    <label for="course_price" class="form-label fw-medium">ชื่อคอร์สเรียน<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="course_name" name="course_name" required placeholder="กรอกชื่อคอร์สเรียน">
+                    <label for="course_name" class="form-label fw-medium">ชื่อคอร์สเรียน <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="course_name" name="course_name" placeholder="กรอกชื่อคอร์สเรียน">
                 </div>
 
                 <div class="col-md-4">
-                    <label for="course_type" class="form-label fw-medium">ประเภท<span class="text-danger">*</span></label>
-                     <input type="text" class="form-control" id="course_type" name="course_type" required placeholder="ประเภทคอร์สเรียน">
+                    <label for="course_type" class="form-label fw-medium">ประเภท <span class="text-danger">*</span></label>
+                    <select class="form-select" id="course_type" name="course_type">
+                        <option value="">เลือกประเภท</option>
+                        <?php $type_selected = false; ?>
+                        <?php foreach ($types as $row): ?>
+                            <?php
+                                // เลือก "ทั่วไป" เป็นค่าเริ่มต้น
+                                $is_general = (($row['type_name'] ?? '') === 'ทั่วไป');
+                                $sel = ($is_general && !$type_selected) ? 'selected' : '';
+                                if ($sel) { $type_selected = true; }
+                            ?>
+                            <option value="<?php echo htmlspecialchars($row['type_id'] ?? ''); ?>"
+                                    data-name="<?php echo htmlspecialchars($row['type_name'] ?? ''); ?>" <?php echo $sel; ?>>
+                                <?php echo htmlspecialchars($row['type_name'] ?? ''); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-
-                  <div class="col-md-4">
-                    <label for="course_category" class="form-label fw-medium">หมวดหมู่<span class="text-danger">*</span></label>
-                    <select class="form-select" id="course_category" name="course_category" required>
-                        <option value="" disabled selected>เลือกหมวดหมู่</option>
-                        <?php foreach ($list_data as $row): ?>
+                <div class="col-md-4">
+                    <label for="course_group" class="form-label fw-medium">หมวดหมู่ <span class="text-danger">*</span></label>
+                    <select class="form-select" id="course_group" name="course_group">
+                        <option value="">กรุณาเลือกหมวดหมู่</option>
+                        <?php foreach ($groups as $row): ?>
                             <option value="<?php echo htmlspecialchars($row['group_id'] ?? ''); ?>">
                                 <?php echo htmlspecialchars($row['group_name'] ?? ''); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-
                 <div class="col-md-4">
-                    <label for="course_instructor" class="form-label fw-medium">ผู้บรรยาย/ผู้สอน<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="course_instructor" name="course_instructor" required placeholder="กรอกผู้บรรยาย/ผู้สอน">
+                    <label for="course_instructor" class="form-label fw-medium">ผู้บรรยาย/ผู้สอน <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="course_instructor" name="course_instructor" placeholder="กรอกผู้บรรยาย/ผู้สอน">
                 </div>
             </div>
 
-            <!-- รหัสวิชา CPD -->
-            <h5 class="mb-3 border-bottom pb-2">รหัสวิชา CPD</h5>
+            <div class="mb-3">
+                <label for="course_overview" class="form-label fw-medium">รายละเอียดโดยย่อ <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="course_overview" name="course_overview" rows="3" placeholder="คำอธิบายสั้นๆ"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-medium">รายละเอียดแบบเต็ม <span class="text-danger">*</span></label>
+                <div id="editor_course_detail"></div>
+                <input type="hidden" name="course_detail" id="course_detail">
+            </div>
+
+            <div class="row g-3 mb-3">
+                <?php for ($i = 1; $i <= 4; $i++): ?>
+                    <div class="col-md-3">
+                        <label for="course_approval_date_<?php echo $i; ?>" class="form-label fw-medium">วันที่อนุมัติหลักสูตร (ไตรมาส <?php echo $i; ?>)</label>
+                        <input type="date" class="form-control course-approval-date" id="course_approval_date_<?php echo $i; ?>" name="course_approval_date_<?php echo $i; ?>" disabled>
+                    </div>
+                <?php endfor; ?>
+            </div>
+
+            <div class="mb-4">
+                <label for="course_demo_link" class="form-label fw-medium">ลิงก์ตัวอย่าง (Demo)</label>
+                <input type="text" class="form-control" id="course_demo_link" name="course_demo_link" placeholder="https://...">
+            </div>
+
+            <!-- ===== รหัสหลักสูตรทุกไตรมาส ===== -->
+            <h4 class="mb-1 fw-bold">รหัสหลักสูตรทุกไตรมาส</h4>
             <div class="row g-3 mb-4">
-
-                <div class="col-md-3">
-                    <label for="course_code_cpd_1" class="form-label fw-medium">รหัสวิชา CPD 1</label>
-                    <input type="text" class="form-control" id="course_code_cpd_1" name="course_code_cpd_1" placeholder="กรอกรหัส CPD 1">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpd_2" class="form-label fw-medium">รหัสวิชา CPD 2</label>
-                    <input type="text" class="form-control" id="course_code_cpd_2" name="course_code_cpd_2" placeholder="กรอกรหัส CPD 2">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpd_3" class="form-label fw-medium">รหัสวิชา CPD 3</label>
-                    <input type="text" class="form-control" id="course_code_cpd_3" name="course_code_cpd_3" placeholder="กรอกรหัส CPD 3">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpd_4" class="form-label fw-medium">รหัสวิชา CPD 4</label>
-                    <input type="text" class="form-control" id="course_code_cpd_4" name="course_code_cpd_4" placeholder="กรอกรหัส CPD 4">
-                </div>
-
+                <?php for ($i = 1; $i <= 4; $i++): $q = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
+                    <div class="col-md-3">
+                        <div class="code-builder" data-name="course_code_cpd_<?php echo $i; ?>" data-quarter="<?php echo $q; ?>">
+                            <label class="form-label fw-medium mb-1">รหัสหลักสูตร CPD (ไตรมาส <?php echo $i; ?>)</label>
+                            <div class="cb-row d-flex flex-wrap align-items-center gap-1"></div>
+                            <div class="cb-toggles d-flex justify-content-end gap-3 mt-1 small text-secondary">
+                                <label class="m-0 user-select-none"><input type="checkbox" class="cb-year"> ปี</label>
+                                <label class="m-0 user-select-none"><input type="checkbox" class="cb-quarter"> ไตรมาส</label>
+                            </div>
+                            <input type="hidden" name="course_code_cpd_<?php echo $i; ?>">
+                        </div>
+                    </div>
+                <?php endfor; ?>
+                <?php for ($i = 1; $i <= 4; $i++): $q = str_pad($i, 2, '0', STR_PAD_LEFT); ?>
+                    <div class="col-md-3">
+                        <div class="code-builder" data-name="course_code_cpa_<?php echo $i; ?>" data-quarter="<?php echo $q; ?>">
+                            <label class="form-label fw-medium mb-1">รหัสหลักสูตร CPA (ไตรมาส <?php echo $i; ?>)</label>
+                            <div class="cb-row d-flex flex-wrap align-items-center gap-1"></div>
+                            <div class="cb-toggles d-flex justify-content-end gap-3 mt-1 small text-secondary">
+                                <label class="m-0 user-select-none"><input type="checkbox" class="cb-year"> ปี</label>
+                                <label class="m-0 user-select-none"><input type="checkbox" class="cb-quarter"> ไตรมาส</label>
+                            </div>
+                            <input type="hidden" name="course_code_cpa_<?php echo $i; ?>">
+                        </div>
+                    </div>
+                <?php endfor; ?>
             </div>
 
-            <!-- รหัสวิชา CPA -->
-            <h5 class="mb-3 border-bottom pb-2">รหัสวิชา CPA</h5>
+            <!-- ===== การทำข้อสอบ ===== -->
+            <h4 class="mb-3 fw-bold">การทำข้อสอบ</h4>
             <div class="row g-3 mb-4">
-
-                <div class="col-md-3">
-                    <label for="course_code_cpa_1" class="form-label fw-medium">รหัสวิชา CPA 1</label>
-                    <input type="text" class="form-control" id="course_code_cpa_1" name="course_code_cpa_1" placeholder="กรอกรหัส CPA 1">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpa_2" class="form-label fw-medium">รหัสวิชา CPA 2</label>
-                    <input type="text" class="form-control" id="course_code_cpa_2" name="course_code_cpa_2" placeholder="กรอกรหัส CPA 2">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpa_3" class="form-label fw-medium">รหัสวิชา CPA 3</label>
-                    <input type="text" class="form-control" id="course_code_cpa_3" name="course_code_cpa_3" placeholder="กรอกรหัส CPA 3">
-                </div>
-
-                <div class="col-md-3">
-                    <label for="course_code_cpa_4" class="form-label fw-medium">รหัสวิชา CPA 4</label>
-                    <input type="text" class="form-control" id="course_code_cpa_4" name="course_code_cpa_4" placeholder="กรอกรหัส CPA 4">
-                </div>
-
+                <div class="col-md-3"><label class="form-label fw-medium">ระยะเวลาทำข้อสอบ (นาที) <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control" name="course_exam_time" placeholder="0"></div>
+                <div class="col-md-3"><label class="form-label fw-medium">คะแนนขั้นต่ำในการผ่านข้อสอบ <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control" name="course_minimum_score" placeholder="0"></div>
+                <div class="col-md-3"><label class="form-label fw-medium">จำนวนข้อสอบที่ต้องทำ <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control" name="course_number_exam" placeholder="0"></div>
+                <div class="col-md-3"><label class="form-label fw-medium">จำนวนครั้งที่ทำข้อสอบได้ <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control" name="course_number_time" placeholder="0"></div>
             </div>
 
-            <!-- การแสดงผลและสถานะ -->
-            <h5 class="mb-3 border-bottom pb-2">การตั้งค่าการแสดงผล</h5>
+            <!-- ===== ราคาและข้อมูลที่จำเป็นอื่น ๆ ===== -->
+            <h4 class="mb-3 fw-bold">ราคาและข้อมูลที่จำเป็นอื่น ๆ</h4>
+
+            <h6 class="fw-bold text-secondary mb-2">ผู้ทำ</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPD บัญชี <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpd_hour" placeholder="0.00"></div>
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPD บัญชี (จรรยาบรรณ) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpd_ethics" placeholder="0.00"></div>
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPD (อื่น ๆ) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpd_other" placeholder="0.00"></div>
+            </div>
+
+            <h6 class="fw-bold text-secondary mb-2">ผู้สอบ</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPA บัญชี <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpa_hour" placeholder="0.00"></div>
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPA บัญชี (จรรยาบรรณ) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpa_ethics" placeholder="0.00"></div>
+                <div class="col-md-4"><label class="form-label fw-medium">ชั่วโมง CPA (อื่น ๆ) <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_cpa_other" placeholder="0.00"></div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-3"><label class="form-label fw-medium">ราคาปกติ <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_price" placeholder="0.00"></div>
+                <div class="col-md-3"><label class="form-label fw-medium">ราคาโปรโมชั่น</label>
+                    <input type="number" step="0.01" min="0" class="form-control" name="course_promotion" placeholder="0.00"></div>
+                <div class="col-md-3"><label class="form-label fw-medium">ระยะเวลาอบรม (วัน) <span class="text-danger">*</span></label>
+                    <input type="number" min="0" class="form-control" name="course_period" placeholder="0"></div>
+                <div class="col-md-3">
+                    <label class="form-label fw-medium d-block">แสดงคอร์สในหน้าแรก <span class="text-danger">*</span></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_display" id="course_display_1" value="1">
+                        <label class="form-check-label" for="course_display_1">แสดง</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_display" id="course_display_0" value="0" checked>
+                        <label class="form-check-label" for="course_display_0">ไม่แสดง</label>
+                    </div>
+                </div>
+            </div>
+
             <div class="row g-3 mb-4">
-
-                <div class="col-md-6">
-                    <label for="course_display" class="form-label fw-medium">แสดงในหน้าหลัก</label>
-                    <select class="form-select" id="course_display" name="course_display">
-                        <option value="1" selected>แสดง</option>
-                        <option value="0">ไม่แสดง</option>
-                    </select>
+                <div class="col-md-4">
+                    <label class="form-label fw-medium d-block">สถานะคอร์สเรียน <span class="text-danger">*</span></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_status" id="course_status_1" value="1" checked>
+                        <label class="form-check-label" for="course_status_1">เปิดใช้งาน</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_status" id="course_status_0" value="0">
+                        <label class="form-check-label" for="course_status_0">ปิดใช้งาน</label>
+                    </div>
                 </div>
-
-                <div class="col-md-6">
-                    <label for="course_status" class="form-label fw-medium">สถานะคอร์สเรียน</label>
-                    <select class="form-select" id="course_status" name="course_status">
-                        <option value="1" selected>เปิดใช้งาน</option>
-                        <option value="0">ปิดใช้งาน</option>
-                    </select>
+                <div class="col-md-4">
+                    <label class="form-label fw-medium d-block">การข้ามวีดีโอและคำถามระหว่างรับชม <span class="text-danger">*</span></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_skip" id="course_skip_1" value="1" checked>
+                        <label class="form-check-label" for="course_skip_1">เปิดใช้งาน</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_skip" id="course_skip_0" value="0">
+                        <label class="form-check-label" for="course_skip_0">ปิดใช้งาน</label>
+                    </div>
                 </div>
-
+                <div class="col-md-4">
+                    <label class="form-label fw-medium d-block">การยืนยัน OTP <span class="text-danger">*</span></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_otp" id="course_otp_1" value="1" checked>
+                        <label class="form-check-label" for="course_otp_1">เปิดใช้งาน</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="course_otp" id="course_otp_0" value="0">
+                        <label class="form-check-label" for="course_otp_0">ปิดใช้งาน</label>
+                    </div>
+                </div>
             </div>
 
-            <!-- ปุ่มกดยืนยัน -->
-            <div class="d-flex justify-content-end gap-2 border-top pt-3">
-                <button type="button" class="btn btn-secondary px-4" onclick="LoadData();">
-                    <i class="ri-close-line me-1"></i> ยกเลิก
-                </button>
-                <button type="submit" class="btn btn-primary px-4">
-                    <i class="ri-save-line me-1"></i> บันทึกข้อมูล
+            <div class="border-top pt-3">
+                <button type="button" class="btn btn-primary w-100 py-2 BtnSaveCourse" onclick="SaveCourse()">
+                    เพิ่มคอร์สเรียนใหม่
                 </button>
             </div>
         </form>
     </div>
 </div>
 
+<script>
+    // เริ่มต้น dropdown + rich text editor (รันหลังฟอร์มถูกแทรกเข้า DOM)
+    (function () {
+        if ($.fn.select2) {
+            $('#course_type').select2({ width: '100%', placeholder: 'เลือกประเภท' });
+            $('#course_group').select2({ width: '100%', placeholder: 'กรุณาเลือกหมวดหมู่' });
+        }
 
+        // เปิด/ปิดช่อง "วันที่อนุมัติหลักสูตร" ตามประเภท: ทั่วไป = ปิด (disabled สีเทา), อื่นๆ (เช่น เก็บชั่วโมงเรียน) = เปิดให้กรอก
+        function toggleApprovalDates() {
+            var name = ($('#course_type option:selected').data('name') || '').toString();
+            var enable = (name !== '' && name !== 'ทั่วไป');
+            $('.course-approval-date').prop('disabled', !enable);
+            if (!enable) { $('.course-approval-date').val(''); }
+        }
+        $('#course_type').on('change', toggleApprovalDates);
+        toggleApprovalDates();
+        if (typeof Quill !== 'undefined') {
+            window.quillCourseDetail = new Quill('#editor_course_detail', {
+                theme: 'snow',
+                placeholder: 'กรอกรายละเอียดคอร์สเรียน...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+
+        // ===== ตัวสร้างรหัสหลักสูตร (year ddl + quarter + textbox) =====
+        function initCodeBuilder(root) {
+            const hidden     = root.querySelector('input[type=hidden]');
+            const row        = root.querySelector('.cb-row');
+            const cbYear     = root.querySelector('.cb-year');
+            const cbQuarter  = root.querySelector('.cb-quarter');
+            const quarter    = root.dataset.quarter || '01';
+
+            const ce = new Date().getFullYear();   // ค.ศ.
+            const be = ce + 543;                    // พ.ศ.
+            const yearOpts = [
+                { v: String(be),            t: String(be) },
+                { v: String(be).slice(-2),  t: String(be).slice(-2) },
+                { v: String(ce),            t: String(ce) },
+                { v: String(ce).slice(-2),  t: String(ce).slice(-2) }
+            ];
+
+            // segments: [{type:'text'|'year'|'quarter', value}]
+            let segs = [{ type: 'text', value: '' }];
+            let active = { seg: null, pos: 0 };   // ช่อง text + ตำแหน่ง cursor ล่าสุด
+
+            function syncFromDom() {
+                Array.from(row.children).forEach(function (node, i) {
+                    if (segs[i] && (segs[i].type === 'text' || segs[i].type === 'year')) {
+                        segs[i].value = node.value;
+                    }
+                });
+            }
+            function recompute() {
+                // ปี/ไตรมาส คร่อมด้วย [] เพื่อให้หน้าแก้ไข parse แยกกลับเป็น array ได้ เช่น [2569]10-06-330-002-[01]-E
+                hidden.value = segs.map(function (s) {
+                    if (s.type === 'year' || s.type === 'quarter') { return '[' + (s.value || '') + ']'; }
+                    return s.value || '';
+                }).join('');
+            }
+            // วัดความกว้างของข้อความใน input แล้วตั้ง width ให้พอดี (ใช้ span ซ่อนวัด)
+            function cbFitWidth(el) {
+                let m = document.getElementById('cbMeasureSpan');
+                if (!m) {
+                    m = document.createElement('span');
+                    m.id = 'cbMeasureSpan';
+                    m.style.cssText = 'position:absolute;left:-9999px;top:0;white-space:pre;visibility:hidden;';
+                    document.body.appendChild(m);
+                }
+                const cs = getComputedStyle(el);
+                m.style.font = cs.font;
+                m.style.letterSpacing = cs.letterSpacing;
+                m.textContent = el.value || '';
+                el.style.width = (m.offsetWidth + 2) + 'px';
+            }
+            function render() {
+                row.innerHTML = '';
+                segs.forEach(function (s, i) {
+                    let el;
+                    if (s.type === 'year') {
+                        el = document.createElement('select');
+                        el.className = 'cb-seg-year';
+                        if (!s.value) s.value = yearOpts[0].v;
+                        yearOpts.forEach(function (o) {
+                            const op = document.createElement('option');
+                            op.value = o.v; op.textContent = o.t;
+                            if (o.v === s.value) op.selected = true;
+                            el.appendChild(op);
+                        });
+                        el.addEventListener('change', function () { s.value = el.value; recompute(); });
+                    } else if (s.type === 'quarter') {
+                        el = document.createElement('input');
+                        el.type = 'text';
+                        el.className = 'cb-seg-quarter form-control form-control-sm';
+                        el.value = s.value; el.disabled = true;
+                    } else {
+                        el = document.createElement('input');
+                        el.type = 'text';
+                        el.className = 'cb-seg-text';
+                        el.value = s.value;
+                        // ช่อง text ตัวสุดท้าย = พื้นที่พิมพ์ต่อ → ยืดเต็มเสมอ (คลิก/พิมพ์ได้แม้ว่าง); ตัวอื่นกว้างพอดีเนื้อหา
+                        const isLast = (i === segs.length - 1);
+                        if (isLast) { el.classList.add('cb-seg-last'); }
+                        const track = function () { active.seg = s; active.pos = el.selectionStart || 0; };
+                        el.addEventListener('input', function () { s.value = el.value; if (!isLast) { cbFitWidth(el); } track(); recompute(); });
+                        el.addEventListener('focus', track);
+                        el.addEventListener('click', track);
+                        el.addEventListener('keyup', track);
+                    }
+                    row.appendChild(el);
+                });
+                // วัดความกว้างจริงของช่อง text (ยกเว้นตัวสุดท้ายที่ยืดเต็ม) ให้พอดีเนื้อหา — ปี/ไตรมาสจึงมาติดท้ายพอดี
+                Array.prototype.forEach.call(row.querySelectorAll('.cb-seg-text:not(.cb-seg-last)'), cbFitWidth);
+                recompute();
+            }
+
+            // แทรก segment ใหม่ (ปี/ไตรมาส) ตรงตำแหน่ง cursor ของช่องที่กำลังพิมพ์
+            function insertAtCursor(newSeg) {
+                syncFromDom();
+                let idx = active.seg ? segs.indexOf(active.seg) : -1;
+                if (idx < 0 || segs[idx].type !== 'text') {
+                    for (let k = segs.length - 1; k >= 0; k--) { if (segs[k].type === 'text') { idx = k; break; } }
+                }
+                if (idx < 0) { segs.push(newSeg, { type: 'text', value: '' }); render(); return; }
+                const seg = segs[idx];
+                const val = seg.value || '';
+                let pos = (active.seg === seg) ? active.pos : val.length;
+                pos = Math.max(0, Math.min(pos, val.length));
+                segs.splice(idx, 1, { type: 'text', value: val.slice(0, pos) }, newSeg, { type: 'text', value: val.slice(pos) });
+                render();
+                const after = row.children[idx + 2];
+                if (after && after.focus) { active.seg = segs[idx + 2]; active.pos = 0; after.focus(); if (after.setSelectionRange) after.setSelectionRange(0, 0); }
+            }
+
+            // ลบ segment (ปี/ไตรมาส) แล้วรวมข้อความซ้าย-ขวาเข้าด้วยกัน
+            function removeSeg(type) {
+                syncFromDom();
+                const i = segs.findIndex(function (s) { return s.type === type; });
+                if (i < 0) { render(); return; }
+                const before = (i - 1 >= 0 && segs[i - 1].type === 'text') ? segs[i - 1] : null;
+                const after = (segs[i + 1] && segs[i + 1].type === 'text') ? segs[i + 1] : null;
+                if (before && after) {
+                    before.value = (before.value || '') + (after.value || '');
+                    segs.splice(i, 2);
+                } else {
+                    segs.splice(i, 1);
+                }
+                render();
+            }
+
+            cbYear.addEventListener('change', function () {
+                if (this.checked) { insertAtCursor({ type: 'year', value: yearOpts[0].v }); }
+                else { removeSeg('year'); }
+            });
+            cbQuarter.addEventListener('change', function () {
+                if (this.checked) { insertAtCursor({ type: 'quarter', value: quarter }); }
+                else { removeSeg('quarter'); }
+            });
+
+            render();
+        }
+        document.querySelectorAll('.code-builder').forEach(initCodeBuilder);
+    })();
+
+    function SaveCourse() {
+        // ดึงเนื้อหาจาก Quill ใส่ hidden input
+        if (window.quillCourseDetail) {
+            let html = window.quillCourseDetail.root.innerHTML;
+            if (window.quillCourseDetail.getText().trim() === '') { html = ''; }
+            $('#course_detail').val(html);
+        }
+
+        const name  = $('#course_name').val().trim();
+        const group = $('#course_group').val();
+
+        if (name === "") {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกชื่อคอร์สเรียน</span>', icon: "warning", showConfirmButton: false, timer: 2000, timerProgressBar: true });
+            return;
+        }
+        if (!group) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกหมวดหมู่</span>', icon: "warning", showConfirmButton: false, timer: 2000, timerProgressBar: true });
+            return;
+        }
+
+        const formData = new FormData($('#formAddCourse')[0]);
+        formData.append('request_state', 'list_course');
+        formData.append('request_function', 'add_course');
+
+        $.ajax({
+            beforeSend: function () { ShowLoadingButton('.BtnSaveCourse'); },
+            type: "POST",
+            url: "core.php",
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: "json",
+            success: function (response) {
+                if (response.result == 1) {
+                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, allowOutsideClick: false, timer: 1500, timerProgressBar: true })
+                        .then(() => { window.location.href = "course.php"; });
+                } else {
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, timer: 2500, timerProgressBar: true });
+                }
+            },
+            complete: function () { HideLoadingButton('.BtnSaveCourse'); },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+        });
+    }
+</script>
