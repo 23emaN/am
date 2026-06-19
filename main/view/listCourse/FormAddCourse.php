@@ -8,6 +8,14 @@
     // รองรับทั้งรูปแบบใหม่ (groups/types) และเก่า (list_data = groups)
     $groups = $data["groups"] ?? $data["list_data"] ?? [];
     $types  = $data["types"]  ?? [];
+
+    // dual-mode: ถ้ามี course = โหมดแก้ไข (prefill), ไม่มี = โหมดเพิ่ม (เหมือนเดิมทุกประการ)
+    $course = $data["course"] ?? null;
+    $mode   = $course ? 'edit' : 'add';
+    // helper ดึงค่าเดิมมาใส่ value attribute (escape ให้เรียบร้อย)
+    $cv = function (string $key) use ($course) {
+        return htmlspecialchars((string)($course[$key] ?? ''), ENT_QUOTES);
+    };
 ?>
 <style>
     .form-control, .form-select { background-color: #ffffff !important; }
@@ -38,22 +46,33 @@
 
 <div class="card bg-white border-0 rounded-3 mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-0">
-        <h2 class="mb-0">เพิ่มคอร์สเรียนใหม่</h2>
+        <h2 class="mb-0"><?php echo $mode === 'edit' ? 'ข้อมูลทั่วไปของคอร์สเรียน' : 'เพิ่มคอร์สเรียนใหม่'; ?></h2>
     </div>
+    <?php if ($mode !== 'edit'): ?>
     <div class="px-4 mb-3">
         <div class="alert alert-success mb-0" role="alert">
             คุณสามารถเพิ่มข้อมูลบทเรียนและข้อสอบได้หลังจากเพิ่มคอร์สเรียน
         </div>
     </div>
+    <?php endif; ?>
 
     <div class="card-body p-4">
         <form id="formAddCourse" enctype="multipart/form-data">
+            <?php if ($mode === 'edit'): ?>
+                <input type="hidden" name="course_id" value="<?php echo $cv('course_id'); ?>">
+            <?php endif; ?>
+
+            <!-- ===== พรีวิวรูปหน้าปก (ทั้งเพิ่มและแก้ไข) ===== -->
+            <div id="coverPreviewWrap" class="text-center mb-4" style="display:none;">
+                <img id="coverPreview" src="" alt="พรีวิวรูปหน้าปก"
+                     style="max-width:100%; width:600px; border-radius:12px; border:1px solid #e5e7eb;">
+            </div>
 
             <!-- ===== ข้อมูลทั่วไป ===== -->
             <h4 class="mb-3 fw-bold">ข้อมูลทั่วไป</h4>
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                    <label for="course_cover_image" class="form-label fw-medium">รูปหน้าปก <span class="text-danger">*</span></label>
+                    <label for="course_cover_image" class="form-label fw-medium"><?php echo $mode === 'edit' ? 'เปลี่ยนรูปหน้าปก' : 'รูปหน้าปก'; ?> <?php if ($mode !== 'edit'): ?><span class="text-danger">*</span><?php endif; ?></label>
                     <input type="file" class="form-control" id="course_cover_image" name="course_cover_image" accept="image/*">
                 </div>
                 <div class="col-md-8">
@@ -134,7 +153,7 @@
                                 <label class="m-0 user-select-none"><input type="checkbox" class="cb-year"> ปี</label>
                                 <label class="m-0 user-select-none"><input type="checkbox" class="cb-quarter"> ไตรมาส</label>
                             </div>
-                            <input type="hidden" name="course_code_cpd_<?php echo $i; ?>">
+                            <input type="hidden" name="course_code_cpd_<?php echo $i; ?>" value="<?php echo $cv('course_code_cpd_' . $i); ?>">
                         </div>
                     </div>
                 <?php endfor; ?>
@@ -147,7 +166,7 @@
                                 <label class="m-0 user-select-none"><input type="checkbox" class="cb-year"> ปี</label>
                                 <label class="m-0 user-select-none"><input type="checkbox" class="cb-quarter"> ไตรมาส</label>
                             </div>
-                            <input type="hidden" name="course_code_cpa_<?php echo $i; ?>">
+                            <input type="hidden" name="course_code_cpa_<?php echo $i; ?>" value="<?php echo $cv('course_code_cpa_' . $i); ?>">
                         </div>
                     </div>
                 <?php endfor; ?>
@@ -247,7 +266,7 @@
 
             <div class="border-top pt-3">
                 <button type="button" class="btn btn-primary w-100 py-2 BtnSaveCourse" onclick="SaveCourse()">
-                    เพิ่มคอร์สเรียนใหม่
+                    <?php echo $mode === 'edit' ? 'บันทึกการแก้ไข' : 'เพิ่มคอร์สเรียนใหม่'; ?>
                 </button>
             </div>
         </form>
@@ -255,6 +274,10 @@
 </div>
 
 <script>
+    // ข้อมูลโหมดแก้ไข (โหมดเพิ่ม = null → prefill ทั้งหมดถูกข้าม ทำงานเหมือนเดิม)
+    var FORM_MODE = '<?php echo $mode; ?>';
+    var COURSE = <?php echo $course ? json_encode($course, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
+
     // เริ่มต้น dropdown + rich text editor (รันหลังฟอร์มถูกแทรกเข้า DOM)
     (function () {
         if ($.fn.select2) {
@@ -271,6 +294,16 @@
         }
         $('#course_type').on('change', toggleApprovalDates);
         toggleApprovalDates();
+
+        // พรีวิวรูปหน้าปก — แสดงเมื่อเลือกไฟล์ใหม่ (ใช้ทั้งโหมดเพิ่มและแก้ไข)
+        function showCoverPreview(src) {
+            if (src) { $('#coverPreview').attr('src', src); $('#coverPreviewWrap').show(); }
+            else { $('#coverPreviewWrap').hide(); }
+        }
+        $('#course_cover_image').on('change', function () {
+            var f = this.files && this.files[0];
+            if (f) { var r = new FileReader(); r.onload = function (e) { showCoverPreview(e.target.result); }; r.readAsDataURL(f); }
+        });
         if (typeof Quill !== 'undefined') {
             window.quillCourseDetail = new Quill('#editor_course_detail', {
                 theme: 'snow',
@@ -306,7 +339,27 @@
             ];
 
             // segments: [{type:'text'|'year'|'quarter', value}]
-            let segs = [{ type: 'text', value: '' }];
+            // โหมดแก้ไข: parse ค่าเดิม เช่น "[2569]10-06-330-002-[01]-E" กลับเป็น segments
+            // กฎ inverse ของ recompute(): [content] ที่ตรง data-quarter = ไตรมาส, นอกนั้น = ปี
+            function parseStored(str) {
+                if (!str) { return [{ type: 'text', value: '' }]; }
+                const parts = str.split(/(\[[^\]]*\])/).filter(function (s) { return s !== ''; });
+                const out = [];
+                parts.forEach(function (p) {
+                    const m = p.match(/^\[([^\]]*)\]$/);
+                    if (m) {
+                        out.push({ type: (m[1] === quarter ? 'quarter' : 'year'), value: m[1] });
+                    } else {
+                        out.push({ type: 'text', value: p });
+                    }
+                });
+                if (!out.length || out[out.length - 1].type !== 'text') { out.push({ type: 'text', value: '' }); }
+                return out;
+            }
+            let segs = parseStored(hidden.value);
+            // ตั้งสถานะ checkbox ให้ตรงกับค่าที่ parse ได้
+            cbYear.checked    = segs.some(function (s) { return s.type === 'year'; });
+            cbQuarter.checked = segs.some(function (s) { return s.type === 'quarter'; });
             let active = { seg: null, pos: 0 };   // ช่อง text + ตำแหน่ง cursor ล่าสุด
 
             function syncFromDom() {
@@ -346,6 +399,12 @@
                         el = document.createElement('select');
                         el.className = 'cb-seg-year';
                         if (!s.value) s.value = yearOpts[0].v;
+                        // ปีเดิมที่ไม่อยู่ใน options ปัจจุบัน (เช่นคอร์สเก่า) → เพิ่มเข้าไปให้แสดงได้
+                        if (!yearOpts.some(function (o) { return o.v === s.value; })) {
+                            const op0 = document.createElement('option');
+                            op0.value = s.value; op0.textContent = s.value; op0.selected = true;
+                            el.appendChild(op0);
+                        }
                         yearOpts.forEach(function (o) {
                             const op = document.createElement('option');
                             op.value = o.v; op.textContent = o.t;
@@ -425,6 +484,38 @@
             render();
         }
         document.querySelectorAll('.code-builder').forEach(initCodeBuilder);
+
+        // ===== โหมดแก้ไข: เติมข้อมูลเดิมลงฟอร์ม =====
+        if (FORM_MODE === 'edit' && COURSE) {
+            ['course_name', 'course_instructor', 'course_overview', 'course_demo_link',
+             'course_exam_time', 'course_minimum_score', 'course_number_exam', 'course_number_time',
+             'course_cpd_hour', 'course_cpd_ethics', 'course_cpd_other',
+             'course_cpa_hour', 'course_cpa_ethics', 'course_cpa_other',
+             'course_price', 'course_promotion', 'course_period'
+            ].forEach(function (n) {
+                if (COURSE[n] !== null && COURSE[n] !== undefined) { $('[name="' + n + '"]').val(COURSE[n]); }
+            });
+            // select (+ refresh select2) — trigger change ทำให้ toggleApprovalDates อัปเดตด้วย
+            $('#course_type').val(COURSE.course_type || '').trigger('change');
+            $('#course_group').val(COURSE.course_group || '').trigger('change');
+            // radio flags
+            ['course_display', 'course_status', 'course_skip', 'course_otp'].forEach(function (n) {
+                if (COURSE[n] !== null && COURSE[n] !== undefined) {
+                    $('[name="' + n + '"][value="' + COURSE[n] + '"]').prop('checked', true);
+                }
+            });
+            // วันที่อนุมัติ — ตั้งหลัง trigger change (จะถูกเปิดถ้าประเภทไม่ใช่ "ทั่วไป")
+            for (var qd = 1; qd <= 4; qd++) {
+                var dn = 'course_approval_date_' + qd;
+                if (COURSE[dn]) { $('[name="' + dn + '"]').val(COURSE[dn]); }
+            }
+            // Quill rich text
+            if (window.quillCourseDetail && COURSE.course_detail) {
+                window.quillCourseDetail.root.innerHTML = COURSE.course_detail;
+            }
+            // พรีวิวรูปหน้าปกเดิม
+            if (COURSE.course_cover_image) { showCoverPreview('../' + COURSE.course_cover_image); }
+        }
     })();
 
     function SaveCourse() {
@@ -447,9 +538,10 @@
             return;
         }
 
+        const isEdit = (FORM_MODE === 'edit');
         const formData = new FormData($('#formAddCourse')[0]);
         formData.append('request_state', 'list_course');
-        formData.append('request_function', 'add_course');
+        formData.append('request_function', isEdit ? 'update_course' : 'add_course');
 
         $.ajax({
             beforeSend: function () { ShowLoadingButton('.BtnSaveCourse'); },
@@ -462,7 +554,7 @@
             success: function (response) {
                 if (response.result == 1) {
                     Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, allowOutsideClick: false, timer: 1500, timerProgressBar: true })
-                        .then(() => { window.location.href = "course.php"; });
+                        .then(() => { if (!isEdit) { window.location.href = "course.php"; } });
                 } else {
                     Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, timer: 2500, timerProgressBar: true });
                 }

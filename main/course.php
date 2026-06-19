@@ -72,8 +72,8 @@
         });
     }
 
-    // ปุ่มแก้ไข — ยังไม่อยู่ในขอบเขตงานนี้ (list + เพิ่มคอร์ส)
+    // ปุ่มแก้ไข → ไปหน้าแก้ไขคอร์ส (4 แท็บ)
     function GetEditCourse(course_id) {
-        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-secondary">หน้าแก้ไขคอร์สเรียนอยู่ระหว่างพัฒนา</span>', icon: "info", showConfirmButton: true });
+        window.location.href = "course_edit.php?id=" + course_id;
     }
 </script>
