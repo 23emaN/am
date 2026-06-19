@@ -18,11 +18,15 @@ $routes = [
     'list_course'               => [
         'get_list_course'       => __DIR__ . '/core/listCourse/GetListCourse.php',
         'get_select_category'   => __DIR__ . '/core/listCourse/GetSelectCategory.php',
-
+        'add_course'            => __DIR__ . '/core/listCourse/AddCourse.php',
     ],
     'listCourseCategory'               => [
         'get_list_category'       => __DIR__ . '/core/listCourseCategory/GetListCategory.php',
         'add_category'       => __DIR__ . '/core/listCourseCategory/AddCategory.php',
+    ],
+    'listCourseType'               => [
+        'get_list_type'           => __DIR__ . '/core/listCourseType/GetListType.php',
+        'add_type'                => __DIR__ . '/core/listCourseType/AddType.php',
     ],
 ];
 foreach ($routes as $state => $actions) {

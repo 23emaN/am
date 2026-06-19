@@ -1,27 +1,56 @@
-:root {
-    --font-sans-serif: 'Kanit', sans-serif;
-}
-
-html, body {
-    font-family: var(--font-sans-serif) !important;
-}
-
-input, button, select, textarea {
-    font-family: var(--font-sans-serif) !important;
-}
-
-.ri-refresh-line {
-    animation: spin 2s linear infinite;
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.pagination .page-item.active .page-link,
-.pagination .page-item .page-link.active {
-    background-color: #605dff;
-    border-color: #605dff;
-    color: #fff;
-    z-index: 0 !important;
+:root {
+    --font-sans-serif: 'Kanit', sans-serif;
 }
+
+html, body {
+    font-family: var(--font-sans-serif) !important;
+}
+
+input, button, select, textarea {
+    font-family: var(--font-sans-serif) !important;
+}
+
+.ri-refresh-line {
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pagination .page-item.active .page-link,
+.pagination .page-item .page-link.active {
+    background-color: #605dff;
+    border-color: #605dff;
+    color: #fff;
+    z-index: 0 !important;
+}
+/* ===== Project layout overrides (intern/am) ===== */
+/* #1 fix: select2 hides the original <select> with this class but select2.min.css here
+   is missing the rule, so the original select keeps full width and causes horizontal scroll. */
+.select2-hidden-accessible {
+    position: absolute !important;
+    width: 1px !important;
+    min-width: 1px !important;
+    max-width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+}
+html, body { overflow-x: hidden; max-width: 100%; }
+
+/* #5 user profile pinned at the bottom of the sidebar
+   (.sidebar-area already has position:fixed from the theme = containing block) */
+.sidebar-user {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-top: 1px solid #eef0f3;
+}
+.sidebar-user .logout-btn { line-height: 0; }
+.layout-menu { padding-bottom: 84px; }

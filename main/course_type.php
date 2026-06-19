@@ -1,4 +1,4 @@
-<?php $breadcrumbs = [['label' => 'คอร์สเรียน', 'url' => 'course'], ['label' => 'หมวดหมู่ของคอร์สเรียน']]; ?>
+<?php $breadcrumbs = [['label' => 'คอร์สเรียน', 'url' => 'course'], ['label' => 'ประเภทคอร์สเรียน']]; ?>
 <?php include "header.php"; ?>
 
 <div class="container-fluid">
@@ -37,13 +37,13 @@
             type: "POST",
             url: "core.php",
             data: {
-                request_state: "listCourseCategory",
-                request_function: "get_list_category",
+                request_state: "listCourseType",
+                request_function: "get_list_type",
             },
             dataType: "json",
             success: function (response) {
                 if (response.result == 1) {
-                    RenderListCourse(response.data);
+                    RenderList(response.data);
                 } else {
                     Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
                 }
@@ -53,13 +53,13 @@
         });
     }
 
-    function RenderListCourse(data) {
+    function RenderList(data) {
         const payload = { list_data: data.list_data };
 
         $.ajax({
             beforeSend: function () { ShowLoadingOverlay("#GetTable"); },
             type: "POST",
-            url: "view/listCourseCategory/GetTable.php",
+            url: "view/listCourseType/GetTable.php",
             data: JSON.stringify(payload),
             contentType: "application/json; charset=utf-8",
             processData: false,
@@ -83,7 +83,7 @@
         $.ajax({
             beforeSend: function () { ShowLoadingOverlay("#myModal"); },
             type: "POST",
-            url: "view/listCourseCategory/GetModalAdd.php",
+            url: "view/listCourseType/GetModalAdd.php",
             dataType: "html",
             success: function (response) {
                 $("#showModal").html(response);
@@ -92,5 +92,13 @@
             complete: function () { HideLoadingOverlay("#myModal"); },
             error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
+    }
+
+    // แก้ไข/ลบ ประเภท — ยังไม่อยู่ในขอบเขตงานนี้ (เหมือนหน้าหมวดหมู่)
+    function GetEditType(type_id) {
+        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-secondary">การแก้ไขประเภทอยู่ระหว่างพัฒนา</span>', icon: "info", showConfirmButton: true });
+    }
+    function GetDeleteType(type_id) {
+        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-secondary">การลบประเภทอยู่ระหว่างพัฒนา</span>', icon: "info", showConfirmButton: true });
     }
 </script>
