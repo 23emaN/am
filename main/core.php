@@ -19,6 +19,9 @@ $routes = [
         'get_list_course'       => __DIR__ . '/core/listCourse/GetListCourse.php',
         'get_select_category'   => __DIR__ . '/core/listCourse/GetSelectCategory.php',
         'add_course'            => __DIR__ . '/core/listCourse/AddCourse.php',
+        'get_course'            => __DIR__ . '/core/listCourse/GetCourse.php',
+        'update_course'         => __DIR__ . '/core/listCourse/UpdateCourse.php',
+        'delete_course'         => __DIR__ . '/core/listCourse/DeleteCourse.php',
     ],
     'listCourseCategory'               => [
         'get_list_category'       => __DIR__ . '/core/listCourseCategory/GetListCategory.php',
@@ -27,6 +30,36 @@ $routes = [
     'listCourseType'               => [
         'get_list_type'           => __DIR__ . '/core/listCourseType/GetListType.php',
         'add_type'                => __DIR__ . '/core/listCourseType/AddType.php',
+    ],
+    'lesson'                    => [
+        'get_list_lesson'       => __DIR__ . '/core/lesson/GetListLesson.php',
+        'add_lesson'            => __DIR__ . '/core/lesson/AddLesson.php',
+        'get_lesson'            => __DIR__ . '/core/lesson/GetLesson.php',
+        'update_lesson'         => __DIR__ . '/core/lesson/UpdateLesson.php',
+        'update_video'          => __DIR__ . '/core/lesson/UpdateVideo.php',
+        'upload_video'          => __DIR__ . '/core/lesson/UploadVideo.php',
+        'delete_lesson'         => __DIR__ . '/core/lesson/DeleteLesson.php',
+    ],
+    'question'                  => [
+        'get_list_question'     => __DIR__ . '/core/question/GetListQuestion.php',
+        'add_question'          => __DIR__ . '/core/question/AddQuestion.php',
+        'get_question'          => __DIR__ . '/core/question/GetQuestion.php',
+        'update_question'       => __DIR__ . '/core/question/UpdateQuestion.php',
+        'delete_question'       => __DIR__ . '/core/question/DeleteQuestion.php',
+        'upload_question'       => __DIR__ . '/core/question/UploadQuestion.php',
+    ],
+    'lesson_file'               => [
+        'get_list_lesson_file'  => __DIR__ . '/core/lessonFile/GetListLessonFile.php',
+        'add_lesson_file'       => __DIR__ . '/core/lessonFile/AddLessonFile.php',
+        'delete_lesson_file'    => __DIR__ . '/core/lessonFile/DeleteLessonFile.php',
+    ],
+    'exam'                      => [
+        'get_list_exam'         => __DIR__ . '/core/exam/GetListExam.php',
+        'add_exam'              => __DIR__ . '/core/exam/AddExam.php',
+        'get_exam'              => __DIR__ . '/core/exam/GetExam.php',
+        'update_exam'           => __DIR__ . '/core/exam/UpdateExam.php',
+        'delete_exam'           => __DIR__ . '/core/exam/DeleteExam.php',
+        'upload_exam'           => __DIR__ . '/core/exam/UploadExam.php',
     ],
 ];
 foreach ($routes as $state => $actions) {
