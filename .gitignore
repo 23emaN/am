@@ -24,3 +24,20 @@
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# AI
+.claude
+
+# AI context files (local only — not part of the product)
+CLAUDE.md
+CONTEXT.md
+DESIGN.md
+CHANGES.md
+AGENTS.md
+
+# Note
+จด.md
+
+*.sql
+
+/dbandenv/
