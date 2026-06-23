@@ -1,0 +1,91 @@
+<?php
+
+    require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+
+    $raw = file_get_contents("php://input");
+    $data = json_decode($raw, true);
+    $list_data = $data["list_data"] ?? [];
+
+    // แปลงวันที่ Y-m-d -> d/m/Y (ค.ศ.)
+    function coupon_date($d): string {
+        $d = trim((string)$d);
+        if ($d === '' || $d === '0000-00-00') return '-';
+        $ts = strtotime($d);
+        return $ts ? date('d/m/Y', $ts) : '-';
+    }
+?>
+
+<div class="card bg-white border-0 rounded-3 mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
+        <h2 class="mb-0">คูปองส่วนลด</h2>
+        <a href="coupon_fromadd.php" class="btn btn-success">สร้างคูปองส่วนลดใหม่</a>
+    </div>
+
+    <div class="card-body p-4">
+        <div class="default-table-area">
+            <div class="table-responsive">
+                <table class="table align-middle w-100" id="PageTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center" style="width: 60px;">#</th>
+                            <th scope="col">CODE</th>
+                            <th scope="col">ประเภทส่วนลด</th>
+                            <th scope="col">ใช้ไปแล้ว / คงเหลือ</th>
+                            <th scope="col">เงื่อนไข</th>
+                            <th scope="col">เริ่ม</th>
+                            <th scope="col">สิ้นสุด</th>
+                            <th scope="col" class="text-center">สถานะ</th>
+                            <th scope="col" class="text-center" style="width: 160px;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (count($list_data) > 0): ?>
+                            <?php $n = 1; ?>
+                            <?php foreach ($list_data as $row): ?>
+                                <?php
+                                    $type      = (string)($row['coupon_type'] ?? '');
+                                    $type_text = $type === 'percent' ? 'เปอร์เซ็นต์' : ($type === 'fixed' ? 'จำนวนเงิน' : '-');
+                                    $limit     = $row['coupon_limit'];
+                                    $limit_txt = ($limit === null || $limit === '') ? 'ไม่จำกัด' : (int)$limit;
+                                    $min       = (float)($row['coupon_min'] ?? 0);
+                                    $max       = (float)($row['coupon_max'] ?? 0);
+                                    $is_active = (string)($row['coupon_status'] ?? '0') === '1';
+                                ?>
+                                <tr>
+                                    <td class="text-center"><?php echo $n++; ?></td>
+                                    <td class="fw-medium"><?php echo htmlspecialchars($row['coupon_code'] ?? '-'); ?></td>
+                                    <td><?php echo $type_text; ?></td>
+                                    <td>
+                                        <!-- ยังไม่มีตารางบันทึกการใช้คูปอง → "ใช้ไปแล้ว" = 0 ชั่วคราว -->
+                                        <span class="text-muted">0</span> / <?php echo $limit_txt; ?>
+                                    </td>
+                                    <td>
+                                        <div class="small">ยอดซื้อขั้นต่ำ: <?php echo number_format($min, 0); ?> ฿</div>
+                                        <?php if ($max > 0): ?>
+                                            <div class="small text-secondary">ลดสูงสุด: <?php echo number_format($max, 0); ?> ฿</div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?php echo coupon_date($row['coupon_start'] ?? ''); ?></td>
+                                    <td><?php echo coupon_date($row['coupon_end'] ?? ''); ?></td>
+                                    <td class="text-center">
+                                        <?php if ($is_active): ?>
+                                            <span class="badge bg-success">เปิดใช้งาน</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">ปิดใช้งาน</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-info text-white w-100"
+                                            onclick="GetEditCoupon('<?php echo $row['coupon_id']; ?>');">
+                                            ดูรายละเอียด/แก้ไข
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
+<?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
 
 <div class="sidebar-area" id="sidebar-area">
 
@@ -44,6 +45,17 @@
                 <a href="user" class="menu-link <?php echo in_array($now_page, $user_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">group</span>
                     <span class="title">ผู้ใช้/ลูกค้า</span>
+                </a>
+            </li>
+
+            <li class="menu-title small text-uppercase">
+                <span class="menu-title-text">อื่น ๆ</span>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $coupon_pages) ? 'open' : '' ?>">
+                <a href="coupon" class="menu-link <?php echo in_array($now_page, $coupon_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">sell</span>
+                    <span class="title">คูปองส่วนลด</span>
                 </a>
             </li>
 
