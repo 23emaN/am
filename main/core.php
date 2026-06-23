@@ -19,6 +19,14 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
+    'list_coupon'              => [
+        'get_list_coupon' => __DIR__ . '/core/listCoupon/GetListCoupon.php',
+        'add_coupon'      => __DIR__ . '/core/listCoupon/AddCoupon.php',
+        'get_coupon'      => __DIR__ . '/core/listCoupon/GetCoupon.php',
+        'update_coupon'   => __DIR__ . '/core/listCoupon/UpdateCoupon.php',
+        'delete_coupon'   => __DIR__ . '/core/listCoupon/DeleteCoupon.php',
+    ],
+
     'list_course'               => [
         'get_list_course'       => __DIR__ . '/core/listCourse/GetListCourse.php',
         'get_select_category'   => __DIR__ . '/core/listCourse/GetSelectCategory.php',
