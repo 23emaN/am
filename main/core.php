@@ -12,7 +12,11 @@ $router = new Router();
 
 $routes = [
     'list_user'                => [
-        'user_profile' => __DIR__ . '/core/listUser/UserProfile.php',
+        'user_profile'   => __DIR__ . '/core/listUser/UserProfile.php',
+        'get_list_user'  => __DIR__ . '/core/listUser/GetListUser.php',
+        'get_user'       => __DIR__ . '/core/listUser/GetUser.php',
+        'update_user'    => __DIR__ . '/core/listUser/UpdateUser.php',
+        'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
     'list_course'               => [

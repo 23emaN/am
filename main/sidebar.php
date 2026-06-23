@@ -1,5 +1,6 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
+<?php $user_pages = ['user', 'user_edit']; ?>
 
 <div class="sidebar-area" id="sidebar-area">
 
@@ -32,6 +33,17 @@
                 <a href="course" class="menu-link <?php echo in_array($now_page, $course_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">school</span>
                     <span class="title">คอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-title small text-uppercase">
+                <span class="menu-title-text">จัดการผู้ใช้</span>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $user_pages) ? 'open' : '' ?>">
+                <a href="user" class="menu-link <?php echo in_array($now_page, $user_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">group</span>
+                    <span class="title">ผู้ใช้/ลูกค้า</span>
                 </a>
             </li>
 
