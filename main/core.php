@@ -19,12 +19,6 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
-    'verify_request'           => [
-        'get_list_verify' => __DIR__ . '/core/verifyRequest/GetListVerifyRequest.php',
-        'get_verify'      => __DIR__ . '/core/verifyRequest/GetVerifyRequest.php',
-        'update_verify'   => __DIR__ . '/core/verifyRequest/UpdateVerifyRequest.php',
-    ],
-
     'list_coupon'              => [
         'get_list_coupon' => __DIR__ . '/core/listCoupon/GetListCoupon.php',
         'add_coupon'      => __DIR__ . '/core/listCoupon/AddCoupon.php',
@@ -78,6 +72,13 @@ $routes = [
         'update_exam'           => __DIR__ . '/core/exam/UpdateExam.php',
         'delete_exam'           => __DIR__ . '/core/exam/DeleteExam.php',
         'upload_exam'           => __DIR__ . '/core/exam/UploadExam.php',
+    ],
+    'list_banner'               => [
+        'get_list_banner'       => __DIR__ . '/core/listBanner/GetListBanner.php',
+        'add_banner'            => __DIR__ . '/core/listBanner/AddBanner.php',
+        'get_banner'            => __DIR__ . '/core/listBanner/GetBanner.php',
+        'update_banner'         => __DIR__ . '/core/listBanner/UpdateBanner.php',
+        'delete_banner'         => __DIR__ . '/core/listBanner/DeleteBanner.php',
     ],
 ];
 foreach ($routes as $state => $actions) {

@@ -1,8 +1,8 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
-<?php $verify_pages = ['verify_request']; ?>
 <?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
+<?php $banner_pages = ['banner', 'banner_fromadd', 'banner_edit']; ?>
 
 <div class="sidebar-area" id="sidebar-area">
 
@@ -49,13 +49,6 @@
                 </a>
             </li>
 
-            <li class="menu-item <?php echo in_array($now_page, $verify_pages) ? 'open' : '' ?>">
-                <a href="verify_request" class="menu-link <?php echo in_array($now_page, $verify_pages) ? 'active' : '' ?>">
-                    <span class="material-symbols-outlined menu-icon">how_to_reg</span>
-                    <span class="title">ยืนยันตัวตนผู้ใช้งาน</span>
-                </a>
-            </li>
-
             <li class="menu-title small text-uppercase">
                 <span class="menu-title-text">อื่น ๆ</span>
             </li>
@@ -64,6 +57,13 @@
                 <a href="coupon" class="menu-link <?php echo in_array($now_page, $coupon_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">sell</span>
                     <span class="title">คูปองส่วนลด</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $banner_pages) ? 'open' : '' ?>">
+                <a href="banner" class="menu-link <?php echo in_array($now_page, $banner_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">image</span>
+                    <span class="title">แบนเนอร์</span>
                 </a>
             </li>
 
