@@ -65,7 +65,7 @@
 
     <body class="boxed-size">
 
-        <div class="preloader" id="preloader">
+        <div class="preloader" id="preloader"><script>if(sessionStorage.getItem('cpdth_show_preloader')==='1'){sessionStorage.removeItem('cpdth_show_preloader');}else{var _p=document.getElementById('preloader');if(_p){_p.style.display='none';}}</script>
 
             <div class="preloader">
 

@@ -68,6 +68,32 @@ html, body { overflow-x: hidden; max-width: 100%; }
     }
 }
 
+/* เว้นระยะด้านบนของเนื้อหา (หลังเอา breadcrumb header ออกทุกหน้า ไม่งั้นการ์ดชิดบนเกินไป) */
+.main-content {
+    padding-top: 1.5rem;
+}
+
+/* ===== Top loading bar (แบบ delay) — แทน spinner/skeleton ===== */
+/* แถบบางด้านบนจอ โผล่เฉพาะตอนโหลดนานเกิน ~300ms (คุมด้วย JS ใน loading.js) */
+#cpdth-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, #605DFF, #8b89ff);
+    box-shadow: 0 0 10px rgba(96, 93, 255, 0.6);
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ปุ่มระหว่างโหลด */
+.cpdth-btn-loading {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
 /* #7 sidebar แคบ (200px): เมนูที่ข้อความยาว เช่น "คำขอยืนยันตัวตนผู้ใช้งาน"
    ให้ตัดบรรทัดแทนการดันเนื้อหาจนเกิด scrollbar แนวนอน, ตรึง icon ไว้ซ้าย */
 .sidebar-area .menu-vertical .menu-item .menu-link {

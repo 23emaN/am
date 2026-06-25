@@ -334,7 +334,7 @@
 
                                 didClose: () => {
 
-                                    window.location.replace("main/index");
+                                    sessionStorage.setItem("cpdth_show_preloader", "1"); window.location.replace("main/index");
 
                                 }
 

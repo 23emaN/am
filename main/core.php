@@ -28,6 +28,10 @@ $routes = [
         'delete_admin'   => __DIR__ . '/core/listAdmin/DeleteAdmin.php',
     ],
 
+    'verify_history'           => [
+        'get_list_history' => __DIR__ . '/core/verifyHistory/GetListHistory.php',
+    ],
+
     'verify_request'           => [
         'get_list_verify' => __DIR__ . '/core/verifyRequest/GetListVerifyRequest.php',
         'get_verify'      => __DIR__ . '/core/verifyRequest/GetVerifyRequest.php',
