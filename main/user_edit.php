@@ -234,12 +234,21 @@
                         </div>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label">ผลการตรวจสอบเอกสาร</label>
-                        <select class="form-select" name="approver_citizen" id="verify_result">
-                            <option value="">---กรุณาเลือก---</option>
-                            <option value="2">อนุมัติ (ยืนยันตัวตนสำเร็จ)</option>
-                            <option value="1">ไม่อนุมัติ (ปฏิเสธ)</option>
-                        </select>
+                        <label class="form-label d-block">ผลการตรวจสอบเอกสาร <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="approver_citizen" id="result_approve" value="2">
+                            <label class="form-check-label" for="result_approve">อนุมัติ (ยืนยันตัวตนสำเร็จ)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="approver_citizen" id="result_reject" value="1">
+                            <label class="form-check-label" for="result_reject">ไม่อนุมัติ (ปฏิเสธ)</label>
+                        </div>
+                    </div>
+
+                    <!-- หมายเหตุ: บังคับกรอกเมื่อเลือก "ไม่อนุมัติ" (เหตุผลการปฏิเสธ) -->
+                    <div class="mb-2 d-none" id="remark_wrap">
+                        <label class="form-label">หมายเหตุ (เหตุผลที่ไม่อนุมัติ) <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="remark" id="verify_remark" rows="2" placeholder="ระบุเหตุผลการปฏิเสธ"></textarea>
                     </div>
                 </form>
             </div>
@@ -263,6 +272,16 @@
 
     $(document).ready(function () {
         verifyModal = new bootstrap.Modal(document.getElementById('VerifyModal'));
+
+        // เลือก "ไม่อนุมัติ" -> โชว์ช่องหมายเหตุ (บังคับกรอก) ; "อนุมัติ" -> ซ่อน + ล้างค่า
+        $('input[name="approver_citizen"]').on('change', function () {
+            if ($(this).val() === '1') {
+                $('#remark_wrap').removeClass('d-none');
+            } else {
+                $('#remark_wrap').addClass('d-none');
+                $('#verify_remark').val('');
+            }
+        });
 
         // มาจากหน้า "คำขอยืนยันตัวตนผู้ใช้งาน" -> เปิด modal ตรวจเอกสารอัตโนมัติ
         if (USER_ID && AUTO_VERIFY === '1') {
@@ -436,10 +455,17 @@
 
     // ===== ตรวจสอบเอกสารยืนยันตัวตน (modal) =====
 
-    // แปลง path รูปที่เก็บใน DB (เช่น upload/xxx.png) ให้ชี้จาก main/ ออกไป root ของเว็บ
+    // รูป KYC (DB เก็บเป็น "uploads/identity/...") เว็บฝั่งลูกค้า (โฟลเดอร์ cpdth) เป็นคนอัปโหลด
+    // โปรเจกต์แอดมินกับ cpdth เป็นโฟลเดอร์พี่น้องกันทั้ง 2 environment:
+    //   - local : intern/am/        + intern/cpdth/
+    //   - server: public_html/am/backoffice/ + public_html/am/cpdth/
+    // หน้าอยู่ใน main/ -> ถอยขึ้น 2 ชั้น (main -> โปรเจกต์ -> โฟลเดอร์แม่) แล้วเข้า cpdth/
+    var KYC_BASE = "../../cpdth/";
+
+    // แปลง path รูปที่เก็บใน DB ให้เป็น URL ที่เปิดได้ (ถ้าเป็น URL เต็มอยู่แล้วใช้ตามนั้น)
     function ImageSrc(path) {
         if (!path) return "";
-        return /^https?:\/\//.test(path) ? path : "../" + path;
+        return /^https?:\/\//.test(path) ? path : KYC_BASE + path;
     }
 
     // แปลงวันหมดอายุ Y-m-d -> dd/mm/yyyy (ค.ศ.)
@@ -475,7 +501,9 @@
         $("#verify_user_id").val(v.user_id || "");
         $("#verify_citizen_id").val(v.user_citizen_id || "-");
         $("#verify_expiry").val(FormatExpiry(v.id_card_expiry_date));
-        $("#verify_result").val("");
+        $('input[name="approver_citizen"]').prop("checked", false);
+        $("#verify_remark").val("");
+        $("#remark_wrap").addClass("d-none");
 
         SetVerifyImage("#verify_id_image", "#verify_id_image_empty", v.id_card_image);
         SetVerifyImage("#verify_photo", "#verify_photo_empty", v.current_photo);
@@ -493,9 +521,16 @@
     }
 
     function SubmitVerify() {
-        var result = $("#verify_result").val();
+        var result = $('input[name="approver_citizen"]:checked').val();
         if (!result) {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกผลการตรวจสอบเอกสาร</span>', icon: "warning", confirmButtonText: "ตกลง" });
+            return;
+        }
+
+        // ปฏิเสธ ต้องระบุหมายเหตุ (เหตุผล) เสมอ
+        if (result === '1' && $('#verify_remark').val().trim() === '') {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาระบุหมายเหตุการไม่อนุมัติ</span>', icon: "warning", confirmButtonText: "ตกลง" });
+            $('#verify_remark').focus();
             return;
         }
 

@@ -24,6 +24,11 @@ if (!in_array($result, ['1', '2'], true)) {
 
 $remark = isset($_POST['remark']) ? trim((string) $_POST['remark']) : '';
 
+// ปฏิเสธ (1) ต้องมีหมายเหตุเสมอ
+if ($result === '1' && $remark === '') {
+    Response::json(0, 'กรุณาระบุหมายเหตุการไม่อนุมัติ', null);
+}
+
 $db_instance = new Connection();
 $pdo_connect = $db_instance->getPdo();
 
