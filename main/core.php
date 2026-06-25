@@ -58,6 +58,8 @@ $routes = [
     'listCourseCategory'               => [
         'get_list_category'       => __DIR__ . '/core/listCourseCategory/GetListCategory.php',
         'add_category'       => __DIR__ . '/core/listCourseCategory/AddCategory.php',
+        'update_category'    => __DIR__ . '/core/listCourseCategory/UpdateCategory.php',
+        'delete_category'    => __DIR__ . '/core/listCourseCategory/DeleteCategory.php',
     ],
     'listCourseType'               => [
         'get_list_type'           => __DIR__ . '/core/listCourseType/GetListType.php',

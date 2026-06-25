@@ -73,3 +73,31 @@
         $el.removeClass('cpdth-btn-loading');
     };
 })();
+
+/**
+ * ลดเวลาแจ้งเตือน SweetAlert ให้เด้งเร็วขึ้น
+ * เดิมหลายไฟล์ตั้ง timer: 2000 (2 วินาที) ทำให้รอนาน
+ * patch รวมศูนย์ที่เดียว: ครอบ Swal.fire ทุกจุดที่มี timer ให้ไม่เกินเพดานนี้
+ * (ไดอะล็อกยืนยัน/ที่ไม่มี timer ไม่ได้รับผลกระทบ)
+ */
+(function () {
+    "use strict";
+
+    var MAX_TIMER = 1200; // ms: เพดานเวลา auto-close ของ toast
+
+    if (typeof window.Swal === "undefined" ||
+        typeof Swal.fire !== "function" ||
+        Swal.__cpdthTimerPatched) {
+        return;
+    }
+
+    var origFire = Swal.fire;
+    Swal.fire = function () {
+        var opt = arguments[0];
+        if (opt && typeof opt === "object" && typeof opt.timer === "number" && opt.timer > MAX_TIMER) {
+            opt.timer = MAX_TIMER;
+        }
+        return origFire.apply(Swal, arguments);
+    };
+    Swal.__cpdthTimerPatched = true;
+})();

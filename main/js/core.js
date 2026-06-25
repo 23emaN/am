@@ -68,8 +68,7 @@ async function KeepSessionAlive() {
                 timer: 2000,
                 timerProgressBar: true,
                 didClose: () => {
-                    window.locat
-                    ion.replace("logout.php");
+                    window.location.replace("logout.php");
                 },
             });
         }

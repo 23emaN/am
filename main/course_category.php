@@ -93,4 +93,56 @@
             error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
     }
+
+    // แก้ไขหมวดหมู่ -> โหลด modal พร้อมข้อมูลเดิม
+    function GetEditCategory(group_id) {
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#myModal"); },
+            type: "POST",
+            url: "view/listCourseCategory/GetModalEdit.php",
+            data: JSON.stringify({ group_id: group_id }),
+            contentType: "application/json; charset=utf-8",
+            processData: false,
+            dataType: "html",
+            success: function (response) {
+                $("#showModal").html(response);
+                $("#myModal").modal("show");
+            },
+            complete: function () { HideLoadingOverlay("#myModal"); },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+        });
+    }
+
+    // ลบหมวดหมู่ (soft delete) -> ยืนยันก่อน แล้วเรียก handler
+    function GetDeleteCategory(group_id) {
+        Swal.fire({
+            title: "ยืนยันการลบ",
+            html: '<span class="text-secondary">ต้องการลบหมวดหมู่นี้ใช่หรือไม่?</span>',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ลบ",
+            cancelButtonText: "ยกเลิก",
+            confirmButtonColor: "#dc3545"
+        }).then((result) => {
+            if (!result.isConfirmed) { return; }
+            $.ajax({
+                type: "POST",
+                url: "core.php",
+                data: {
+                    request_state: "listCourseCategory",
+                    request_function: "delete_category",
+                    group_id: group_id
+                },
+                dataType: "json",
+                success: function (response) {
+                    if (response.result == 1) {
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true }).then(() => { LoadData(); });
+                    } else {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
+                    }
+                },
+                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+            });
+        });
+    }
 </script>
