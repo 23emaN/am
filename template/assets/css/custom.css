@@ -61,10 +61,10 @@ html, body { overflow-x: hidden; max-width: 100%; }
    and is untouched. main-content padding-left keeps the ~12px gap (200 + 12 = 212). */
 @media only screen and (min-width: 1200px) {
     .sidebar-area {
-        width: 200px;
+        width: 240px;
     }
     .main-content {
-        padding-left: 212px;
+        padding-left: 252px;
     }
 }
 
@@ -74,9 +74,24 @@ html, body { overflow-x: hidden; max-width: 100%; }
     display: flex;
     align-items: center;
     white-space: normal;
+    position: relative;
 }
 .sidebar-area .menu-vertical .menu-item .menu-link .menu-icon {
     flex-shrink: 0;
+}
+.sidebar-area .menu-vertical .menu-item .menu-link .title {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+/* badge นับจำนวน: ตรึงมุมขวา-กึ่งกลาง (ออกนอก flow) + เว้นที่ฝั่งขวาของข้อความไม่ให้ทับ */
+.sidebar-area .menu-vertical .menu-item .menu-link:has(.badge) .title {
+    padding-right: 24px;
+}
+.sidebar-area .menu-vertical .menu-item .menu-link .badge {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 /* #8 DataTables: ไอคอนลูกศร sort (▲▼) ถูก render ด้วยฟอนต์ K2D ของธีม ทำให้ตัวอักษร

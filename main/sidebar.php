@@ -3,6 +3,24 @@
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $verify_pages = ['verify_request']; ?>
 <?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
+<?php $admin_pages = ['admin', 'admin_fromadd', 'admin_edit']; ?>
+<?php
+    // จำนวนคำขอยืนยันตัวตนที่รอตรวจ (identity_verified = '1') สำหรับ badge ข้างเมนู
+    $verify_pending = 0;
+    try {
+        require_once dirname(__DIR__) . '/vendor/autoload.php';
+        $pdo_sidebar = (new \App\Database\Connection())->getPdo();
+        if ($pdo_sidebar) {
+            $stmt_sidebar = $pdo_sidebar->query(
+                "SELECT COUNT(*) FROM tbl_user WHERE delete_at IS NULL AND identity_verified = '1'"
+            );
+            $verify_pending = (int) $stmt_sidebar->fetchColumn();
+            $stmt_sidebar->closeCursor();
+        }
+    } catch (\Throwable $e) {
+        $verify_pending = 0; // DB มีปัญหา -> ไม่ให้ sidebar พัง
+    }
+?>
 
 <div class="sidebar-area" id="sidebar-area">
 
@@ -53,6 +71,9 @@
                 <a href="verify_request" class="menu-link <?php echo in_array($now_page, $verify_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">how_to_reg</span>
                     <span class="title">ยืนยันตัวตนผู้ใช้งาน</span>
+                    <?php if ($verify_pending > 0): ?>
+                        <span class="badge rounded-pill bg-danger ms-auto"><?php echo $verify_pending > 99 ? '99+' : $verify_pending; ?></span>
+                    <?php endif; ?>
                 </a>
             </li>
 
@@ -64,6 +85,13 @@
                 <a href="coupon" class="menu-link <?php echo in_array($now_page, $coupon_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">sell</span>
                     <span class="title">คูปองส่วนลด</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $admin_pages) ? 'open' : '' ?>">
+                <a href="admin" class="menu-link <?php echo in_array($now_page, $admin_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">manage_accounts</span>
+                    <span class="title">ผู้ดูแลระบบ</span>
                 </a>
             </li>
 
