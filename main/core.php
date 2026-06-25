@@ -19,6 +19,14 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
+    'list_admin'               => [
+        'get_list_admin' => __DIR__ . '/core/listAdmin/GetListAdmin.php',
+        'add_admin'      => __DIR__ . '/core/listAdmin/AddAdmin.php',
+        'get_admin'      => __DIR__ . '/core/listAdmin/GetAdmin.php',
+        'update_admin'   => __DIR__ . '/core/listAdmin/UpdateAdmin.php',
+        'delete_admin'   => __DIR__ . '/core/listAdmin/DeleteAdmin.php',
+    ],
+
     'verify_request'           => [
         'get_list_verify' => __DIR__ . '/core/verifyRequest/GetListVerifyRequest.php',
         'get_verify'      => __DIR__ . '/core/verifyRequest/GetVerifyRequest.php',
