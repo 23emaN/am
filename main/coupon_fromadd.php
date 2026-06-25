@@ -80,11 +80,11 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">เริ่มใช้เมื่อ</label>
-                                <input type="date" class="form-control" name="coupon_start">
+                                <input type="text" class="form-control datepicker" name="coupon_start" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">สิ้นสุดเมื่อ</label>
-                                <input type="date" class="form-control" name="coupon_end">
+                                <input type="text" class="form-control datepicker" name="coupon_end" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
 
                             <div class="col-12 mt-4">
@@ -108,6 +108,10 @@
 </html>
 
 <script>
+    $(document).ready(function () {
+        InitThaiDatepicker(".datepicker");
+    });
+
     // สุ่มสร้างรหัสคูปอง (8 ตัวอักษร ตัดตัวที่สับสน I/O/0/1 ออก)
     function GenerateCode() {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

@@ -55,7 +55,7 @@ if ($row_login) {
 
             $createdAt = date('Y-m-d H:i:s', $now);
 
-            $expiresAt = date('Y-m-d H:i:s', $now + 25200);
+            $expiresAt = date('Y-m-d H:i:s', $now + 86400);
 
             $ip = $_SERVER['REMOTE_ADDR'] ?? null;
 
@@ -125,7 +125,7 @@ if ($row_login) {
 
                 'iat' => $now,
 
-                'exp' => $now + 25200,
+                'exp' => $now + 86400,
 
             ];
 

@@ -83,11 +83,11 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">เริ่มใช้เมื่อ</label>
-                                <input type="date" class="form-control" name="coupon_start">
+                                <input type="text" class="form-control datepicker" name="coupon_start" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">สิ้นสุดเมื่อ</label>
-                                <input type="date" class="form-control" name="coupon_end">
+                                <input type="text" class="form-control datepicker" name="coupon_end" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
 
                             <div class="col-12 mt-4">
@@ -114,8 +114,18 @@
     var COUPON_ID = "<?php echo $coupon_id; ?>";
 
     $(document).ready(function () {
+        InitThaiDatepicker(".datepicker");
         if (COUPON_ID) LoadCoupon();
     });
+
+    // เซ็ตค่าวันที่ผ่าน instance ของ flatpickr (ถ้ามี) เพื่อให้ช่องแสดงค่าถูก
+    function setDateField(name, val) {
+        var el = document.querySelector('#FormEditCoupon [name="' + name + '"]');
+        if (!el) return;
+        var clean = (val && val !== "0000-00-00") ? val : "";
+        if (el._flatpickr) el._flatpickr.setDate(clean, false);
+        else el.value = clean;
+    }
 
     function GenerateCode() {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -155,8 +165,8 @@
         f.find('[name="coupon_limit_person"]').val(c.coupon_limit_person || "");
         f.find('[name="coupon_min"]').val(c.coupon_min || "");
         f.find('[name="coupon_max"]').val(c.coupon_max || "");
-        f.find('[name="coupon_start"]').val((c.coupon_start && c.coupon_start !== "0000-00-00") ? c.coupon_start : "");
-        f.find('[name="coupon_end"]').val((c.coupon_end && c.coupon_end !== "0000-00-00") ? c.coupon_end : "");
+        setDateField("coupon_start", c.coupon_start);
+        setDateField("coupon_end", c.coupon_end);
     }
 
     $(document).on('submit', '#FormEditCoupon', function (e) {
