@@ -19,6 +19,12 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
+    'verify_request'           => [
+        'get_list_verify' => __DIR__ . '/core/verifyRequest/GetListVerifyRequest.php',
+        'get_verify'      => __DIR__ . '/core/verifyRequest/GetVerifyRequest.php',
+        'update_verify'   => __DIR__ . '/core/verifyRequest/UpdateVerifyRequest.php',
+    ],
+
     'list_coupon'              => [
         'get_list_coupon' => __DIR__ . '/core/listCoupon/GetListCoupon.php',
         'add_coupon'      => __DIR__ . '/core/listCoupon/AddCoupon.php',

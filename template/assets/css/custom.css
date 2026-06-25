@@ -54,3 +54,40 @@ html, body { overflow-x: hidden; max-width: 100%; }
 }
 .sidebar-user .logout-btn { line-height: 0; }
 .layout-menu { padding-bottom: 84px; }
+
+/* #6 narrow the sidebar: theme default 260/250px -> 200px.
+   scoped to >=1200px (where the sidebar is shown) so mobile off-canvas stays intact.
+   the collapsed state ([sidebar-data-theme=sidebar-hide]) has higher specificity
+   and is untouched. main-content padding-left keeps the ~12px gap (200 + 12 = 212). */
+@media only screen and (min-width: 1200px) {
+    .sidebar-area {
+        width: 200px;
+    }
+    .main-content {
+        padding-left: 212px;
+    }
+}
+
+/* #7 sidebar แคบ (200px): เมนูที่ข้อความยาว เช่น "คำขอยืนยันตัวตนผู้ใช้งาน"
+   ให้ตัดบรรทัดแทนการดันเนื้อหาจนเกิด scrollbar แนวนอน, ตรึง icon ไว้ซ้าย */
+.sidebar-area .menu-vertical .menu-item .menu-link {
+    display: flex;
+    align-items: center;
+    white-space: normal;
+}
+.sidebar-area .menu-vertical .menu-item .menu-link .menu-icon {
+    flex-shrink: 0;
+}
+
+/* #8 DataTables: ไอคอนลูกศร sort (▲▼) ถูก render ด้วยฟอนต์ K2D ของธีม ทำให้ตัวอักษร
+   เพี้ยน (ดูเหมือน encoding error) -> บังคับใช้ฟอนต์ที่มี glyph สามเหลี่ยมปกติ */
+table.dataTable thead .dt-column-order::before,
+table.dataTable thead .dt-column-order::after,
+table.dataTable thead .sorting::before,
+table.dataTable thead .sorting::after,
+table.dataTable thead .sorting_asc::before,
+table.dataTable thead .sorting_asc::after,
+table.dataTable thead .sorting_desc::before,
+table.dataTable thead .sorting_desc::after {
+    font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+}
