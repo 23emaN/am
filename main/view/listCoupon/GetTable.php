@@ -6,12 +6,13 @@
     $data = json_decode($raw, true);
     $list_data = $data["list_data"] ?? [];
 
-    // แปลงวันที่ Y-m-d -> d/m/Y (ค.ศ.)
+    // แปลงวันที่ Y-m-d -> วว/ดด/ปปปป
     function coupon_date($d): string {
         $d = trim((string)$d);
         if ($d === '' || $d === '0000-00-00') return '-';
         $ts = strtotime($d);
-        return $ts ? date('d/m/Y', $ts) : '-';
+        if (!$ts) return '-';
+        return date('d/m/', $ts) . ((int) date('Y', $ts) + 543); // ปี พ.ศ.
     }
 ?>
 
