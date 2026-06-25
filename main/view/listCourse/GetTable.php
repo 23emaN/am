@@ -19,13 +19,21 @@
 ?>
 
 <div class="card bg-white border-0 rounded-3 mb-4">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
-        <h2 class="mb-0">คอร์สเรียน</h2>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
+        <h4 class="mb-0">คอร์สเรียน</h4>
 
-        <div class="d-flex gap-2">
-            <a href="course_type.php" class="btn btn-info">จัดการประเภท</a>
-            <a href="course_category.php" class="btn btn-info">จัดการหมวดหมู่</a>
-            <a href="course_fromadd.php" class="btn btn-success">เพิ่มคอร์สเรียน</a>
+        <div class="d-flex flex-wrap gap-2">
+            <?php /* ปิดปุ่ม "จัดการประเภท" ไว้ชั่วคราว — เปิดกลับได้โดยลบ comment นี้
+            <a href="course_type.php" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:18px;">category</span> จัดการประเภท
+            </a>
+            */ ?>
+            <a href="course_category.php" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:18px;">folder</span> จัดการหมวดหมู่
+            </a>
+            <a href="course_fromadd.php" class="btn btn-primary d-inline-flex align-items-center gap-1">
+                <span class="material-symbols-outlined" style="font-size:18px;">add</span> เพิ่มคอร์สเรียน
+            </a>
         </div>
     </div>
 
@@ -66,9 +74,12 @@
                                     <td class="text-center">
                                         <?php if ($cover !== ''): ?>
                                             <img src="../<?php echo htmlspecialchars($cover); ?>" alt="cover"
-                                                 style="width:64px;height:48px;object-fit:cover;border-radius:6px;">
+                                                 style="width:64px;height:48px;object-fit:cover;border-radius:8px;">
                                         <?php else: ?>
-                                            <span class="text-muted small"><i class="ri-image-line"></i> ไม่มีรูป</span>
+                                            <span class="d-inline-flex align-items-center justify-content-center text-muted"
+                                                  style="width:64px;height:48px;border-radius:8px;background:#f1f3f6;">
+                                                <i class="ri-image-line fs-18"></i>
+                                            </span>
                                         <?php endif; ?>
                                     </td>
 
@@ -94,7 +105,7 @@
                                         <?php if (count($codes_cpd) > 0): ?>
                                             <div class="d-flex flex-column align-items-start gap-1">
                                                 <?php foreach ($codes_cpd as $code): ?>
-                                                    <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($code); ?></span>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary"><?php echo htmlspecialchars($code); ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -106,7 +117,7 @@
                                         <?php if (count($codes_cpa) > 0): ?>
                                             <div class="d-flex flex-column align-items-start gap-1">
                                                 <?php foreach ($codes_cpa as $code): ?>
-                                                    <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($code); ?></span>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary"><?php echo htmlspecialchars($code); ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -116,24 +127,24 @@
 
                                     <td class="text-center">
                                         <?php if ($is_display): ?>
-                                            <span class="badge bg-success">แสดง</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success">แสดง</span>
                                         <?php else: ?>
-                                            <span class="badge bg-secondary">ไม่แสดง</span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">ไม่แสดง</span>
                                         <?php endif; ?>
                                     </td>
 
                                     <td class="text-center">
                                         <?php if ($is_active): ?>
-                                            <span class="badge bg-success">เปิดใช้งาน</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success">เปิดใช้งาน</span>
                                         <?php else: ?>
-                                            <span class="badge bg-danger">ปิดใช้งาน</span>
+                                            <span class="badge bg-danger bg-opacity-10 text-danger">ปิดใช้งาน</span>
                                         <?php endif; ?>
                                     </td>
 
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-warning w-100"
-                                            onclick="GetEditCourse('<?php echo $row['course_id']; ?>');">
-                                            แก้ไข
+                                        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                                            onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข">
+                                            <span class="material-symbols-outlined" style="font-size:18px;">edit</span> แก้ไข
                                         </button>
                                     </td>
                                 </tr>
