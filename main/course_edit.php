@@ -192,10 +192,11 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning small">
-                    กรุณาอัพโหลดไฟล์ตามรูปแบบ: <b>Question | Choice 1 | Choice 2 | Choice 3 | Choice 4 | Correct Answer</b> (ช่องคำตอบใส่เลข 1-4)
+                    กรุณาอัพโหลดไฟล์ข้อสอบตามรูปแบบที่กำหนด โดยสามารถดาวน์โหลดตัวอย่างรูปแบบไฟล์ได้
+                    <a href="sample/example_question.xlsx" download>ที่นี่</a>
                 </div>
                 <form id="formUploadExam" enctype="multipart/form-data">
-                    <label class="form-label fw-medium">ไฟล์ข้อสอบ (.xlsx)</label>
+                    <label class="form-label fw-medium">ไฟล์ข้อสอบ</label>
                     <input type="file" class="form-control" name="excel_file" accept=".xlsx,.xls">
                 </form>
             </div>
