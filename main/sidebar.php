@@ -1,8 +1,9 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
-<?php $verify_pages = ['verify_request']; ?>
 <?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
+<?php $banner_pages = ['banner', 'banner_fromadd', 'banner_edit']; ?>
+
 <?php $admin_pages = ['admin', 'admin_fromadd', 'admin_edit']; ?>
 <?php
     // จำนวนคำขอยืนยันตัวตนที่รอตรวจ (identity_verified = '1') สำหรับ badge ข้างเมนู
@@ -21,6 +22,7 @@
         $verify_pending = 0; // DB มีปัญหา -> ไม่ให้ sidebar พัง
     }
 ?>
+
 
 <div class="sidebar-area" id="sidebar-area">
 
@@ -67,6 +69,7 @@
                 </a>
             </li>
 
+
             <li class="menu-item <?php echo in_array($now_page, $verify_pages) ? 'open' : '' ?>">
                 <a href="verify_request" class="menu-link <?php echo in_array($now_page, $verify_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">how_to_reg</span>
@@ -76,6 +79,7 @@
                     <?php endif; ?>
                 </a>
             </li>
+
 
             <li class="menu-title small text-uppercase">
                 <span class="menu-title-text">อื่น ๆ</span>
@@ -88,10 +92,17 @@
                 </a>
             </li>
 
+
+            <li class="menu-item <?php echo in_array($now_page, $banner_pages) ? 'open' : '' ?>">
+                <a href="banner" class="menu-link <?php echo in_array($now_page, $banner_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">image</span>
+                    <span class="title">แบนเนอร์</span>
+
             <li class="menu-item <?php echo in_array($now_page, $admin_pages) ? 'open' : '' ?>">
                 <a href="admin" class="menu-link <?php echo in_array($now_page, $admin_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">manage_accounts</span>
                     <span class="title">ผู้ดูแลระบบ</span>
+
                 </a>
             </li>
 
