@@ -6,12 +6,11 @@
     $data = json_decode($raw, true);
     $list_data = $data["list_data"] ?? [];
 
-    // รวมรหัสวิชา CPD/CPA ที่ไม่ว่างให้เป็นรายการเดียว
-    function course_codes(array $row): array {
+    // ดึงรหัสวิชาตามประเภท (cpd หรือ cpa) เฉพาะที่ไม่ว่าง
+    function course_codes(array $row, string $type): array {
         $codes = [];
-        foreach (['course_code_cpd_1','course_code_cpd_2','course_code_cpd_3','course_code_cpd_4',
-                  'course_code_cpa_1','course_code_cpa_2','course_code_cpa_3','course_code_cpa_4'] as $k) {
-            $v = trim((string)($row[$k] ?? ''));
+        foreach (['1', '2', '3', '4'] as $i) {
+            $v = trim((string)($row["course_code_{$type}_{$i}"] ?? ''));
             $v = str_replace(['[', ']'], '', $v); // ตัดวงเล็บปี/ไตรมาสออกตอนแสดงผล
             if ($v !== '') { $codes[] = $v; }
         }
@@ -41,7 +40,8 @@
                             <th scope="col">ประเภท / หมวดหมู่</th>
                             <th scope="col">ชื่อคอร์สเรียน</th>
                             <th scope="col" class="text-end">ราคา</th>
-                            <th scope="col">รหัสวิชา</th>
+                            <th scope="col">รหัสวิชา CPD</th>
+                            <th scope="col">รหัสวิชา CPA</th>
                             <th scope="col" class="text-center">แสดงในหน้าหลัก</th>
                             <th scope="col" class="text-center">สถานะ</th>
                             <th scope="col" class="text-center" style="width: 110px;"></th>
@@ -52,7 +52,8 @@
                             <?php $n = 1; ?>
                             <?php foreach ($list_data as $row): ?>
                                 <?php
-                                    $codes      = course_codes($row);
+                                    $codes_cpd  = course_codes($row, 'cpd');
+                                    $codes_cpa  = course_codes($row, 'cpa');
                                     $price      = (float)($row['course_price'] ?? 0);
                                     $promotion  = (float)($row['course_promotion'] ?? 0);
                                     $cover      = trim((string)($row['course_cover_image'] ?? ''));
@@ -90,9 +91,21 @@
                                     </td>
 
                                     <td>
-                                        <?php if (count($codes) > 0): ?>
-                                            <div class="d-flex flex-wrap gap-1">
-                                                <?php foreach ($codes as $code): ?>
+                                        <?php if (count($codes_cpd) > 0): ?>
+                                            <div class="d-flex flex-column align-items-start gap-1">
+                                                <?php foreach ($codes_cpd as $code): ?>
+                                                    <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($code); ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+
+                                    <td>
+                                        <?php if (count($codes_cpa) > 0): ?>
+                                            <div class="d-flex flex-column align-items-start gap-1">
+                                                <?php foreach ($codes_cpa as $code): ?>
                                                     <span class="badge bg-light text-dark border"><?php echo htmlspecialchars($code); ?></span>
                                                 <?php endforeach; ?>
                                             </div>

@@ -27,7 +27,7 @@
                         <h4 class="mb-0">รายละเอียดผู้ใช้/ลูกค้า</h4>
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" class="btn btn-info text-white" onclick="LoginAsUser('<?php echo $user_id; ?>');">ล็อกอินเข้าเว็บไซต์</button>
-                            <button type="button" class="btn btn-warning" onclick="VerifyUser('<?php echo $user_id; ?>');">ดำเนินการยืนยันตัวตนผู้ใช้</button>
+                            <button type="button" class="btn btn-warning" onclick="OpenVerifyModal();">ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้</button>
                             <button type="button" class="btn btn-danger" onclick="DeleteUser('<?php echo $user_id; ?>');">ลบบัญชีผู้ใช้</button>
                         </div>
                     </div>
@@ -195,6 +195,61 @@
     </div>
 </div>
 
+<!-- Modal: ตรวจสอบเอกสารยืนยันตัวตน -->
+<div class="modal fade" id="VerifyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ยืนยันตัวตนผู้ใช้</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="FormVerify" autocomplete="off">
+                    <input type="hidden" name="user_id" id="verify_user_id" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label">ประเภทเอกสาร</label>
+                        <input type="text" class="form-control bg-light" value="ยืนยันด้วยบัตรประชาชน" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">หมายเลขเอกสาร</label>
+                        <input type="text" class="form-control bg-light" id="verify_citizen_id" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">วันหมดอายุของเอกสาร</label>
+                        <input type="text" class="form-control bg-light" id="verify_expiry" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">รูปเอกสาร</label>
+                        <div>
+                            <img id="verify_id_image" src="" alt="รูปเอกสาร" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <div id="verify_id_image_empty" class="text-muted small d-none">ไม่มีรูปเอกสาร</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">รูปหน้ายืนยัน</label>
+                        <div>
+                            <img id="verify_photo" src="" alt="รูปหน้ายืนยัน" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <div id="verify_photo_empty" class="text-muted small d-none">ไม่มีรูปหน้ายืนยัน</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">ผลการตรวจสอบเอกสาร</label>
+                        <select class="form-select" name="approver_citizen" id="verify_result">
+                            <option value="">---กรุณาเลือก---</option>
+                            <option value="2">อนุมัติ (ยืนยันตัวตนสำเร็จ)</option>
+                            <option value="1">ไม่อนุมัติ (ปฏิเสธ)</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary w-100" onclick="SubmitVerify();">ยืนยันข้อมูลการยืนยันตัวตน</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php include "script.php"; ?>
 
 </body>
@@ -203,8 +258,17 @@
 
 <script>
     var USER_ID = "<?php echo $user_id; ?>";
+    var AUTO_VERIFY = "<?php echo isset($_GET['verify']) ? '1' : '' ?>";
+    var verifyModal = null;
 
     $(document).ready(function () {
+        verifyModal = new bootstrap.Modal(document.getElementById('VerifyModal'));
+
+        // มาจากหน้า "คำขอยืนยันตัวตนผู้ใช้งาน" -> เปิด modal ตรวจเอกสารอัตโนมัติ
+        if (USER_ID && AUTO_VERIFY === '1') {
+            OpenVerifyModal();
+        }
+
         InitTabTables();
 
         // ปรับความกว้างคอลัมน์เมื่อสลับแท็บ (DataTable ในแท็บที่ซ่อนอยู่จะคำนวณความกว้างผิด)
@@ -370,7 +434,87 @@
         Swal.fire({ title: "ล็อกอินเข้าเว็บไซต์", html: '<span class="text-secondary">ฟังก์ชันนี้ยังไม่เปิดใช้งาน (รอเชื่อมระบบฝั่งเว็บไซต์)</span>', icon: "info", confirmButtonText: "ตกลง" });
     }
 
-    function VerifyUser(user_id) {
-        Swal.fire({ title: "ยืนยันตัวตนผู้ใช้", html: '<span class="text-secondary">ฟังก์ชันนี้ยังเป็นโครง (ยังไม่มีตารางยืนยันตัวตนใน DB)</span>', icon: "info", confirmButtonText: "ตกลง" });
+    // ===== ตรวจสอบเอกสารยืนยันตัวตน (modal) =====
+
+    // แปลง path รูปที่เก็บใน DB (เช่น upload/xxx.png) ให้ชี้จาก main/ ออกไป root ของเว็บ
+    function ImageSrc(path) {
+        if (!path) return "";
+        return /^https?:\/\//.test(path) ? path : "../" + path;
+    }
+
+    // แปลงวันหมดอายุ Y-m-d -> dd/mm/yyyy (ค.ศ.)
+    function FormatExpiry(d) {
+        if (!d || d === "0000-00-00") return "-";
+        var p = String(d).split("-");
+        if (p.length !== 3) return d;
+        return p[2] + "/" + p[1] + "/" + p[0];
+    }
+
+    function OpenVerifyModal() {
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#FormEditUser"); },
+            type: "POST",
+            url: "core.php",
+            data: { request_state: "verify_request", request_function: "get_verify", user_id: USER_ID },
+            dataType: "json",
+            success: function (response) {
+                if (response.result == 1) {
+                    FillVerifyModal(response.data.verify);
+                    verifyModal.show();
+                } else {
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", confirmButtonText: "ตกลง" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#FormEditUser"); },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+        });
+    }
+
+    function FillVerifyModal(v) {
+        if (!v) return;
+        $("#verify_user_id").val(v.user_id || "");
+        $("#verify_citizen_id").val(v.user_citizen_id || "-");
+        $("#verify_expiry").val(FormatExpiry(v.id_card_expiry_date));
+        $("#verify_result").val("");
+
+        SetVerifyImage("#verify_id_image", "#verify_id_image_empty", v.id_card_image);
+        SetVerifyImage("#verify_photo", "#verify_photo_empty", v.current_photo);
+    }
+
+    function SetVerifyImage(imgSel, emptySel, path) {
+        var src = ImageSrc(path);
+        if (src) {
+            $(imgSel).attr("src", src).removeClass("d-none");
+            $(emptySel).addClass("d-none");
+        } else {
+            $(imgSel).attr("src", "").addClass("d-none");
+            $(emptySel).removeClass("d-none");
+        }
+    }
+
+    function SubmitVerify() {
+        var result = $("#verify_result").val();
+        if (!result) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกผลการตรวจสอบเอกสาร</span>', icon: "warning", confirmButtonText: "ตกลง" });
+            return;
+        }
+
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#FormVerify"); },
+            type: "POST",
+            url: "core.php",
+            data: $("#FormVerify").serialize() + "&request_state=verify_request&request_function=update_verify",
+            dataType: "json",
+            success: function (response) {
+                if (response.result == 1) {
+                    verifyModal.hide();
+                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                } else {
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", confirmButtonText: "ตกลง" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#FormVerify"); },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+        });
     }
 </script>
