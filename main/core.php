@@ -72,7 +72,14 @@ $routes = [
         'update_lesson'         => __DIR__ . '/core/lesson/UpdateLesson.php',
         'update_video'          => __DIR__ . '/core/lesson/UpdateVideo.php',
         'upload_video'          => __DIR__ . '/core/lesson/UploadVideo.php',
+        'create_upload'         => __DIR__ . '/core/lesson/CreateUpload.php',
+        'finish_upload'         => __DIR__ . '/core/lesson/FinishUpload.php',
+        'get_video_status'      => __DIR__ . '/core/lesson/GetVideoStatus.php',
         'delete_lesson'         => __DIR__ . '/core/lesson/DeleteLesson.php',
+    ],
+    'lesson_progress'           => [
+        'get_progress'          => __DIR__ . '/core/lessonProgress/GetProgress.php',
+        'save_progress'         => __DIR__ . '/core/lessonProgress/SaveProgress.php',
     ],
     'question'                  => [
         'get_list_question'     => __DIR__ . '/core/question/GetListQuestion.php',

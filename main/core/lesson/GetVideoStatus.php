@@ -1,0 +1,54 @@
+<?php
+// เช็คสถานะการประมวลผล (transcode) ของวิดีโอบทเรียนบน Vimeo
+// ใช้หลังอัปโหลด: หน้า lesson_manage จะ poll จนกว่า is_playable = true ค่อยฝังวิดีโอ
+
+use App\Utility\Auth;
+use App\Utility\Response;
+use App\Database\Connection;
+use Vimeo\Vimeo;
+
+$access_token = Auth::requireUserToken();
+$user_id = $access_token->user_id ?? null;
+if (!$user_id) {
+    Response::json(0, 'Unauthorized', null);
+}
+
+$lesson_id = isset($_POST['lesson_id']) ? (int) $_POST['lesson_id'] : 0;
+if ($lesson_id <= 0) {
+    Response::json(0, 'ไม่พบรหัสบทเรียน', null);
+}
+
+$db_instance = new Connection();
+$pdo_connect = $db_instance->getPdo();
+if (!$pdo_connect) {
+    Response::json(0, 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', null);
+}
+
+$stmt = $pdo_connect->prepare("SELECT lesson_video FROM tbl_lesson WHERE lesson_id = :id AND delete_at IS NULL LIMIT 1");
+$stmt->execute([':id' => $lesson_id]);
+$video = (string) $stmt->fetchColumn();
+$stmt->closeCursor();
+
+if ($video === '' || !preg_match('#/video/(\d+)#', $video, $m)) {
+    Response::json(0, 'บทเรียนนี้ยังไม่มีวิดีโอ', null);
+}
+$video_id = $m[1];
+
+$token = trim($_ENV['VIMEO_ACCESS_TOKEN'] ?? '');
+
+try {
+    $lib  = new Vimeo($_ENV['VIMEO_CLIENT_ID'] ?? '', $_ENV['VIMEO_CLIENT_SECRET'] ?? '', $token);
+    $info = $lib->request('/videos/' . $video_id, ['fields' => 'status,is_playable,transcode.status'], 'GET');
+    $b = $info['body'] ?? [];
+
+    Response::json(1, 'Success', [
+        'status'      => $b['status'] ?? 'unknown',
+        'is_playable' => !empty($b['is_playable']),
+        'transcode'   => $b['transcode']['status'] ?? 'unknown',
+    ]);
+} catch (Exception $e) {
+    error_log('GetVideoStatus Error: ' . $e->getMessage());
+    Response::json(0, $e->getMessage(), null);
+} finally {
+    $pdo_connect = null;
+}
