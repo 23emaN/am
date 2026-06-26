@@ -65,7 +65,18 @@ try {
         Response::json(0, 'อัปโหลดสำเร็จแต่ไม่พบรหัสวิดีโอจาก Vimeo', null);
     }
     $video_id = $m[1];
-    $embed    = 'https://player.vimeo.com/video/' . $video_id;
+
+    // วิดีโอใหม่ของ Vimeo ต้องใช้ embed URL ที่มี privacy hash (?h=...) ไม่งั้นขึ้น "This video does not exist"
+    // ดึง player_embed_url ของจริงจาก API (มี hash อยู่แล้ว) แทนการประกอบ URL เอง
+    $embed = 'https://player.vimeo.com/video/' . $video_id;
+    try {
+        $info = $lib->request('/videos/' . $video_id, ['fields' => 'player_embed_url'], 'GET');
+        if (!empty($info['body']['player_embed_url'])) {
+            $embed = $info['body']['player_embed_url'];
+        }
+    } catch (Exception $e) {
+        error_log('Vimeo get embed url failed: ' . $e->getMessage());
+    }
 
     $upd = $pdo_connect->prepare("UPDATE tbl_lesson SET lesson_video = :v WHERE lesson_id = :id AND delete_at IS NULL");
     $upd->execute([':v' => $embed, ':id' => $lesson_id]);

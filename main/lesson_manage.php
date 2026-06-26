@@ -75,6 +75,14 @@
                                 <div class="form-text">อัปโหลดไฟล์วิดีโอ → ระบบจะอัปขึ้น Vimeo ให้อัตโนมัติแล้วเก็บลิงก์ (รองรับ mp4, mov, avi, wmv, mkv, webm)</div>
                                 <button type="button" class="btn btn-primary w-100 mt-3 BtnUploadVideo" onclick="SubmitUploadVideo()">อัพโหลดวีดีโอขึ้น Vimeo</button>
                             </form>
+
+                            <!-- ปุ่มไปหน้าทดสอบบทเรียน (เครื่องเล่นจริง + คำถามคั่น) -->
+                            <a href="lesson_preview.php?course_id=<?php echo $course_id; ?>&lesson_id=<?php echo $lesson_id; ?>"
+                               class="btn btn-outline-success w-100 mt-2 d-inline-flex align-items-center justify-content-center gap-1">
+                                <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                                ทดสอบเล่นบทเรียน (Preview)
+                            </a>
+
                             <div id="videoPreview" class="mt-4"></div>
                         </div>
 
@@ -160,6 +168,7 @@
 </div>
 
 <?php include "script.php"; ?>
+<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.1.0/dist/tus.min.js"></script>
 
 </body>
 
@@ -231,21 +240,68 @@
     }
 
     function SubmitUploadVideo() {
-        if (!$('#formVideo [name="video_file"]').val()) {
+        var fileInput = $('#formVideo [name="video_file"]')[0];
+        if (!fileInput || !fileInput.files || !fileInput.files.length) {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกไฟล์วิดีโอ</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
             return;
         }
-        var fd = new FormData($('#formVideo')[0]);
-        fd.append('request_state', 'lesson');
-        fd.append('request_function', 'upload_video');
-        fd.append('lesson_id', LESSON_ID);
-        // อัปโหลดไฟล์ใหญ่ + ส่งต่อ Vimeo ใช้เวลานาน — แจ้งให้รอ
-        Swal.fire({ title: "กำลังอัปโหลดขึ้น Vimeo...", html: 'อาจใช้เวลาสักครู่ตามขนาดไฟล์', allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
-        $.ajax({
-            type: "POST", url: "core.php", data: fd, processData: false, contentType: false, dataType: "json",
-            success: function (response) { Swal.close(); ToastResult(response); if (response.result == 1) { LoadLesson(); } },
-            error: function (jqXHR, exception) { Swal.close(); ShowErrorAjax(jqXHR, exception); }
+        if (typeof tus === "undefined") {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">ไลบรารีอัปโหลดยังไม่พร้อม (ตรวจสอบอินเทอร์เน็ต)</span>', icon: "error", showConfirmButton: true });
+            return;
+        }
+        var file = fileInput.files[0];
+
+        Swal.fire({
+            title: "กำลังอัปโหลดวีดีโอขึ้น Vimeo",
+            html:
+                '<div class="text-secondary mb-2" id="upPhase">กำลังเตรียมการอัปโหลด...</div>' +
+                '<div class="progress" style="height:20px;border-radius:10px;">' +
+                '<div id="upBar" class="progress-bar progress-bar-striped progress-bar-animated" ' +
+                'role="progressbar" style="width:0%;background:#605DFF;">0%</div></div>',
+            allowOutsideClick: false,
+            showConfirmButton: false
         });
+
+        // 1) สร้างงานอัปโหลดบน Vimeo (ขอ upload_link)
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "lesson", request_function: "create_upload", lesson_id: LESSON_ID, size: file.size },
+            dataType: "json"
+        }).done(function (res) {
+            if (res.result != 1) { Swal.close(); ToastResult(res); return; }
+
+            var uploadLink = res.data.upload_link;
+            var videoUri = res.data.video_uri;
+            $("#upPhase").text("กำลังอัปโหลดไฟล์ขึ้น Vimeo...");
+
+            // 2) อัปไฟล์ตรงไป Vimeo ผ่าน tus -> progress จริง
+            var upload = new tus.Upload(file, {
+                uploadUrl: uploadLink,
+                retryDelays: [0, 1000, 3000, 5000],
+                onProgress: function (uploaded, total) {
+                    var pct = Math.round((uploaded / total) * 100);
+                    $("#upBar").css("width", pct + "%").text(pct + "%");
+                },
+                onError: function (error) {
+                    Swal.close();
+                    Swal.fire({ title: "อัปโหลดล้มเหลว", html: '<span class="fw-bold text-danger">' + error + '</span>', icon: "error", showConfirmButton: true });
+                },
+                onSuccess: function () {
+                    $("#upBar").css("width", "100%").text("100%");
+                    $("#upPhase").text("อัปโหลดเสร็จ — กำลังบันทึกลิงก์...");
+                    // 3) ให้ server ดึง embed URL (มี hash) มาเก็บใน DB
+                    $.ajax({
+                        type: "POST", url: "core.php",
+                        data: { request_state: "lesson", request_function: "finish_upload", lesson_id: LESSON_ID, video_uri: videoUri },
+                        dataType: "json"
+                    }).done(function (fin) {
+                        Swal.close(); ToastResult(fin);
+                        if (fin.result == 1) { LoadLesson(); } // อัปเสร็จ -> แสดงวิดีโอที่อัปทันที
+                    }).fail(function (j, e) { Swal.close(); ShowErrorAjax(j, e); });
+                }
+            });
+            upload.start();
+        }).fail(function (j, e) { Swal.close(); ShowErrorAjax(j, e); });
     }
 
     // ===== แท็บคำถาม =====
