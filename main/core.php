@@ -19,6 +19,19 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
+    'list_etax'                => [
+        'get_list_etax'  => __DIR__ . '/core/listEtax/GetListEtax.php',
+        'send_email'     => __DIR__ . '/core/listEtax/SendEtaxEmail.php',
+    ],
+
+    'list_order'               => [
+        'get_list_order' => __DIR__ . '/core/listOrder/GetListOrder.php',
+        'get_order'      => __DIR__ . '/core/listOrder/GetOrder.php',
+        'update_note'    => __DIR__ . '/core/listOrder/UpdateOrderNote.php',
+        'update_address' => __DIR__ . '/core/listOrder/UpdateOrderAddress.php',
+        'export_report'  => __DIR__ . '/core/listOrder/OrderReport.php',
+    ],
+
 
     'list_admin'               => [
         'get_list_admin' => __DIR__ . '/core/listAdmin/GetListAdmin.php',
