@@ -75,7 +75,8 @@ if ($row_login) {
 
             $stmt_edit->bindValue(":end_datetime", $createdAt, PDO::PARAM_STR);
 
-            $edit = $stmt_edit->execute();
+            // ปิด single-session: ไม่ revoke session เดิม เพื่อกันการเด้งออกเวลา login ซ้ำ/เปิดหลายแท็บ
+            // $edit = $stmt_edit->execute();
 
             $stmt_edit->closeCursor();
 

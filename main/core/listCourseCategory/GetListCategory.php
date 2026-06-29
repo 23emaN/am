@@ -36,9 +36,10 @@ if ($user_id) {
 
 
     $sql_data = "SELECT a.*,
-                        COUNT(b.course_id) as course_count 
+                        COUNT(b.course_id) as course_count
                 FROM tbl_course_group a
-                LEFT JOIN tbl_course b ON a.group_id = b.course_group 
+                LEFT JOIN tbl_course b ON a.group_id = b.course_group AND b.delete_at IS NULL
+                WHERE a.delete_at IS NULL
                 GROUP BY a.group_id
                 ORDER BY a.group_id   ASC;";
 

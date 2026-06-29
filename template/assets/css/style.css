@@ -9,7 +9,9 @@ This files table contents are outlined below>>>>>
 
 *******************************************
 **/
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"); */
+@import url('https://fonts.googleapis.com/css2?family=K2D:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
 
 :root,
 [data-bs-theme=light] {
@@ -130,8 +132,10 @@ This files table contents are outlined below>>>>>
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
+
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
   --bs-body-font-family: var(--bs-font-sans-serif);
   --bs-body-font-size: 0.88rem;
@@ -263,7 +267,106 @@ body {
   background-color: var(--bs-body-bg);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+
 }
+
+.k2d-thin {
+  font-family: "K2D", sans-serif;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.k2d-extralight {
+  font-family: "K2D", sans-serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.k2d-light {
+  font-family: "K2D", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.k2d-regular {
+  font-family: "K2D", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.k2d-medium {
+  font-family: "K2D", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.k2d-semibold {
+  font-family: "K2D", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.k2d-bold {
+  font-family: "K2D", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.k2d-extrabold {
+  font-family: "K2D", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.k2d-thin-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.k2d-extralight-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.k2d-light-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.k2d-regular-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.k2d-medium-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.k2d-semibold-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.k2d-bold-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.k2d-extrabold-italic {
+  font-family: "K2D", sans-serif;
+  font-weight: 800;
+  font-style: italic;
+}
+
 
 hr {
   margin: 1rem 0;
@@ -3262,7 +3365,7 @@ progress {
 .form-control {
   display: block;
   width: 100%;
-  padding: 0.375rem 0.5rem;
+  padding: 0.375rem 0.75rem;
   font-size: 0.88rem;
   font-weight: 400;
   line-height: 1.5;
@@ -3523,7 +3626,8 @@ textarea.form-control-lg {
 }
 
 .form-check-input {
-  --bs-form-check-bg: var(--bs-body-bg);
+  /* --bs-form-check-bg: var(--bs-body-bg); */
+  --bs-form-check-bg: #fff;
   flex-shrink: 0;
   width: 1em;
   height: 1em;
@@ -3535,7 +3639,8 @@ textarea.form-control-lg {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  border: var(--bs-border-width) solid var(--bs-border-color);
+  /* border: var(--bs-border-width) solid var(--bs-border-color); */
+  border: var(--bs-border-width) solid #3e3e3e;
   print-color-adjust: exact;
 }
 
@@ -16984,7 +17089,7 @@ fieldset:disabled .btn {
 /* Global Area Style
 ============================================*/
 body {
-  font-family: "Inter", sans-serif;
+  font-family: "K2D", sans-serif;
 }
 
 a {
@@ -17044,10 +17149,10 @@ img {
 .form-control {
   background-color: #fff;
   border: 1px solid #D5D9E2;
-  height: 50px;
+  height: 42px;
   color: #3A4252 !important;
   font-size: 15px;
-  padding: 14px 16px;
+  /* padding: 14px 16px; */
   width: 100%;
   transition: all ease 0.5s;
   border-radius: 7px;
@@ -17282,6 +17387,9 @@ textarea.form-control {
 
 #preloader .preloader .waviy span:nth-child(5) {
   animation-delay: 0.5s;
+}
+#preloader .preloader .waviy span:nth-child(6) {
+  animation-delay: 0.6s;
 }
 
 @keyframes rotate {
@@ -27577,6 +27685,13 @@ Theme Settings Style
 
 /*# sourceMappingURL=style.css.map */
 
+.select2-dropdown {
+  z-index: 9999999;
+}
+
+.select2-container--open {
+  z-index: 9999999 !important;
+}
 
 .select2-selection__rendered {
   line-height: 49px !important;
@@ -27589,12 +27704,210 @@ Theme Settings Style
 
 .select2-selection__arrow {
   height: 49px !important;
-  
+
 }
 
 .select2-container--default .select2-selection--single {
   border: 1px solid #e5e6e7;
   border-radius: 5px;
-  
+
 }
 
+
+    #sortable tr {
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* แถวที่กำลังลาก */
+    .sortable-chosen {
+        background-color: #ffe5e5 !important;
+    }
+
+    /* ตำแหน่งที่จะแทรก */
+    .sortable-ghost {
+        border-top: 2px solid red !important;
+    }
+
+    #sortable.sorting-mode .sortable-ghost {
+        border: 2px solid red !important;
+    }
+
+    #sortable.sorting-mode .sortable-chosen {
+        background-color: #ffe5e5 !important;
+    }
+
+    #sortable tr:hover {
+        background-color: #ffcccc !important;
+        cursor: pointer;
+
+        /* สีแดงอ่อน */
+    }
+
+    /* card */
+    .highlight-hover {
+        background-color: #ffcccc !important;
+    }
+
+
+    /* สไตล์ของสวิตช์ */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    /* ซ่อน checkbox จริง */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* สร้าง slider */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+    }
+
+    /* สร้างวงกลมในสวิตช์ */
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        border-radius: 50%;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+    }
+
+    /* เปลี่ยนสีเมื่อเลือก */
+    input:checked+.slider {
+        background-color: #4CAF50;
+    }
+
+    /* เลื่อนวงกลมเมื่อเลือก */
+    input:checked+.slider:before {
+        transform: translateX(26px);
+    }
+
+    .middle {
+        text-align: center;
+        /* จัดแนวนอน */
+        vertical-align: middle;
+        /* จัดแนวตั้ง */
+    }
+
+#sortable tr {
+  transition: all 0.2s ease-in-out;
+}
+
+/* แถวที่กำลังลาก */
+.sortable-chosen {
+  background-color: #ffe5e5 !important;
+}
+
+/* ตำแหน่งที่จะแทรก */
+.sortable-ghost {
+  border-top: 2px solid red !important;
+}
+
+#sortable.sorting-mode .sortable-ghost {
+  border: 2px solid red !important;
+}
+
+#sortable.sorting-mode .sortable-chosen {
+  background-color: #ffe5e5 !important;
+}
+
+#sortable tr:hover {
+  background-color: #ffcccc !important;
+  cursor: pointer;
+  /* สีแดงอ่อน */
+}
+
+
+/*     
+/* card */
+.highlight-hover {
+  background-color: #ffcccc !important;
+}
+
+
+/* สไตล์ของสวิตช์ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* ซ่อน checkbox จริง */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* สร้าง slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* สร้างวงกลมในสวิตช์ */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  border-radius: 50%;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+/* เปลี่ยนสีเมื่อเลือก */
+input:checked+.slider {
+  background-color: #4CAF50;
+}
+
+/* เลื่อนวงกลมเมื่อเลือก */
+input:checked+.slider:before {
+  transform: translateX(26px);
+}
+
+.middle {
+  text-align: center;
+  /* จัดแนวนอน */
+  vertical-align: middle;
+  /* จัดแนวตั้ง */
+}
+.td-5 { width: 5%; }
+.td-10 { width: 10%; }
+.td-20 { width: 20%; }
+.td-30 { width: 30%; }
+.td-40 { width: 40%; }
+.td-50 { width: 50%; }
+.td-60 { width: 60%; }
+.td-70 { width: 70%; }
+.td-80 { width: 80%; }
+.td-90 { width: 90%; }
+.td-100 { width: 100%; }

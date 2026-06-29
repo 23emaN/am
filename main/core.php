@@ -19,6 +19,19 @@ $routes = [
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
 
+    'list_etax'                => [
+        'get_list_etax'  => __DIR__ . '/core/listEtax/GetListEtax.php',
+        'send_email'     => __DIR__ . '/core/listEtax/SendEtaxEmail.php',
+    ],
+
+    'list_order'               => [
+        'get_list_order' => __DIR__ . '/core/listOrder/GetListOrder.php',
+        'get_order'      => __DIR__ . '/core/listOrder/GetOrder.php',
+        'update_note'    => __DIR__ . '/core/listOrder/UpdateOrderNote.php',
+        'update_address' => __DIR__ . '/core/listOrder/UpdateOrderAddress.php',
+        'export_report'  => __DIR__ . '/core/listOrder/OrderReport.php',
+    ],
+
 
     'list_admin'               => [
         'get_list_admin' => __DIR__ . '/core/listAdmin/GetListAdmin.php',
@@ -58,6 +71,8 @@ $routes = [
     'listCourseCategory'               => [
         'get_list_category'       => __DIR__ . '/core/listCourseCategory/GetListCategory.php',
         'add_category'       => __DIR__ . '/core/listCourseCategory/AddCategory.php',
+        'update_category'    => __DIR__ . '/core/listCourseCategory/UpdateCategory.php',
+        'delete_category'    => __DIR__ . '/core/listCourseCategory/DeleteCategory.php',
     ],
     'listCourseType'               => [
         'get_list_type'           => __DIR__ . '/core/listCourseType/GetListType.php',
@@ -70,7 +85,14 @@ $routes = [
         'update_lesson'         => __DIR__ . '/core/lesson/UpdateLesson.php',
         'update_video'          => __DIR__ . '/core/lesson/UpdateVideo.php',
         'upload_video'          => __DIR__ . '/core/lesson/UploadVideo.php',
+        'create_upload'         => __DIR__ . '/core/lesson/CreateUpload.php',
+        'finish_upload'         => __DIR__ . '/core/lesson/FinishUpload.php',
+        'get_video_status'      => __DIR__ . '/core/lesson/GetVideoStatus.php',
         'delete_lesson'         => __DIR__ . '/core/lesson/DeleteLesson.php',
+    ],
+    'lesson_progress'           => [
+        'get_progress'          => __DIR__ . '/core/lessonProgress/GetProgress.php',
+        'save_progress'         => __DIR__ . '/core/lessonProgress/SaveProgress.php',
     ],
     'question'                  => [
         'get_list_question'     => __DIR__ . '/core/question/GetListQuestion.php',

@@ -1,5 +1,7 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
+<?php $order_pages = ['order', 'order_detail']; ?>
+<?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $history_pages = ['verify_history']; ?>
 <?php $verify_pages = ['verify_request']; ?>
@@ -20,7 +22,7 @@
             $stmt_sidebar->closeCursor();
         }
     } catch (\Throwable $e) {
-        $verify_pending = 0; // DB มีปัญหา -> ไม่ให้ sidebar พัง
+        $verify_pending = 0; 
     }
 ?>
 
@@ -55,6 +57,24 @@
                 <a href="course" class="menu-link <?php echo in_array($now_page, $course_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">school</span>
                     <span class="title">คอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $order_pages) ? 'open' : '' ?>">
+                <a href="order" class="menu-link <?php echo in_array($now_page, $order_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">receipt_long</span>
+                    <span class="title">คำสั่งซื้อคอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-title small text-uppercase">
+                <span class="menu-title-text">เอกสารทางบัญชี</span>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $etax_pages) ? 'open' : '' ?>">
+                <a href="etax" class="menu-link <?php echo in_array($now_page, $etax_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">description</span>
+                    <span class="title">ใบกำกับภาษี (E-Tax)</span>
                 </a>
             </li>
 
