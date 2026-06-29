@@ -11,8 +11,10 @@
     $role_name = $access_token->access_level ?? '';
     $avatar = $access_token->profile_image ?? '';
 
-    // เมนูที่ผู้ใช้คนนี้มีสิทธิ์เข้าถึง (สำหรับกรอง sidebar ฝั่ง client)
+    // access_menus = เมนูที่ผู้ใช้มีสิทธิ์ (กรอง sidebar)
+    // menu_map     = เมนูทั้งหมด + url_path (สร้าง page->menu สำหรับ guard ฝั่ง client)
     $access_menus = [];
+    $menu_map = [];
     try {
         $pdo = (new Connection())->getPdo();
         if ($pdo && $user_id) {
@@ -25,9 +27,17 @@
             $stmt->execute([':uid' => $user_id]);
             $access_menus = array_map(fn($r) => (string) $r['menu_name'], $stmt->fetchAll(PDO::FETCH_ASSOC));
             $stmt->closeCursor();
+
+            $ms = $pdo->query("SELECT menu_name, url_path FROM tbl_slidebar WHERE active_status = '1'");
+            $menu_map = array_map(fn($r) => [
+                'menu_name' => (string) $r['menu_name'],
+                'url_path'  => (string) ($r['url_path'] ?? ''),
+            ], $ms->fetchAll(PDO::FETCH_ASSOC));
+            $ms->closeCursor();
         }
     } catch (\Throwable $e) {
-        $access_menus = []; // error -> ไม่กรองเมนู (กัน sidebar พัง)
+        $access_menus = [];
+        $menu_map = [];
     }
 
     Response::json(1, 'Success', [
@@ -35,5 +45,6 @@
         'role_name'    => $role_name,
         'avatar'       => $avatar,
         'access_menus' => $access_menus,
+        'menu_map'     => $menu_map,
     ]);
 ?>

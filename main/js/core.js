@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $(".ShowUserAvatar").attr("src", response.data.avatar || "../template/assets/images/administrator.jpg");
 
             FilterSidebarByAccess(response.data.access_menus);
-            GuardPageByAccess(response.data.access_menus);
+            GuardPageByAccess(response.data.access_menus, response.data.menu_map);
 
             setInterval(KeepSessionAlive, 30000);
         }else{
@@ -55,25 +55,23 @@ function FilterSidebarByAccess(allowed) {
 }
 
 // บล็อกระดับหน้า: ถ้าผู้ใช้ไม่มีสิทธิ์เมนูของหน้านี้ -> เด้งกลับหน้าแรก
+// page->menu สร้างจาก tbl_slidebar.url_path (คั่นด้วย ,) ที่ส่งมาจาก server -> ไม่ต้อง hardcode
 // (หน้าแรก/หน้าที่ไม่อยู่ในแมป = เข้าได้เสมอ กัน loop; fail-open ถ้าไม่มีข้อมูลสิทธิ์)
-var PAGE_MENU_MAP = {
-    course: "คอร์สเรียน", course_fromadd: "คอร์สเรียน", course_category: "คอร์สเรียน",
-    lesson_manage: "คอร์สเรียน", lesson_preview: "คอร์สเรียน", course_type: "คอร์สเรียน",
-    order: "คำสั่งซื้อคอร์สเรียน", order_detail: "คำสั่งซื้อคอร์สเรียน",
-    etax: "ใบกำกับภาษี (E-Tax)", etax_view: "ใบกำกับภาษี (E-Tax)", etax_edit: "ใบกำกับภาษี (E-Tax)", etax_invoice: "ใบกำกับภาษี (E-Tax)",
-    user: "ผู้ใช้/ลูกค้า", user_edit: "ผู้ใช้/ลูกค้า",
-    verify_history: "ประวัติการยืนยันตัวตน",
-    verify_request: "ยืนยันตัวตนผู้ใช้งาน",
-    coupon: "คูปองส่วนลด", coupon_fromadd: "คูปองส่วนลด", coupon_edit: "คูปองส่วนลด",
-    banner: "แบนเนอร์", banner_fromadd: "แบนเนอร์", banner_edit: "แบนเนอร์",
-    admin: "ผู้ดูแลระบบ", admin_fromadd: "ผู้ดูแลระบบ", admin_edit: "ผู้ดูแลระบบ"
-};
+function GuardPageByAccess(allowed, menuMap) {
+    if (!allowed || !allowed.length || !menuMap || !menuMap.length) { return; } // fail-open
 
-function GuardPageByAccess(allowed) {
-    if (!allowed || !allowed.length) { return; } // fail-open
+    // สร้าง page -> menu_name จาก url_path ใน DB
+    var pageMenu = {};
+    menuMap.forEach(function (m) {
+        (m.url_path || "").split(",").forEach(function (p) {
+            p = p.trim();
+            if (p) { pageMenu[p] = m.menu_name; }
+        });
+    });
+
     var page = (location.pathname.split("/").pop() || "").replace(".php", "");
-    var required = PAGE_MENU_MAP[page];
-    if (!required) { return; } // หน้าแรก/ไม่อยู่ในแมป -> เข้าได้
+    var required = pageMenu[page];
+    if (!required) { return; } // ไม่อยู่ในแมป -> เข้าได้
     if (allowed.indexOf(required) === -1) {
         Swal.fire({
             title: "ไม่มีสิทธิ์เข้าถึง",
