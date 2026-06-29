@@ -120,6 +120,34 @@ html, body { overflow-x: hidden; max-width: 100%; }
     transform: translateY(-50%);
 }
 
+/* ===== ตารางในระบบ (DataTables + style-two) ===== */
+/* หัวตารางไม่ตัดบรรทัด (เช่น "สถานะการยืนยัน")
+   ถ้าคอลัมน์เยอะเกินจอ ตัว .table-responsive จะ scroll แนวนอนเอง — สี/น้ำหนักใช้ของธีมเดิม */
+.default-table-area thead th {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ===== Dashboard (หน้าแรก) ===== */
+/* การ์ดสถิติ: ไอคอนวงกลมพื้นสีอ่อน + ป้ายแนวโน้ม */
+.stat-card { transition: box-shadow .2s ease, transform .2s ease; }
+.stat-card:hover { box-shadow: 0 .5rem 1.25rem rgba(16, 24, 40, .08); transform: translateY(-2px); }
+.stat-card .stat-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.stat-card .stat-icon .material-symbols-outlined { font-size: 28px; }
+.stat-trend { font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
+.stat-trend.up { color: #16a34a; }
+.stat-trend.down { color: #dc2626; }
+/* welcome-box: เผื่อธีมไม่ได้ไล่เฉด ให้พื้นหลังไล่สีม่วงสวยขึ้น */
+.welcome-box.bg-primary { background: linear-gradient(120deg, #605DFF 0%, #8b89ff 100%) !important; }
+
 /* #8 DataTables: ไอคอนลูกศร sort (▲▼) ถูก render ด้วยฟอนต์ K2D ของธีม ทำให้ตัวอักษร
    เพี้ยน (ดูเหมือน encoding error) -> บังคับใช้ฟอนต์ที่มี glyph สามเหลี่ยมปกติ */
 table.dataTable thead .dt-column-order::before,

@@ -1,5 +1,6 @@
 <?php $now_page = str_replace('.php', '', basename($_SERVER['PHP_SELF'])); ?>
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
+<?php $remaining_pages = ['course_remaining']; ?>
 <?php $order_pages = ['order', 'order_detail']; ?>
 <?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
@@ -57,6 +58,12 @@
                 <a href="course" class="menu-link <?php echo in_array($now_page, $course_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">school</span>
                     <span class="title">คอร์สเรียน</span>
+                </a>
+            </li>
+           <li class="menu-item <?php echo in_array($now_page, $remaining_pages) ? 'open' : '' ?>">
+                <a href="course_remaining" class="menu-link <?php echo in_array($now_page, $remaining_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">inventory</span>
+                    <span class="title">คอร์สเรียนคงเหลือ</span>
                 </a>
             </li>
 

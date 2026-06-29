@@ -66,8 +66,17 @@ try {
         ':email'     => $email,
         ':password'  => password_hash($password, PASSWORD_DEFAULT),
     ]);
-    $new_id = $pdo_connect->lastInsertId();
+    $new_id = (int) $pdo_connect->lastInsertId();
     $stmt->closeCursor();
+
+    // บันทึกสิทธิ์เมนูตามที่ติ๊ก (ค่าเริ่มต้นจากหน้าเพิ่ม: ทุกเมนูยกเว้น "ผู้ดูแลระบบ")
+    $menu_ids = (isset($_POST['menu_ids']) && is_array($_POST['menu_ids'])) ? array_unique(array_map('intval', $_POST['menu_ids'])) : [];
+    if ($menu_ids) {
+        $insA = $pdo_connect->prepare("INSERT INTO tbl_user_access (user_id, menu_id) VALUES (:u, :m)");
+        foreach ($menu_ids as $mid) {
+            if ($mid > 0) { $insA->execute([':u' => $new_id, ':m' => $mid]); }
+        }
+    }
 
     Response::json(1, 'เพิ่มผู้ดูแลระบบสำเร็จ', ['user_id' => $new_id]);
 } catch (Exception $e) {

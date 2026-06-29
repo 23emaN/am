@@ -95,6 +95,16 @@ try {
     $stmt->execute($params);
     $stmt->closeCursor();
 
+    // บันทึกสิทธิ์เมนู: ล้างของเดิม แล้วใส่ตามที่ติ๊ก
+    $menu_ids = (isset($_POST['menu_ids']) && is_array($_POST['menu_ids'])) ? array_unique(array_map('intval', $_POST['menu_ids'])) : [];
+    $pdo_connect->prepare("DELETE FROM tbl_user_access WHERE user_id = :id")->execute([':id' => $target_id]);
+    if ($menu_ids) {
+        $insA = $pdo_connect->prepare("INSERT INTO tbl_user_access (user_id, menu_id) VALUES (:u, :m)");
+        foreach ($menu_ids as $mid) {
+            if ($mid > 0) { $insA->execute([':u' => $target_id, ':m' => $mid]); }
+        }
+    }
+
     Response::json(1, 'บันทึกข้อมูลสำเร็จ', ['user_id' => $target_id]);
 } catch (Exception $e) {
     error_log('Update Admin Error: ' . $e->getMessage());

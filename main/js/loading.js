@@ -83,7 +83,8 @@
 (function () {
     "use strict";
 
-    var MAX_TIMER = 1200; // ms: เพดานเวลา auto-close ของ toast
+    var MAX_TIMER = 800; // ms: เพดานเวลา auto-close ของ toast
+
 
     if (typeof window.Swal === "undefined" ||
         typeof Swal.fire !== "function" ||
