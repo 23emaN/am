@@ -2,6 +2,7 @@
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
 <?php $remaining_pages = ['course_remaining']; ?>
 <?php $order_pages = ['order', 'order_detail']; ?>
+<?php $certificate_pages = ['course_certificate']; ?>
 <?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $history_pages = ['verify_history']; ?>
@@ -71,6 +72,13 @@
                 <a href="order" class="menu-link <?php echo in_array($now_page, $order_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">receipt_long</span>
                     <span class="title">คำสั่งซื้อคอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $certificate_pages) ? 'open' : '' ?>">
+                <a href="course_certificate" class="menu-link <?php echo in_array($now_page, $certificate_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">workspace_premium</span>
+                    <span class="title">ใบรับรองผลการสอบ</span>
                 </a>
             </li>
 

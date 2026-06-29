@@ -26,9 +26,16 @@ $routes = [
         'update_enrollment'   => __DIR__ . '/core/listEnrollment/UpdateEnrollment.php',
         'export_report'       => __DIR__ . '/core/listEnrollment/EnrollmentReport.php',
     ],
+  
+    'list_certificate'         => [
+        'get_list_certificate' => __DIR__ . '/core/listCertificate/GetListCertificate.php',
+        'get_certificate'      => __DIR__ . '/core/listCertificate/GetCertificate.php',
+        'export_certificate'   => __DIR__ . '/core/listCertificate/ExportCertificate.php',
+    ],
     'list_etax'                => [
         'get_list_etax'  => __DIR__ . '/core/listEtax/GetListEtax.php',
         'send_email'     => __DIR__ . '/core/listEtax/SendEtaxEmail.php',
+        'export_etax'    => __DIR__ . '/core/listEtax/ExportEtax.php',
     ],
 
     'list_order'               => [
