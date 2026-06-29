@@ -4,15 +4,6 @@
         ['label' => 'เพิ่มผู้ดูแลระบบใหม่'],
     ];
 
-    // ป้ายสิทธิ์การใช้งาน (skeleton ตัวอย่าง — ยังไม่เชื่อมระบบสิทธิ์)
-    $permission_labels = [
-        'ข้อมูลหน้าแรก', 'คอร์สเรียน', 'คอร์สเรียนคงเหลือ',
-        'ตอบคำถามจากผู้เรียน', 'คำสั่งซื้อคอร์สเรียน', 'ยืนยันการชำระเงิน',
-        'ใบรับรองผลการสอบ', 'ผู้ใช้/ลูกค้า', 'ประวัติการยืนยันตัวตน',
-        'คูปองส่วนลด', 'แบนเนอร์', 'ตั้งค่าเว็บไซต์',
-        'ผู้ดูแลระบบ', 'รายงาน/เอกสาร', 'คำขอยืนยันตัวตนผู้ใช้งาน',
-        'รอยืนยันการซื้อ',
-    ];
 ?>
 <?php include "header.php"; ?>
 
@@ -48,19 +39,10 @@
                                 <input type="password" class="form-control" name="user_password_confirm" value="" autocomplete="new-password">
                             </div>
 
-                            <!-- สิทธิ์การใช้งาน: skeleton ตัวอย่างเท่านั้น (ยังไม่บันทึก/เชื่อมระบบสิทธิ์) -->
+                            <!-- สิทธิ์การใช้งาน: โหลดจาก tbl_slidebar (ค่าเริ่มต้นติ๊กทุกเมนูยกเว้น "ผู้ดูแลระบบ") -->
                             <div class="col-12">
                                 <label class="form-label d-block mb-2">สิทธิ์การใช้งาน</label>
-                                <div class="row g-2">
-                                    <?php foreach ($permission_labels as $i => $label): ?>
-                                        <div class="col-md-4">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="perm_<?php echo $i; ?>" checked disabled>
-                                                <label class="form-check-label" for="perm_<?php echo $i; ?>"><?php echo htmlspecialchars($label); ?></label>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
+                                <div class="row g-2" id="PermissionList"></div>
                             </div>
 
                             <div class="col-12 mt-3">
@@ -84,6 +66,33 @@
 </html>
 
 <script>
+    $(document).ready(function () { LoadMenus(); });
+
+    // โหลดเมนู -> ติ๊กทุกเมนูยกเว้น "ผู้ดูแลระบบ" (default ตามที่กำหนด)
+    function LoadMenus() {
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "list_admin", request_function: "get_menus" },
+            dataType: "json",
+            success: function (response) {
+                if (response.result != 1) { return; }
+                var html = "";
+                (response.data.menus || []).forEach(function (m) {
+                    var checked = (m.menu_name === "ผู้ดูแลระบบ") ? "" : "checked";
+                    html +=
+                        '<div class="col-md-4">' +
+                            '<div class="form-check">' +
+                                '<input class="form-check-input" type="checkbox" name="menu_ids[]" value="' + m.menu_id + '" id="perm_' + m.menu_id + '" ' + checked + '>' +
+                                '<label class="form-check-label" for="perm_' + m.menu_id + '">' + EscapeHTML(m.menu_name) + '</label>' +
+                            '</div>' +
+                        '</div>';
+                });
+                $("#PermissionList").html(html);
+            },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+        });
+    }
+
     $(document).on('submit', '#FormAddAdmin', function (e) {
         e.preventDefault();
 
