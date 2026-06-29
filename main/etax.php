@@ -82,8 +82,8 @@
                 '<a href="etax_view.php?id=' + it.order_id + '" class="' + sq + ' btn-info text-white" style="width:34px;height:34px;" title="ดูข้อมูล">' +
                     '<span class="material-symbols-outlined" style="font-size:18px;">visibility</span></a>';
             if (it.status === "1") {
-                actions += '<a href="etax_invoice.php?id=' + it.order_id + '" class="' + sq + ' btn-success" style="width:34px;height:34px;" title="ดาวน์โหลด">' +
-                        '<span class="material-symbols-outlined" style="font-size:18px;">download</span></a>' +
+                actions += '<button type="button" class="' + sq + ' btn-success" style="width:34px;height:34px;" onclick="DownloadEtax(' + it.order_id + ')" title="ดาวน์โหลด PDF">' +
+                        '<span class="material-symbols-outlined" style="font-size:18px;">download</span></button>' +
                     '<button type="button" class="' + sq + ' btn-warning" style="width:34px;height:34px;" onclick="SendEmail(' + it.order_id + ')" title="ส่งอีเมล">' +
                         '<span class="material-symbols-outlined" style="font-size:18px;">mail</span></button>';
             }
@@ -108,6 +108,30 @@
             language: { url: '../template/assets/js/data-table-th.json' },
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]],
             columnDefs: [{ orderable: false, targets: [6] }]
+        });
+    }
+
+    // ดูใบกำกับภาษี -> แจ้งรหัสผ่าน (4 ตัวท้ายเลขผู้เสียภาษี) แล้วเปิดหน้าพรีวิว PDF
+    function DownloadEtax(order_id) {
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "list_order", request_function: "get_order", order_id: order_id },
+            dataType: "json",
+            success: function (r) {
+                if (r.result != 1) { Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || "ไม่พบข้อมูล") + '</span>', icon: "error" }); return; }
+                var taxId = ((r.data.receipt && r.data.receipt.tax_id) || "").replace(/\D/g, "");
+                var pass = taxId.length >= 4 ? taxId.slice(-4) : taxId;
+                Swal.fire({
+                    icon: "success",
+                    title: "ดาวน์โหลดใบกำกับภาษี",
+                    html: 'รหัสผ่านใบกำกับภาษีของคุณคือ <b style="font-size:1.3em;">' + (pass || "-") + '</b>',
+                    confirmButtonText: "ดาวน์โหลด",
+                    confirmButtonColor: "#605DFF"
+                }).then(function (res) {
+                    if (res.isConfirmed) { window.open("pdf_preview.php?type=etax&id=" + order_id, "_blank"); }
+                });
+            },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
     }
 

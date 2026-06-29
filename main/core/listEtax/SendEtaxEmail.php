@@ -129,14 +129,39 @@ $body = '
     <tr><td style="text-align:right;">ภาษีมูลค่าเพิ่ม 7%:</td><td style="text-align:right;">' . number_format($vat, 2) . ' บาท</td></tr>
     <tr><td style="text-align:right;"><b>ยอดเงินสุทธิ:</b></td><td style="text-align:right;"><b>' . number_format($total, 2) . ' บาท</b></td></tr>
   </table>
+  <p style="margin-top:16px;background:#fff8e1;border:1px solid #ffe082;padding:10px 12px;border-radius:6px;font-size:13px;">
+    <b>หมายเหตุ:</b> ไฟล์ใบกำกับภาษี (PDF) ที่แนบมามีการตั้งรหัสผ่านเพื่อความปลอดภัย
+    รหัสผ่านคือ <b>เลข 4 ตัวท้ายของเลขประจำตัวผู้เสียภาษีของท่าน</b>
+  </p>
   <p style="color:#888;font-size:12px;margin-top:16px;">อีเมลฉบับนี้ส่งจากระบบ CPDTH โดยอัตโนมัติ</p>
 </div>';
 
 $subject = 'ใบกำกับภาษี เลขที่ ' . $doc_no . ' - CPDTH';
 
-$ok = Email::send($email, $subject, $body, true);
+// แนบไฟล์ PDF ใบกำกับภาษีจริง (สร้างด้วย mPDF ผ่านฟังก์ชันกลางเดียวกับหน้าดาวน์โหลด)
+$attachments = [];
+$tmp_pdf = null;
+require_once __DIR__ . '/build_etax_pdf.php';
+try {
+    $built = build_etax_pdf($pdo_connect, $order_id);
+    if ($built['ok'] && $built['pdf'] !== '') {
+        $tmp_pdf = tempnam(sys_get_temp_dir(), 'etax_') . '.pdf';
+        if (@file_put_contents($tmp_pdf, $built['pdf']) !== false) {
+            $attachments[] = ['path' => $tmp_pdf, 'name' => 'tax_invoice_' . $doc_no . '.pdf'];
+        }
+    }
+} catch (\Throwable $e) {
+    error_log('SendEtaxEmail build PDF error: ' . $e->getMessage());
+    // ส่งต่อแบบไม่มีไฟล์แนบ ดีกว่าส่งไม่ได้เลย
+}
+
+$ok = Email::send($email, $subject, $body, true, $attachments);
+
+// ลบไฟล์ชั่วคราว
+if ($tmp_pdf && is_file($tmp_pdf)) { @unlink($tmp_pdf); }
+
 if ($ok) {
-    Response::json(1, 'ส่งใบกำกับภาษีไปยัง ' . $email . ' สำเร็จ', null);
+    Response::json(1, 'ส่งใบกำกับภาษี (พร้อมไฟล์ PDF) ไปยัง ' . $email . ' สำเร็จ', null);
 } else {
     Response::json(0, 'ส่งอีเมลไม่สำเร็จ กรุณาตรวจสอบการตั้งค่า SMTP', null);
 }

@@ -105,7 +105,7 @@
                                         <?php if (count($codes_cpd) > 0): ?>
                                             <div class="d-flex flex-column align-items-start gap-1">
                                                 <?php foreach ($codes_cpd as $code): ?>
-                                                    <span class="badge bg-primary bg-opacity-10 text-primary"><?php echo htmlspecialchars($code); ?></span>
+                                                    <span class="badge bg-primary"><?php echo htmlspecialchars($code); ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -117,7 +117,7 @@
                                         <?php if (count($codes_cpa) > 0): ?>
                                             <div class="d-flex flex-column align-items-start gap-1">
                                                 <?php foreach ($codes_cpa as $code): ?>
-                                                    <span class="badge bg-primary bg-opacity-10 text-primary"><?php echo htmlspecialchars($code); ?></span>
+                                                    <span class="badge bg-primary"><?php echo htmlspecialchars($code); ?></span>
                                                 <?php endforeach; ?>
                                             </div>
                                         <?php else: ?>
@@ -127,25 +127,28 @@
 
                                     <td class="text-center">
                                         <?php if ($is_display): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success">แสดง</span>
+                                            <span class="badge bg-success">แสดง</span>
                                         <?php else: ?>
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">ไม่แสดง</span>
+                                            <span class="badge bg-secondary">ไม่แสดง</span>
                                         <?php endif; ?>
                                     </td>
 
                                     <td class="text-center">
                                         <?php if ($is_active): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success">เปิดใช้งาน</span>
+                                            <span class="badge bg-success">เปิดใช้งาน</span>
                                         <?php else: ?>
-                                            <span class="badge bg-danger bg-opacity-10 text-danger">ปิดใช้งาน</span>
+                                            <span class="badge bg-danger">ปิดใช้งาน</span>
                                         <?php endif; ?>
                                     </td>
 
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
-                                            onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข">
-                                            <span class="material-symbols-outlined" style="font-size:18px;">edit</span> แก้ไข
-                                        </button>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center p-0"
+                                                style="width:34px;height:34px;"
+                                                onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข">
+                                                <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

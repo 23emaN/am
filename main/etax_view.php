@@ -119,7 +119,7 @@
             $("#EtxStatus").html('<span class="badge bg-success">ออกใบกำกับภาษีแล้ว</span>');
             $("#EtxButtons").html(
                 '<button type="button" class="btn btn-warning" onclick="SendEmail()">ส่งอีเมลอีกครั้ง</button>' +
-                '<a href="etax_invoice.php?id=' + o.order_id + '" class="btn btn-success">ดาวน์โหลดใบกำกับภาษี</a>'
+                '<button type="button" class="btn btn-success" onclick="DownloadEtax(' + o.order_id + ')">ดาวน์โหลดใบกำกับภาษี</button>'
             );
         } else {
             $("#EtxStatus").html('<span class="badge bg-danger">ล้มเหลว (สามารถออกใหม่ได้อีกครั้ง)</span>');
@@ -153,6 +153,30 @@
             '<tr><td colspan="6"></td><td class="text-secondary">VAT</td><td class="fw-bold text-end">' + money(sm.vat) + '</td></tr>' +
             '<tr><td colspan="6"></td><td class="fw-bold">รวมทั้งสิ้น</td><td class="fw-bold text-end text-primary">' + money(sm.total) + '</td></tr>'
         );
+    }
+
+    // ดูใบกำกับภาษี -> แจ้งรหัสผ่าน (4 ตัวท้ายเลขผู้เสียภาษี) แล้วเปิดหน้าพรีวิว PDF
+    function DownloadEtax(order_id) {
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "list_order", request_function: "get_order", order_id: order_id },
+            dataType: "json",
+            success: function (r) {
+                if (r.result != 1) { Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || "ไม่พบข้อมูล") + '</span>', icon: "error" }); return; }
+                var taxId = ((r.data.receipt && r.data.receipt.tax_id) || "").replace(/\D/g, "");
+                var pass = taxId.length >= 4 ? taxId.slice(-4) : taxId;
+                Swal.fire({
+                    icon: "success",
+                    title: "ดาวน์โหลดใบกำกับภาษี",
+                    html: 'รหัสผ่านใบกำกับภาษีของคุณคือ <b style="font-size:1.3em;">' + (pass || "-") + '</b>',
+                    confirmButtonText: "ดาวน์โหลด",
+                    confirmButtonColor: "#605DFF"
+                }).then(function (res) {
+                    if (res.isConfirmed) { window.open("pdf_preview.php?type=etax&id=" + order_id, "_blank"); }
+                });
+            },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
     }
 
     // ส่งใบกำกับภาษีทางอีเมลให้ลูกค้า
