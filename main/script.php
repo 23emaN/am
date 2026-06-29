@@ -31,6 +31,6 @@
         <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
 
         <script src="../js/main.js"></script>
-        <script src="js/loading.js?ver=<?php echo time(); ?>"></script>
+        <script src="js/loading.js?ver=<?php echo @filemtime(__DIR__ . '/js/loading.js') ?: time(); ?>"></script>
         <script src="../js/upload.js"></script>
-        <script src="js/core.js?ver=<?php echo time(); ?>"></script>
+        <script src="js/core.js?ver=<?php echo @filemtime(__DIR__ . '/js/core.js') ?: time(); ?>"></script>
