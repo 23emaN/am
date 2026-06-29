@@ -40,6 +40,4 @@ NOTE.md
 
 *.sql
 
-/dbandenv/
-
-/template/
+/db/

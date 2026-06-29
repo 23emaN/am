@@ -61,8 +61,7 @@
                     <span class="title">คอร์สเรียน</span>
                 </a>
             </li>
-
-            <li class="menu-item <?php echo in_array($now_page, $remaining_pages) ? 'open' : '' ?>">
+           <li class="menu-item <?php echo in_array($now_page, $remaining_pages) ? 'open' : '' ?>">
                 <a href="course_remaining" class="menu-link <?php echo in_array($now_page, $remaining_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">inventory</span>
                     <span class="title">คอร์สเรียนคงเหลือ</span>

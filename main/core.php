@@ -18,21 +18,20 @@ $routes = [
         'update_user'    => __DIR__ . '/core/listUser/UpdateUser.php',
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
     ],
-
-    'list_enrollment'          => [
+  
+      'list_enrollment'          => [
         'get_list_enrollment' => __DIR__ . '/core/listEnrollment/GetListEnrollment.php',
         'add_enrollment'      => __DIR__ . '/core/listEnrollment/AddEnrollment.php',
         'get_enrollment'      => __DIR__ . '/core/listEnrollment/GetEnrollment.php',
         'update_enrollment'   => __DIR__ . '/core/listEnrollment/UpdateEnrollment.php',
         'export_report'       => __DIR__ . '/core/listEnrollment/EnrollmentReport.php',
     ],
-
+  
     'list_certificate'         => [
         'get_list_certificate' => __DIR__ . '/core/listCertificate/GetListCertificate.php',
         'get_certificate'      => __DIR__ . '/core/listCertificate/GetCertificate.php',
         'export_certificate'   => __DIR__ . '/core/listCertificate/ExportCertificate.php',
     ],
-
     'list_etax'                => [
         'get_list_etax'  => __DIR__ . '/core/listEtax/GetListEtax.php',
         'send_email'     => __DIR__ . '/core/listEtax/SendEtaxEmail.php',
