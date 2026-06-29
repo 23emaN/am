@@ -39,6 +39,7 @@ $routes = [
         'get_admin'      => __DIR__ . '/core/listAdmin/GetAdmin.php',
         'update_admin'   => __DIR__ . '/core/listAdmin/UpdateAdmin.php',
         'delete_admin'   => __DIR__ . '/core/listAdmin/DeleteAdmin.php',
+        'get_menus'      => __DIR__ . '/core/listAdmin/GetMenus.php',
     ],
 
     'verify_history'           => [

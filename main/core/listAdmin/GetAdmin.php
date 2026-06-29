@@ -42,4 +42,15 @@ $admin = [
     'user_email' => $row['user_email'],
 ];
 
-Response::json(1, 'Success', ['admin' => $admin]);
+// เมนูทั้งหมด (สำหรับ checkbox สิทธิ์)
+$ms = $pdo_connect->query("SELECT menu_id, menu_name FROM tbl_slidebar WHERE active_status = '1' ORDER BY sort_order ASC, menu_id ASC");
+$menus = array_map(fn($r) => ['menu_id' => (int) $r['menu_id'], 'menu_name' => (string) $r['menu_name']], $ms->fetchAll(PDO::FETCH_ASSOC));
+$ms->closeCursor();
+
+// เมนูที่ admin คนนี้เข้าถึงได้
+$ac = $pdo_connect->prepare("SELECT menu_id FROM tbl_user_access WHERE user_id = :id");
+$ac->execute([':id' => $target_id]);
+$access = array_map('intval', $ac->fetchAll(PDO::FETCH_COLUMN));
+$ac->closeCursor();
+
+Response::json(1, 'Success', ['admin' => $admin, 'menus' => $menus, 'access' => $access]);
