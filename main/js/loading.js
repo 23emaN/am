@@ -85,6 +85,7 @@
 
     var MAX_TIMER = 800; // ms: เพดานเวลา auto-close ของ toast
 
+
     if (typeof window.Swal === "undefined" ||
         typeof Swal.fire !== "function" ||
         Swal.__cpdthTimerPatched) {
