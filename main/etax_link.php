@@ -157,6 +157,7 @@
 
     function ToggleLink(id) {
         $.ajax({
+            beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
             type: "POST", url: "core.php",
             data: { request_state: "list_etax_link", request_function: "toggle_link", link_id: id },
             dataType: "json",
@@ -180,6 +181,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
+                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_etax_link", request_function: "delete", link_id: id },
                 dataType: "json",

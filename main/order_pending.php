@@ -1,6 +1,9 @@
 <?php $breadcrumbs = [['label' => 'คำสั่งซื้อรอยืนยัน']]; ?>
 <?php include "header.php"; ?>
 
+<!-- ซ่อนตัวบ่งชี้ processing ของ DataTables แล้วใช้ spinner กลางจอแทน -->
+<style>#PageTable_processing{display:none!important;}</style>
+
 <div class="container-fluid">
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
@@ -99,6 +102,13 @@
                 { data: "action", className: "text-center text-nowrap", orderable: false }
             ]
         });
+
+        // โหลดตาราง (server-side) -> โชว์ spinner กลางจอ แทนข้อความ processing เดิม
+        // ใช้ preXhr/xhr (จับคู่กันแน่นอน 1 request = 1 คู่) + flag กัน Show/Hide ไม่สมดุลจน spinner ค้าง
+        var dtLoading = false;
+        $("#PageTable")
+            .on("preXhr.dt", function () { if (!dtLoading) { dtLoading = true; ShowLoadingOverlay(); } })
+            .on("xhr.dt", function () { if (dtLoading) { dtLoading = false; HideLoadingOverlay(); } });
     });
 
     function SearchOrder() {
@@ -118,6 +128,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
+                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_order", request_function: "cancel_order", order_id: orderId },
                 dataType: "json",

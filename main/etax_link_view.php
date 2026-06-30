@@ -184,6 +184,7 @@
 
     function ToggleLink() {
         $.ajax({
+            beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
             type: "POST", url: "core.php",
             data: { request_state: "list_etax_link", request_function: "toggle_link", link_id: LINK_ID },
             dataType: "json",
