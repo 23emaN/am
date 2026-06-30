@@ -10,6 +10,7 @@
     $map = [
         'certificate' => ['state' => 'list_certificate', 'func' => 'export_certificate', 'idkey' => 'enroll_id', 'title' => 'ใบรับรองผลการสอบ'],
         'etax'        => ['state' => 'list_etax',        'func' => 'export_etax',        'idkey' => 'order_id',  'title' => 'ใบกำกับภาษี'],
+        'etaxlink'    => ['state' => 'list_etax_link',   'func' => 'export',             'idkey' => 'link_id',   'title' => 'ใบกำกับภาษี (ลิ้งค์)'],
     ];
     $cfg = $map[$type] ?? null;
 ?>
