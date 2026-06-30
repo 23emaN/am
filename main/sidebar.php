@@ -2,6 +2,7 @@
 <?php $course_pages = ['course', 'course_fromadd', 'course_category']; ?>
 <?php $remaining_pages = ['course_remaining']; ?>
 <?php $order_pages = ['order', 'order_detail']; ?>
+<?php $order_pending_pages = ['order_pending']; ?>
 <?php $certificate_pages = ['course_certificate']; ?>
 <?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
@@ -24,7 +25,21 @@
             $stmt_sidebar->closeCursor();
         }
     } catch (\Throwable $e) {
-        $verify_pending = 0; 
+        $verify_pending = 0;
+    }
+
+    // จำนวนคำสั่งซื้อรอยืนยันการโอนเงิน (payment_status='0' AND payment_method='2') สำหรับ badge ข้างเมนู
+    $pending_transfer_orders = 0;
+    try {
+        if (!empty($pdo_sidebar)) {
+            $stmt_pending = $pdo_sidebar->query(
+                "SELECT COUNT(*) FROM tbl_orders WHERE payment_status = '0' AND payment_method = '2'"
+            );
+            $pending_transfer_orders = (int) $stmt_pending->fetchColumn();
+            $stmt_pending->closeCursor();
+        }
+    } catch (\Throwable $e) {
+        $pending_transfer_orders = 0;
     }
 ?>
 
@@ -72,6 +87,16 @@
                 <a href="order" class="menu-link <?php echo in_array($now_page, $order_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">receipt_long</span>
                     <span class="title">คำสั่งซื้อคอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $order_pending_pages) ? 'open' : '' ?>">
+                <a href="order_pending" class="menu-link <?php echo in_array($now_page, $order_pending_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">pending_actions</span>
+                    <span class="title">คำสั่งซื้อรอยืนยัน</span>
+                    <?php if ($pending_transfer_orders > 0): ?>
+                        <span class="badge rounded-pill bg-danger ms-auto"><?php echo $pending_transfer_orders > 99 ? '99+' : $pending_transfer_orders; ?></span>
+                    <?php endif; ?>
                 </a>
             </li>
 

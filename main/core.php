@@ -39,11 +39,14 @@ $routes = [
     ],
 
     'list_order'               => [
-        'get_list_order' => __DIR__ . '/core/listOrder/GetListOrder.php',
-        'get_order'      => __DIR__ . '/core/listOrder/GetOrder.php',
-        'update_note'    => __DIR__ . '/core/listOrder/UpdateOrderNote.php',
-        'update_address' => __DIR__ . '/core/listOrder/UpdateOrderAddress.php',
-        'export_report'  => __DIR__ . '/core/listOrder/OrderReport.php',
+        'get_list_order'   => __DIR__ . '/core/listOrder/GetListOrder.php',
+        'get_list_pending' => __DIR__ . '/core/listOrder/GetListPending.php',
+        'get_order'        => __DIR__ . '/core/listOrder/GetOrder.php',
+        'update_note'      => __DIR__ . '/core/listOrder/UpdateOrderNote.php',
+        'update_address'   => __DIR__ . '/core/listOrder/UpdateOrderAddress.php',
+        'confirm_payment'  => __DIR__ . '/core/listOrder/ConfirmPayment.php',
+        'cancel_order'     => __DIR__ . '/core/listOrder/CancelOrder.php',
+        'export_report'    => __DIR__ . '/core/listOrder/OrderReport.php',
     ],
 
 
