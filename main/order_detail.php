@@ -15,7 +15,7 @@
     .od-row { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f0f1f4; align-items: flex-start; }
     .od-row:last-child { border-bottom: 0; }
     .od-row .od-label { color: #8695AA; width: 150px; flex-shrink: 0; font-size: 14px; }
-    .od-row .od-value { font-weight: 500; flex: 1; word-break: break-word; }
+    .od-row .od-value { font-weight: 500; flex: 1; word-break: break-word; color: #212529; }
     .od-summary { min-width: 320px; }
     .od-summary .od-srow { display: flex; justify-content: space-between; padding: 7px 0; }
     #OrdItems td, #OrdItems th { vertical-align: middle; }
@@ -34,7 +34,10 @@
                     <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> กลับ
                 </a>
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="etax_view.php?id=<?php echo $order_id; ?>" class="btn btn-info text-white d-inline-flex align-items-center gap-1">
+                    <button type="button" id="BtnConfirmPayment" class="btn btn-success d-inline-flex align-items-center gap-1 d-none" onclick="ConfirmPayment()">
+                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> ยืนยันการชำระเงิน
+                    </button>
+                    <a href="etax_view.php?id=<?php echo $order_id; ?>" id="BtnEtax" class="btn btn-info text-white d-inline-flex align-items-center gap-1 d-none">
                         <span class="material-symbols-outlined" style="font-size:18px;">receipt</span> ใบกำกับภาษี E-TAX
                     </a>
                     <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" onclick="OpenEditAddress()">
@@ -42,6 +45,9 @@
                     </button>
                     <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" onclick="OpenEditNote()">
                         <span class="material-symbols-outlined" style="font-size:18px;">edit_note</span> แก้ไขหมายเหตุ
+                    </button>
+                    <button type="button" id="BtnCancelOrder" class="btn btn-danger d-inline-flex align-items-center gap-1 d-none" onclick="CancelOrder()">
+                        <span class="material-symbols-outlined" style="font-size:18px;">cancel</span> ยกเลิกคำสั่งซื้อ
                     </button>
                 </div>
             </div>
@@ -81,7 +87,7 @@
                             <div class="od-row"><div class="od-label">หมายเลขคำสั่งซื้อ</div><div class="od-value" id="OrdRef">-</div></div>
                             <div class="od-row"><div class="od-label">ชื่อลูกค้า</div><div class="od-value" id="OrdCustomer">-</div></div>
                             <div class="od-row"><div class="od-label">หมายเหตุ</div><div class="od-value text-muted" id="OrdNote">ไม่มีข้อมูล</div></div>
-                            <div class="od-row"><div class="od-label">หมายเหตุภายใน</div><div class="od-value text-muted" id="OrdNoteInternal">ไม่มีข้อมูล</div></div>
+                            <div class="od-row"><div class="od-label">หมายเหตุภายใน</div><div class="od-value" id="OrdNoteInternal"><span class="text-muted">ไม่มีข้อมูล</span></div></div>
                         </div>
                     </div>
                 </div>
@@ -311,6 +317,14 @@
         $("#OrdStatus").html(statusBadge(o.payment_status));
         $("#OrdPayment").html(paymentBadge(o.payment_status));
 
+        // ปุ่มยืนยัน/ยกเลิก แสดงเฉพาะออเดอร์โอนเงินที่รอยืนยัน (payment_status='0' AND payment_method='2')
+        // ปุ่มใบกำกับภาษี E-TAX แสดงเฉพาะออเดอร์ที่ชำระเงินแล้ว (payment_status='1')
+        // ใช้ d-none toggle (ซ่อนได้แม้ปุ่มเป็น d-inline-flex) เพราะ display:none แบบ inline จะโดน !important ของ d-inline-flex ทับ
+        var canConfirm = (o.payment_status === "0" && o.payment_method === "2");
+        $("#BtnConfirmPayment").toggleClass("d-none", !canConfirm);
+        $("#BtnCancelOrder").toggleClass("d-none", !canConfirm);
+        $("#BtnEtax").toggleClass("d-none", o.payment_status !== "1");
+
         $("#OrdRef").html(o.ref ? EscapeHTML(o.ref) : '<span class="text-muted">ไม่มีข้อมูล</span>');
         $("#OrdCustomer").text(o.customer);
         $("#OrdNoteInternal").html(o.internal_note ? EscapeHTML(o.internal_note).replace(/\n/g, '<br>') : '<span class="text-muted">ไม่มีข้อมูล</span>');
@@ -430,6 +444,64 @@
             },
             complete: function () { HideLoadingButton('.BtnSaveAddress'); },
             error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // ===== ยืนยันการชำระเงิน =====
+    function ConfirmPayment() {
+        Swal.fire({
+            title: "ยืนยันการชำระเงิน",
+            html: '<span class="text-secondary">ยืนยันว่าได้รับการโอนเงินแล้ว? ระบบจะตั้งสถานะเป็นชำระแล้วและให้สิทธิ์เข้าเรียนแก่ลูกค้า</span>',
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "ยืนยันการชำระเงิน",
+            cancelButtonText: "ปิด",
+            confirmButtonColor: "#28a745"
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+            $.ajax({
+                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
+                type: "POST", url: "core.php",
+                data: { request_state: "list_order", request_function: "confirm_payment", order_id: ORDER_ID },
+                dataType: "json",
+                success: function (res) {
+                    if (res.result == 1) {
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + res.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1600 }).then(function () { LoadOrder(); });
+                    } else {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + res.msg + '</span>', icon: "error", showConfirmButton: true });
+                    }
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
+        });
+    }
+
+    // ===== ยกเลิกคำสั่งซื้อ =====
+    function CancelOrder() {
+        Swal.fire({
+            title: "ยืนยันการยกเลิก",
+            html: '<span class="text-secondary">ต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?</span>',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ยกเลิกคำสั่งซื้อ",
+            cancelButtonText: "ปิด",
+            confirmButtonColor: "#dc3545"
+        }).then(function (result) {
+            if (!result.isConfirmed) { return; }
+            $.ajax({
+                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
+                type: "POST", url: "core.php",
+                data: { request_state: "list_order", request_function: "cancel_order", order_id: ORDER_ID },
+                dataType: "json",
+                success: function (res) {
+                    if (res.result == 1) {
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + res.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 }).then(function () { LoadOrder(); });
+                    } else {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + res.msg + '</span>', icon: "error", showConfirmButton: true });
+                    }
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
         });
     }
 
