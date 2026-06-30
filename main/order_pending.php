@@ -37,11 +37,11 @@
                                 <thead>
                                     <tr>
                                         <th scope="col" class="text-center" style="width:60px;">ลำดับ</th>
-                                        <th scope="col">ชื่อลูกค้า</th>
-                                        <th scope="col">คอร์สเรียน</th>
-                                        <th scope="col" class="text-end">ยอดรวม</th>
-                                        <th scope="col">สั่งซื้อเมื่อ</th>
-                                        <th scope="col" class="text-center">ดำเนินการ</th>
+                                        <th scope="col" style="min-width:160px;">ชื่อลูกค้า</th>
+                                        <th scope="col" style="min-width:280px;">คอร์สเรียน</th>
+                                        <th scope="col" class="text-end text-nowrap" style="width:1%;">ยอดรวม</th>
+                                        <th scope="col" class="text-nowrap" style="width:1%;">สั่งซื้อเมื่อ</th>
+                                        <th scope="col" class="text-center text-nowrap" style="width:1%;">ดำเนินการ</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -94,9 +94,9 @@
                 { data: "no", className: "text-center", orderable: false },
                 { data: "customer", className: "fw-medium" },
                 { data: "courses", className: "text-secondary", orderable: false },
-                { data: "total", className: "text-end" },
-                { data: "created" },
-                { data: "action", className: "text-center", orderable: false }
+                { data: "total", className: "text-end text-nowrap" },
+                { data: "created", className: "text-nowrap" },
+                { data: "action", className: "text-center text-nowrap", orderable: false }
             ]
         });
     });
