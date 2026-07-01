@@ -1,5 +1,5 @@
 <?php
-// คำขอยืนยันตัวตนผู้ใช้งาน — view fragment: render ตาราง + pagination จากข้อมูลที่ส่งมาทาง POST
+// ประวัติการยืนยันตัวตน — view fragment: render ตาราง + pagination จากข้อมูลที่ส่งมาทาง POST
 // รับ: data (list), total, page, per_page  ->  คืน HTML แปะใน #result_box
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
@@ -22,35 +22,35 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                     <tr>
                         <th scope="col" class="text-center" style="width: 60px;">#</th>
                         <th scope="col">ชื่อ</th>
-                        <th scope="col">อีเมล</th>
-                        <th scope="col">เบอร์โทรศัพท์</th>
                         <th scope="col">เลขบัตรประชาชน</th>
-                        <th scope="col">เลขที่ผู้ทำบัญชี</th>
-                        <th scope="col">เลขที่ผู้สอบบัญชี</th>
-                        <th scope="col" class="text-center" style="width: 140px;"></th>
+                        <th scope="col">รายละเอียด</th>
+                        <th scope="col" class="text-center">สถานะ</th>
+                        <th scope="col">ผู้ดำเนินการ</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php $i = $from; foreach ($list as $row):
-                        $full_name = trim(($row['user_firstname'] ?? '') . ' ' . ($row['user_lastname'] ?? ''));
-                        $cpd = trim((string) ($row['user_cpd_no'] ?? ''));
-                        $cpa = trim((string) ($row['user_cpa_no'] ?? ''));
-                        $user_id = (int) ($row['user_id'] ?? 0);
+                        $full   = ($row['full_name'] ?? '') !== '' ? $row['full_name'] : '-';
+                        $cid    = ($row['citizen_id'] ?? '') !== '' ? $row['citizen_id'] : '-';
+                        $remark = ($row['remark'] ?? '') !== '' ? $row['remark'] : '-';
+                        $admin  = ($row['admin_name'] ?? '') !== '' ? $row['admin_name'] : 'ไม่มีข้อมูล';
+                        $act    = (string) ($row['action_type'] ?? '0');
                     ?>
                         <tr>
                             <td class="text-center"><?= $i++ ?></td>
-                            <td class="fw-medium"><?= $esc($full_name !== '' ? $full_name : '-') ?></td>
-                            <td class="text-secondary"><?= $esc($row['user_email'] ?? '-') ?></td>
-                            <td><?= $esc($row['user_phone'] ?? '-') ?></td>
-                            <td><?= $esc($row['user_citizen_id'] ?? '-') ?></td>
-                            <td><?= $esc($cpd !== '' ? $cpd : 'ไม่มีข้อมูล') ?></td>
-                            <td><?= $esc($cpa !== '' ? $cpa : 'ไม่มีข้อมูล') ?></td>
+                            <td class="fw-medium"><?= $esc($full) ?></td>
+                            <td><?= $esc($cid) ?></td>
+                            <td class="text-secondary"><?= $esc($remark) ?></td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-warning"
-                                    onclick="OpenVerify('<?= $user_id ?>');">
-                                    ตรวจเอกสาร
-                                </button>
+                                <?php if ($act === '1'): ?>
+                                    <span class="badge bg-success">ผ่านแล้ว</span>
+                                <?php elseif ($act === '2'): ?>
+                                    <span class="badge bg-danger">ยกเลิกการยืนยัน</span>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
                             </td>
+                            <td><?= $esc($admin) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

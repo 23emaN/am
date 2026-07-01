@@ -73,25 +73,8 @@
                         </div>
                     </div>
 
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width:60px;">#</th>
-                                        <th scope="col" class="text-nowrap">เลขที่ใบรับรอง</th>
-                                        <th scope="col">คอร์สเรียน</th>
-                                        <th scope="col" class="text-nowrap">ผู้สอบ</th>
-                                        <th scope="col" class="text-nowrap">คะแนนที่ได้</th>
-                                        <th scope="col" class="text-center">สถานะ</th>
-                                        <th scope="col" class="text-center">การอนุมัติ</th>
-                                        <th scope="col" class="text-center" style="width:160px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- ตาราง + pagination render จาก view/listCertificate/ViewData.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -167,8 +150,8 @@
 </html>
 
 <script>
-    var certTable = null;
     var currentEnrollId = 0;
+    var certPage = 1;
 
     $(document).ready(function () {
         if (typeof TomSelect !== "undefined") {
@@ -176,50 +159,60 @@
                 new TomSelect(el, { create: false, allowEmptyOption: true });
             });
         }
-
-        certTable = $("#PageTable").DataTable({
-            processing: true, serverSide: true, responsive: true, autoWidth: false,
-            pageLength: 10, order: [[0, "desc"]],
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            ajax: {
-                url: "core.php", type: "POST",
-                data: function (d) {
-                    d.request_state = "list_certificate";
-                    d.request_function = "get_list_certificate";
-                    d.f_course = $("#f_course").val();
-                    d.f_member = $("#f_member").val();
-                    d.f_status = $("#f_status").val();
-                    d.f_approve = $("#f_approve").val();
-                    return d;
-                },
-                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-            },
-            columns: [
-                { data: "no", className: "text-center", orderable: false },
-                { data: "cert_no", className: "text-nowrap" },
-                { data: "course" },
-                { data: "examiner", className: "text-nowrap" },
-                { data: "score", className: "text-nowrap" },
-                { data: "status", className: "text-center", orderable: false },
-                { data: "approve", className: "text-center", orderable: false },
-                { data: null, className: "text-center text-nowrap", orderable: false, render: function (row) {
-                    var html = '';
-                    // ผ่าน + อนุมัติ -> ดาวน์โหลดใบรับรองได้
-                    if (row.passed == 1 && row.approved == 1) {
-                        html += '<button type="button" class="btn btn-sm btn-info text-white me-1" onclick="DownloadCert(' + row.enroll_id + ')">ดาวน์โหลด</button>';
-                    }
-                    // ผ่าน (อนุมัติ หรือ รออนุมัติ) -> ดำเนินการได้
-                    if (row.passed == 1) {
-                        html += '<button type="button" class="btn btn-sm btn-primary" onclick="OpenManage(' + row.enroll_id + ')">ดำเนินการ</button>';
-                    }
-                    return html;
-                } }
-            ]
-        });
+        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
+        GetData(1);
     });
 
-    function SearchData() { if (certTable) { certTable.ajax.reload(); } }
+    function SearchData() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        certPage = page;
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "list_certificate",
+                request_function: "get_list_certificate",
+                f_course: $("#f_course").val(),
+                f_member: $("#f_member").val(),
+                f_status: $("#f_status").val(),
+                f_approve: $("#f_approve").val(),
+                search: $("#f_search").val(),
+                page: page
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
+                } else {
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/listCertificate/ViewData.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
 
     // ดูใบรับรอง -> เปิดหน้าพรีวิว PDF ในแท็บใหม่
     function DownloadCert(id) {
@@ -289,7 +282,7 @@
                     if (r.result == 1) {
                         bootstrap.Modal.getInstance(document.getElementById("modalApprove")).hide();
                         Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 })
-                            .then(function () { if (certTable) { certTable.ajax.reload(null, false); } });
+                            .then(function () { GetData(certPage); });
                     } else {
                         Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + r.msg + '</span>', icon: "error" });
                     }

@@ -13,23 +13,20 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width: 60px;">#</th>
-                                        <th scope="col">ชื่อ</th>
-                                        <th scope="col">เลขบัตรประชาชน</th>
-                                        <th scope="col">รายละเอียด</th>
-                                        <th scope="col" class="text-center">สถานะ</th>
-                                        <th scope="col">ผู้ดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">ค้นหา</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="f_search" placeholder="ชื่อ / เลขบัตรประชาชน / รายละเอียด" autocomplete="off">
+                                <button type="button" class="btn btn-primary d-flex align-items-center" onclick="SearchData()">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">search</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- ตาราง + pagination render จาก view/verifyHistory/ViewData.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -46,35 +43,57 @@
 </html>
 
 <script>
+    var currentPage = 1;
+
     $(document).ready(function () {
-        // server-side: ตารางใหญ่ (หลักหมื่นแถว) โหลดทีละหน้าจาก server
-        $("#PageTable").DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            order: [[0, 'desc']], // ใหม่สุดก่อน (column 0 = log_id)
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            ajax: {
-                url: "core.php",
-                type: "POST",
-                data: function (d) {
-                    d.request_state = "verify_history";
-                    d.request_function = "get_list_history";
-                    return d;
-                },
-                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-            },
-            columns: [
-                { data: "no", className: "text-center", orderable: false },
-                { data: "full_name", className: "fw-medium" },
-                { data: "citizen_id" },
-                { data: "remark", className: "text-secondary" },
-                { data: "status", className: "text-center" },
-                { data: "admin_name" }
-            ]
-        });
+        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
+        GetData(1);
     });
+
+    function SearchData() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "verify_history",
+                request_function: "get_list_history",
+                search: $("#f_search").val(),
+                page: page
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
+                } else {
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/verifyHistory/ViewData.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
 </script>

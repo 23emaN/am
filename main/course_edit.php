@@ -504,7 +504,6 @@
             error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
     }
-    var examDT = null;
     function StripTags(h) { var t = document.createElement('div'); t.innerHTML = h || ''; return (t.textContent || t.innerText || '').trim(); }
     function ExamChildRow(d) {
         var hasFile = (d.exam_image || d.exam_file) ? 'มี' : 'ไม่มีข้อมูล';
@@ -520,47 +519,48 @@
     }
     function RenderExamTable(list_data) {
         list_data = list_data || [];
-        list_data.forEach(function (r, i) { r._no = i + 1; });
         var head = '<div class="d-flex justify-content-between align-items-center mb-3">' +
             '<h4 class="mb-0 fw-bold">ข้อสอบ</h4>' +
             '<div class="d-flex gap-2">' +
             '<button type="button" class="btn btn-info" onclick="OpenUploadExam()">อัพโหลดคำถาม</button>' +
             '<button type="button" class="btn btn-success" onclick="OpenAddExam()">เพิ่มคำถาม</button>' +
             '</div></div>';
+
+        var rows = '';
+        list_data.forEach(function (d, i) {
+            var no = i + 1;
+            // แถวหลัก: ปุ่มวงกลม +/− + ลำดับ
+            rows += '<tr class="exam-main" data-exam-idx="' + i + '">' +
+                '<td class="exam-control text-center" style="cursor:pointer"><span class="exam-toggle plus">+</span></td>' +
+                '<td class="text-start">' + no + '</td>' +
+                '<td></td>' +
+                '</tr>';
+            // แถวรายละเอียด (ซ่อนไว้ก่อน) กางด้วยปุ่ม +/−
+            rows += '<tr class="exam-detail" data-exam-idx="' + i + '" style="display:none">' +
+                '<td></td><td colspan="2">' + ExamChildRow(d) + '</td>' +
+                '</tr>';
+        });
+
         $("#GetExamTab").html(head +
             '<table id="ExamTable" class="table align-middle w-100" style="width:100%"><thead><tr>' +
-            '<th style="width:50px"></th><th style="width:100px">ลำดับ</th><th></th><th>คำถาม</th><th>ไฟล์/ภาพ</th><th>คำตอบที่ถูกต้อง</th>' +
-            '</tr></thead></table>');
-
-        examDT = $("#ExamTable").DataTable({
-            data: list_data,
-            autoWidth: false,
-            pageLength: 10,
-            language: { url: '../template/assets/js/data-table-th.json' },
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]],
-            columns: [
-                { className: 'dt-control text-center', orderable: false, data: null, defaultContent: '<span class="exam-toggle plus">+</span>', width: '50px' },
-                { title: 'ลำดับ', data: '_no', className: 'text-start', width: '100px' },
-                { data: null, orderable: false, defaultContent: '' },   // spacer ดูดความกว้างที่เหลือ ให้ ลำดับ ชิดซ้าย
-                { title: 'คำถาม', data: 'exam_text', visible: false, render: function (d) { return StripTags(d); } },
-                { title: 'ไฟล์/ภาพ', data: null, visible: false, render: function (d, t, row) { return (row.exam_image || row.exam_file) ? 'มี' : 'ไม่มีข้อมูล'; } },
-                { title: 'คำตอบที่ถูกต้อง', data: 'correct_text', visible: false }
-            ]
-        });
-
-        // กดวงกลม +/− เพื่อกาง/ยุบรายละเอียดของแต่ละข้อ (child row)
-        $('#ExamTable tbody').off('click', 'td.dt-control').on('click', 'td.dt-control', function () {
-            var tr = $(this).closest('tr');
-            var row = examDT.row(tr);
-            if (row.child.isShown()) {
-                row.child.hide();
-                $(this).find('.exam-toggle').removeClass('minus').addClass('plus').text('+');
-            } else {
-                row.child(ExamChildRow(row.data())).show();
-                $(this).find('.exam-toggle').removeClass('plus').addClass('minus').text('−');
-            }
-        });
+            '<th style="width:50px"></th><th style="width:100px">ลำดับ</th><th></th>' +
+            '</tr></thead><tbody>' + rows + '</tbody></table>');
     }
+
+    // กดวงกลม +/− เพื่อกาง/ยุบรายละเอียดของแต่ละข้อ (event delegation, ไม่ใช้ DataTables)
+    $('#GetExamTab').off('click', 'td.exam-control').on('click', 'td.exam-control', function () {
+        var $mainTr = $(this).closest('tr.exam-main');
+        var idx = $mainTr.data('exam-idx');
+        var $detail = $mainTr.siblings('tr.exam-detail[data-exam-idx="' + idx + '"]');
+        var $glyph = $(this).find('.exam-toggle');
+        if ($detail.is(':visible')) {
+            $detail.hide();
+            $glyph.removeClass('minus').addClass('plus').text('+');
+        } else {
+            $detail.show();
+            $glyph.removeClass('plus').addClass('minus').text('−');
+        }
+    });
     function EnsureExamQuill() {
         if (!quillExam && typeof Quill !== 'undefined') {
             quillExam = new Quill('#editor_exam_text', {

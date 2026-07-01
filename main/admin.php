@@ -6,7 +6,31 @@
 
         <?php include "navbar.php"; ?>
 
-        <div id="GetTable" class="px-2"></div>
+        <div class="px-2">
+            <div class="card bg-white border-0 rounded-3 mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
+                    <h2 class="mb-0">ผู้ดูแลระบบทั้งหมด</h2>
+                    <a href="admin_fromadd.php" class="btn btn-success">เพิ่มผู้ดูแลระบบใหม่</a>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">ค้นหา</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="f_search" placeholder="ชื่อ-นามสกุล / อีเมล" autocomplete="off">
+                                <button type="button" class="btn btn-primary d-flex align-items-center" onclick="SearchData()">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">search</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ตาราง + pagination render จาก view/listAdmin/GetTable.php -->
+                    <div id="result_box"></div>
+                </div>
+            </div>
+        </div>
 
         <?php include "footer.php"; ?>
 
@@ -20,56 +44,60 @@
 </html>
 
 <script>
+    var currentPage = 1;
+
     $(document).ready(function () {
-        LoadData();
+        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
+        GetData(1);
     });
 
-    function LoadData() {
+    function SearchData() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay("#GetTable"); },
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
             type: "POST",
             url: "core.php",
             data: {
                 request_state: "list_admin",
                 request_function: "get_list_admin",
+                search: $("#f_search").val(),
+                page: page
             },
             dataType: "json",
-            success: function (response) {
-                if (response.result == 1) {
-                    RenderListAdmin(response.data);
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
                 } else {
-                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
                 }
             },
-            complete: function () { HideLoadingOverlay("#GetTable"); },
-            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
     }
 
-    function RenderListAdmin(data) {
-        const payload = { list_data: data.list_data, current_admin_id: data.current_admin_id };
-
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay("#GetTable"); },
             type: "POST",
             url: "view/listAdmin/GetTable.php",
-            data: JSON.stringify(payload),
-            contentType: "application/json; charset=utf-8",
-            processData: false,
-            dataType: "html",
-            success: function (response) {
-                $("#GetTable").html(response);
-                $("#PageTable").DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    pageLength: 10,
-                    language: { url: '../template/assets/js/data-table-th.json' },
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]],
-                    columnDefs: [{ orderable: false, targets: [3] }]
-                });
+            data: {
+                data:             payload.list,
+                total:            payload.total,
+                page:             payload.page,
+                per_page:         payload.per_page,
+                current_admin_id: payload.current_admin_id
             },
-            complete: function () { HideLoadingOverlay("#GetTable"); },
-            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
     }
 
@@ -96,7 +124,7 @@
                 dataType: "json",
                 success: function (response) {
                     if (response.result == 1) {
-                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true, didClose: function () { LoadData(); } });
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true, didClose: function () { GetData(currentPage); } });
                     } else {
                         Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", confirmButtonText: "ตกลง" });
                     }

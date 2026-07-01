@@ -12,26 +12,36 @@
                         <span class="material-symbols-outlined" style="font-size:18px;">add</span> สร้างลิ้งค์ใหม่
                     </a>
                 </div>
+
                 <div class="card-body p-4">
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width:60px;">ID</th>
-                                        <th scope="col">เลขใบกำกับ</th>
-                                        <th scope="col">ลูกค้า</th>
-                                        <th scope="col">รายการ</th>
-                                        <th scope="col" class="text-nowrap">วันที่ในใบกำกับ</th>
-                                        <th scope="col" class="text-center">สถานะเอกสาร</th>
-                                        <th scope="col" class="text-center">สถานะลิงค์</th>
-                                        <th scope="col" class="text-center" style="width:200px;">ดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="EtaxLinkBody"></tbody>
-                            </table>
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">ค้นหา</label>
+                            <input type="text" class="form-control" id="f_search" placeholder="เลขใบกำกับ / ชื่อลูกค้า">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-medium">สถานะเอกสาร</label>
+                            <select class="form-select" id="f_doc_status">
+                                <option value="">ทั้งหมด</option>
+                                <option value="1">ออกใบกำกับภาษีแล้ว</option>
+                                <option value="2">ยกเลิก</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-medium">สถานะลิงค์</label>
+                            <select class="form-select" id="f_link_status">
+                                <option value="">ทั้งหมด</option>
+                                <option value="1">ใช้งานได้</option>
+                                <option value="0">ปิดใช้งาน</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary w-100" onclick="SearchData()">ค้นหา</button>
                         </div>
                     </div>
+
+                    <!-- ตาราง + pagination render จาก view/listEtaxLink/ViewData.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -44,81 +54,65 @@
 </html>
 
 <script>
-    var pageTable = null;
+    var currentPage = 1;
 
     function publicLinkUrl(token) {
         var base = location.href.split('/main/')[0];
         return base + '/etax_link_pdf.php?token=' + token;
     }
 
-    function docStatusBadge(s) {
-        if (s === "2") { return '<span class="badge bg-danger">ยกเลิก</span>'; }
-        return '<span class="badge bg-success">ออกใบกำกับภาษีแล้ว</span>';
-    }
-    function linkStatusBadge(s) {
-        if (s === "0") { return '<span class="badge bg-secondary">ปิดใช้งาน</span>'; }
-        return '<span class="badge bg-success">ใช้งานได้</span>';
-    }
+    $(document).ready(function () {
+        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
+        $('#f_doc_status, #f_link_status').on('change', function () { GetData(1); });
+        GetData(1);
+    });
 
-    $(document).ready(function () { LoadData(); });
+    function SearchData() { GetData(1); }
 
-    function LoadData() {
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay("#PageTable"); },
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
             type: "POST", url: "core.php",
-            data: { request_state: "list_etax_link", request_function: "get_list" },
+            data: {
+                request_state: "list_etax_link",
+                request_function: "get_list",
+                f_doc_status: $("#f_doc_status").val(),
+                f_link_status: $("#f_link_status").val(),
+                search: $("#f_search").val(),
+                page: page
+            },
             dataType: "json",
-            success: function (response) {
-                if (response.result == 1) {
-                    RenderTable(response.data.list_data);
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
                 } else {
-                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, timer: 2000 });
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
                 }
             },
-            complete: function () { HideLoadingOverlay("#PageTable"); },
-            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
     }
 
-    function RenderTable(list) {
-        if (pageTable) { pageTable.destroy(); pageTable = null; }
-        var rows = "";
-        (list || []).forEach(function (it) {
-            var sq = 'btn btn-sm d-inline-flex align-items-center justify-content-center p-0';
-            var linkOn = it.link_status === "1";
-            var actions = '<div class="d-flex justify-content-center gap-1">' +
-                '<a href="etax_link_view.php?id=' + it.id + '" class="' + sq + ' btn-info text-white" style="width:34px;height:34px;" title="ดูข้อมูล">' +
-                    '<span class="material-symbols-outlined" style="font-size:18px;">visibility</span></a>' +
-                '<button type="button" class="' + sq + ' btn-secondary" style="width:34px;height:34px;" onclick="CopyLink(\'' + it.token + '\')" title="คัดลอกลิ้งค์">' +
-                    '<span class="material-symbols-outlined" style="font-size:18px;">link</span></button>' +
-                '<button type="button" class="' + sq + ' btn-success" style="width:34px;height:34px;" onclick="DownloadEtaxLink(' + it.id + ')" title="ดาวน์โหลด PDF">' +
-                    '<span class="material-symbols-outlined" style="font-size:18px;">download</span></button>' +
-                '<button type="button" class="' + sq + (linkOn ? ' btn-warning' : ' btn-outline-secondary') + '" style="width:34px;height:34px;" onclick="ToggleLink(' + it.id + ')" title="' + (linkOn ? 'ปิดใช้งานลิ้งค์' : 'เปิดใช้งานลิ้งค์') + '">' +
-                    '<span class="material-symbols-outlined" style="font-size:18px;">' + (linkOn ? 'link_off' : 'link') + '</span></button>' +
-                '<button type="button" class="' + sq + ' btn-danger" style="width:34px;height:34px;" onclick="DeleteLink(' + it.id + ')" title="ลบ">' +
-                    '<span class="material-symbols-outlined" style="font-size:18px;">delete</span></button>' +
-                '</div>';
-            rows +=
-                '<tr>' +
-                    '<td class="text-center">' + it.id + '</td>' +
-                    '<td class="fw-medium">' + EscapeHTML(it.etax_no) + '</td>' +
-                    '<td>' + EscapeHTML(it.customer) + '</td>' +
-                    '<td class="text-secondary">' + EscapeHTML(it.items) + '</td>' +
-                    '<td class="text-nowrap">' + EscapeHTML(it.date) + '</td>' +
-                    '<td class="text-center">' + docStatusBadge(it.doc_status) + '</td>' +
-                    '<td class="text-center">' + linkStatusBadge(it.link_status) + '</td>' +
-                    '<td class="text-center">' + actions + '</td>' +
-                '</tr>';
-        });
-        $("#EtaxLinkBody").html(rows);
-        pageTable = $("#PageTable").DataTable({
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            order: [[0, 'desc']],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]],
-            columnDefs: [{ orderable: false, targets: [3, 7] }]
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/listEtaxLink/ViewData.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
     }
 
@@ -157,14 +151,13 @@
 
     function ToggleLink(id) {
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
             type: "POST", url: "core.php",
             data: { request_state: "list_etax_link", request_function: "toggle_link", link_id: id },
             dataType: "json",
             success: function (res) {
                 if (res.result == 1) {
                     Swal.fire({ toast: true, position: "top-end", icon: "success", title: res.msg, showConfirmButton: false, timer: 1400 });
-                    LoadData();
+                    GetData(currentPage);
                 } else {
                     Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + res.msg + '</span>', icon: "error", showConfirmButton: true });
                 }
@@ -181,13 +174,12 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
-                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_etax_link", request_function: "delete", link_id: id },
                 dataType: "json",
                 success: function (res) {
                     if (res.result == 1) {
-                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + res.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1400 }).then(function () { LoadData(); });
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + res.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1400 }).then(function () { GetData(currentPage); });
                     } else {
                         Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + res.msg + '</span>', icon: "error", showConfirmButton: true });
                     }
