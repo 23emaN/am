@@ -158,8 +158,16 @@
                 { data: "status", className: "text-center", orderable: false },
                 { data: "approve", className: "text-center", orderable: false },
                 { data: null, className: "text-center text-nowrap", orderable: false, render: function (row) {
-                    return '<button type="button" class="btn btn-sm btn-info text-white me-1" onclick="DownloadCert(' + row.enroll_id + ')">ดาวน์โหลด</button>' +
-                           '<button type="button" class="btn btn-sm btn-primary" onclick="OpenManage(' + row.enroll_id + ')">ดำเนินการ</button>';
+                    var html = '';
+                    // ผ่าน + อนุมัติ -> ดาวน์โหลดใบรับรองได้
+                    if (row.passed == 1 && row.approved == 1) {
+                        html += '<button type="button" class="btn btn-sm btn-info text-white me-1" onclick="DownloadCert(' + row.enroll_id + ')">ดาวน์โหลด</button>';
+                    }
+                    // ผ่าน (อนุมัติ หรือ รออนุมัติ) -> ดำเนินการได้
+                    if (row.passed == 1) {
+                        html += '<button type="button" class="btn btn-sm btn-primary" onclick="OpenManage(' + row.enroll_id + ')">ดำเนินการ</button>';
+                    }
+                    return html;
                 } }
             ]
         });
@@ -174,7 +182,7 @@
 
     // ดูไฟล์ยืนยันตัวตนในเอกสาร (เทียบรูปในใบรับรอง vs รูปผู้ใช้ปัจจุบัน)
     function OpenManage(id) {
-        $("#ManageIdCard").html('<div class="text-muted">กำลังโหลด...</div>');
+        $("#ManageIdCard").html('<div class="d-flex justify-content-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">กำลังโหลด...</span></div></div>');
         $("#ManageCurrent").html('<div class="text-muted">-</div>');
         new bootstrap.Modal(document.getElementById("modalManage")).show();
         $.ajax({

@@ -1,7 +1,7 @@
 <?php
 // ใบรับรองผลการสอบ — DataTables server-side
-// ผ่าน/ไม่ผ่าน ดูจาก tbl_course_enrollment.enroll_is_completed (1=ผ่าน)
-// คะแนนจาก tbl_exam_attempt (ครั้งล่าสุด) / การอนุมัติจาก tbl_user.identity_verified
+// ผ่าน/ไม่ผ่าน ดูจาก tbl_exam_attempt.attempt_pass (ครั้งล่าสุด, 1=ผ่าน)
+// คะแนนจาก tbl_exam_attempt (ครั้งล่าสุด) / การอนุมัติจาก tbl_course_enrollment.enroll_access (1=อนุมัติ)
 
 use App\Utility\Auth;
 use App\Utility\Response;
@@ -30,19 +30,23 @@ if ($length > 100) { $length = 100; }
 $f_course  = trim((string) ($_POST['f_course'] ?? ''));   // enroll_course_id
 $f_member  = trim((string) ($_POST['f_member'] ?? ''));   // enroll_user_id
 $f_status  = trim((string) ($_POST['f_status'] ?? ''));   // 1=ผ่าน 0=ไม่ผ่าน
-$f_approve = trim((string) ($_POST['f_approve'] ?? ''));  // 1=อนุมัติ 0=ยังไม่อนุมัติ
+$f_approve = trim((string) ($_POST['f_approve'] ?? ''));  // 1=อนุมัติ 0=รออนุมัติ
 
 $joins = "FROM tbl_course_enrollment e
           LEFT JOIN tbl_user u   ON e.enroll_user_id = u.user_id
           LEFT JOIN tbl_course c ON e.enroll_course_id = c.course_id";
 
+// ผลสอบครั้งล่าสุดของ (ผู้เรียน, คอร์ส) นั้น ๆ
+$pass_expr = "(SELECT a.attempt_pass FROM tbl_exam_attempt a
+               WHERE a.attempt_user_id = e.enroll_user_id AND a.attempt_course_id = e.enroll_course_id
+               ORDER BY a.attempt_id DESC LIMIT 1)";
+
 $where  = ["e.delete_at IS NULL"];
 $params = [];
 if ($f_course !== '' && ctype_digit($f_course)) { $where[] = "e.enroll_course_id = :f_course"; $params[':f_course'] = (int) $f_course; }
 if ($f_member !== '' && ctype_digit($f_member)) { $where[] = "e.enroll_user_id = :f_member"; $params[':f_member'] = (int) $f_member; }
-if ($f_status === '1' || $f_status === '0')     { $where[] = "e.enroll_is_completed = :f_status"; $params[':f_status'] = $f_status; }
-if ($f_approve === '1')                         { $where[] = "u.identity_verified = '2'"; }
-elseif ($f_approve === '0')                     { $where[] = "(u.identity_verified IS NULL OR u.identity_verified <> '2')"; }
+if ($f_status === '1' || $f_status === '0')     { $where[] = "COALESCE($pass_expr, '0') = :f_status"; $params[':f_status'] = $f_status; }
+if ($f_approve === '1' || $f_approve === '0')   { $where[] = "e.enroll_access = :f_approve"; $params[':f_approve'] = $f_approve; }
 $where_sql = 'WHERE ' . implode(' AND ', $where);
 
 $records_total = (int) $pdo_connect->query("SELECT COUNT(*) FROM tbl_course_enrollment WHERE delete_at IS NULL")->fetchColumn();
@@ -56,12 +60,13 @@ if (count($where) > 1) {
 }
 
 try {
-$sql = "SELECT e.enroll_id, e.enroll_user_id, e.enroll_course_id, e.enroll_is_completed, e.create_at,
-               u.user_firstname, u.user_lastname, u.identity_verified,
+$sql = "SELECT e.enroll_id, e.enroll_user_id, e.enroll_course_id, e.enroll_access, e.create_at,
+               u.user_firstname, u.user_lastname,
                c.course_name, c.course_number_exam,
                (SELECT a.attempt_score FROM tbl_exam_attempt a
                  WHERE a.attempt_user_id = e.enroll_user_id AND a.attempt_course_id = e.enroll_course_id
-                 ORDER BY a.attempt_id DESC LIMIT 1) AS score
+                 ORDER BY a.attempt_id DESC LIMIT 1) AS score,
+               $pass_expr AS pass
         $joins
         $where_sql
         ORDER BY e.enroll_id DESC
@@ -92,17 +97,21 @@ foreach ($rows as $r) {
         $score_txt = '<span class="text-muted">-</span>';
     }
 
-    // สถานะการสอบ (จาก enroll_is_completed)
-    $passed = ((string) ($r['enroll_is_completed'] ?? '0') === '1');
+    // สถานะการสอบ (จาก tbl_exam_attempt.attempt_pass ครั้งล่าสุด)
+    $passed = ((string) ($r['pass'] ?? '0') === '1');
     $status = $passed
         ? '<span class="badge bg-success">ผ่าน</span>'
         : '<span class="badge bg-danger">ไม่ผ่าน</span>';
 
-    // การอนุมัติ (จาก identity_verified = 2)
-    $approved = ((string) ($r['identity_verified'] ?? '0') === '2');
-    $approve = $approved
-        ? '<span class="badge bg-success">อนุมัติ</span>'
-        : '<span class="badge bg-secondary">รออนุมัติ</span>';
+    // การอนุมัติ (จาก enroll_access = 1) — แสดงเฉพาะเมื่อสอบผ่าน
+    $approved = ((string) ($r['enroll_access'] ?? '0') === '1');
+    if ($passed) {
+        $approve = $approved
+            ? '<span class="badge bg-success">อนุมัติ</span>'
+            : '<span class="badge bg-secondary">รออนุมัติ</span>';
+    } else {
+        $approve = '';
+    }
 
     $data[] = [
         'enroll_id' => (int) $r['enroll_id'],
@@ -114,6 +123,7 @@ foreach ($rows as $r) {
         'status'    => $status,
         'approve'   => $approve,
         'passed'    => $passed ? 1 : 0,
+        'approved'  => $approved ? 1 : 0,
     ];
 }
 
