@@ -1,7 +1,7 @@
 <?php
 // ใบรับรองผลการสอบ — DataTables server-side
 // ผ่าน/ไม่ผ่าน ดูจาก tbl_exam_attempt.attempt_pass (ครั้งล่าสุด, 1=ผ่าน)
-// คะแนนจาก tbl_exam_attempt (ครั้งล่าสุด) / การอนุมัติจาก tbl_course_enrollment.enroll_access (1=อนุมัติ)
+// คะแนนจาก tbl_exam_attempt (ครั้งล่าสุด) / การอนุมัติจาก tbl_course_enrollment.enroll_is_completed (1=อนุมัติ, 0=รออนุมัติ)
 
 use App\Utility\Auth;
 use App\Utility\Response;
@@ -46,8 +46,20 @@ $params = [];
 if ($f_course !== '' && ctype_digit($f_course)) { $where[] = "e.enroll_course_id = :f_course"; $params[':f_course'] = (int) $f_course; }
 if ($f_member !== '' && ctype_digit($f_member)) { $where[] = "e.enroll_user_id = :f_member"; $params[':f_member'] = (int) $f_member; }
 if ($f_status === '1' || $f_status === '0')     { $where[] = "COALESCE($pass_expr, '0') = :f_status"; $params[':f_status'] = $f_status; }
-if ($f_approve === '1' || $f_approve === '0')   { $where[] = "e.enroll_access = :f_approve"; $params[':f_approve'] = $f_approve; }
+if ($f_approve === '1' || $f_approve === '0')   { $where[] = "e.enroll_is_completed = :f_approve"; $params[':f_approve'] = $f_approve; }
 $where_sql = 'WHERE ' . implode(' AND ', $where);
+
+// คอลัมน์ที่เรียงได้ (index ตรงกับ columns ใน course_certificate.php)
+// 1=เลขที่ใบรับรอง(ฝัง enroll_id) 2=คอร์สเรียน 3=ผู้สอบ 4=คะแนน
+$order_cols = [
+    1 => 'e.enroll_id',
+    2 => 'c.course_name',
+    3 => 'u.user_firstname',
+    4 => 'score',
+];
+$order_idx = (int) ($_POST['order'][0]['column'] ?? 0);
+$order_col = $order_cols[$order_idx] ?? 'e.enroll_id';
+$order_dir = strtolower((string) ($_POST['order'][0]['dir'] ?? 'desc')) === 'asc' ? 'ASC' : 'DESC';
 
 $records_total = (int) $pdo_connect->query("SELECT COUNT(*) FROM tbl_course_enrollment WHERE delete_at IS NULL")->fetchColumn();
 if (count($where) > 1) {
@@ -60,7 +72,7 @@ if (count($where) > 1) {
 }
 
 try {
-$sql = "SELECT e.enroll_id, e.enroll_user_id, e.enroll_course_id, e.enroll_access, e.create_at,
+$sql = "SELECT e.enroll_id, e.enroll_user_id, e.enroll_course_id, e.enroll_is_completed, e.create_at,
                u.user_firstname, u.user_lastname,
                c.course_name, c.course_number_exam,
                (SELECT a.attempt_score FROM tbl_exam_attempt a
@@ -69,7 +81,7 @@ $sql = "SELECT e.enroll_id, e.enroll_user_id, e.enroll_course_id, e.enroll_acces
                $pass_expr AS pass
         $joins
         $where_sql
-        ORDER BY e.enroll_id DESC
+        ORDER BY $order_col $order_dir, e.enroll_id DESC
         LIMIT :start, :length";
 $stmt = $pdo_connect->prepare($sql);
 foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
@@ -103,8 +115,8 @@ foreach ($rows as $r) {
         ? '<span class="badge bg-success">ผ่าน</span>'
         : '<span class="badge bg-danger">ไม่ผ่าน</span>';
 
-    // การอนุมัติ (จาก enroll_access = 1) — แสดงเฉพาะเมื่อสอบผ่าน
-    $approved = ((string) ($r['enroll_access'] ?? '0') === '1');
+    // การอนุมัติ (จาก enroll_is_completed = 1) — แสดงเฉพาะเมื่อสอบผ่าน
+    $approved = ((string) ($r['enroll_is_completed'] ?? '0') === '1');
     if ($passed) {
         $approve = $approved
             ? '<span class="badge bg-success">อนุมัติ</span>'
