@@ -6,6 +6,7 @@
 <?php $certificate_pages = ['course_certificate']; ?>
 <?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
 <?php $etax_link_pages = ['etax_link', 'etax_link_fromadd', 'etax_link_view']; ?>
+<?php $report_pages = ['report']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $history_pages = ['verify_history']; ?>
 <?php $verify_pages = ['verify_request']; ?>
@@ -156,6 +157,13 @@
 
             <li class="menu-title small text-uppercase">
                 <span class="menu-title-text">อื่น ๆ</span>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $report_pages) ? 'open' : '' ?>">
+                <a href="report" class="menu-link <?php echo in_array($now_page, $report_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">summarize</span>
+                    <span class="title">รายงาน/เอกสาร</span>
+                </a>
             </li>
 
             <li class="menu-item <?php echo in_array($now_page, $coupon_pages) ? 'open' : '' ?>">

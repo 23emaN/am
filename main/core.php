@@ -47,6 +47,11 @@ $routes = [
         'delete'      => __DIR__ . '/core/listEtaxLink/DeleteEtaxLink.php',
     ],
 
+    'report'                   => [
+        'get_courses'   => __DIR__ . '/core/report/GetCourses.php',
+        'export_report' => __DIR__ . '/core/report/ExportReport.php',
+    ],
+
     'list_order'               => [
         'get_list_order'   => __DIR__ . '/core/listOrder/GetListOrder.php',
         'get_list_pending' => __DIR__ . '/core/listOrder/GetListPending.php',
