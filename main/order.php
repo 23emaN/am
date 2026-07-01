@@ -54,26 +54,8 @@
                         </div>
                     </div>
 
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width:60px;">ลำดับ</th>
-                                        <th scope="col">หมายเลขคำสั่งซื้อ</th>
-                                        <th scope="col">ชื่อลูกค้า</th>
-                                        <th scope="col">คอร์สเรียน</th>
-                                        <th scope="col" class="text-end">ยอดรวม</th>
-                                        <th scope="col" class="text-center">สถานะ</th>
-                                        <th scope="col" class="text-center">สถานะการชำระเงิน</th>
-                                        <th scope="col">สั่งซื้อเมื่อ</th>
-                                        <th scope="col" class="text-center">ดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- ตาราง + pagination render จาก view/listOrder/ViewOrder.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -114,8 +96,8 @@
 </html>
 
 <script>
-    var orderTable = null;
     var dlRangePicker = null;
+    var currentPage = 1;
 
     $(document).ready(function () {
         // datepicker (รูปแบบ d/m/Y) — ช่องดาวน์โหลดใช้แบบเลือกช่วง (range) เหมือนหน้า home
@@ -124,46 +106,58 @@
             dlRangePicker = flatpickr("#dl_range", { mode: "range", dateFormat: "d/m/Y" });
         }
 
-        orderTable = $("#PageTable").DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            order: [[7, "desc"]], // ใหม่สุดก่อน (สั่งซื้อเมื่อ)
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            ajax: {
-                url: "core.php",
-                type: "POST",
-                data: function (d) {
-                    d.request_state = "list_order";
-                    d.request_function = "get_list_order";
-                    d.f_order = $("#f_order").val();
-                    d.f_customer = $("#f_customer").val();
-                    d.f_status = $("#f_status").val();
-                    d.f_payment = $("#f_payment").val();
-                    d.f_date = $("#f_date").val();
-                    return d;
-                },
-                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-            },
-            columns: [
-                { data: "no", className: "text-center", orderable: false },
-                { data: "order_no" },
-                { data: "customer", className: "fw-medium" },
-                { data: "courses", className: "text-secondary", orderable: false },
-                { data: "total", className: "text-end" },
-                { data: "status", className: "text-center" },
-                { data: "payment", className: "text-center" },
-                { data: "created" },
-                { data: "action", className: "text-center", orderable: false }
-            ]
-        });
+        GetData(1);
     });
 
-    function SearchOrder() {
-        if (orderTable) { orderTable.ajax.reload(); }
+    function SearchOrder() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "list_order",
+                request_function: "get_list_order",
+                f_order: $("#f_order").val(),
+                f_customer: $("#f_customer").val(),
+                f_status: $("#f_status").val(),
+                f_payment: $("#f_payment").val(),
+                f_date: $("#f_date").val(),
+                page: page
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
+                } else {
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/listOrder/ViewOrder.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
     }
 
     // ดาวน์โหลดรายงาน Excel (ส่งออกเฉพาะที่ชำระ+สำเร็จ) — ใช้ fetch แล้วบันทึกเป็นไฟล์

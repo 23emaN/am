@@ -6,7 +6,34 @@
 
         <?php include "navbar.php"; ?>
 
-        <div id="GetTable" class="px-2"></div>
+        <div class="px-2">
+            <div class="card bg-white border-0 rounded-3 mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
+                    <h2 class="mb-0">หมวดหมู่ของคอร์สเรียน</h2>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success" type="button" onclick="GetModalAdd()">
+                            เพิ่มหมวดหมู่ใหม่
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">ค้นหา</label>
+                            <input type="text" class="form-control" id="f_search" placeholder="ค้นหาชื่อหมวดหมู่">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary w-100" onclick="SearchData()">ค้นหา</button>
+                        </div>
+                    </div>
+
+                    <!-- ตาราง + pagination render จาก view/listCourseCategory/GetTable.php -->
+                    <div id="result_box"></div>
+                </div>
+            </div>
+        </div>
 
         <?php include "footer.php"; ?>
     </div>
@@ -27,59 +54,72 @@
 </html>
 
 <script>
+    var currentPage = 1;
+    var addMode = false;
+
     $(document).ready(function () {
-        LoadData();
+        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
+        GetData(1);
     });
 
-    function LoadData() {
+    function SearchData() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay("#GetTable"); },
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
             type: "POST",
             url: "core.php",
             data: {
                 request_state: "listCourseCategory",
                 request_function: "get_list_category",
+                search: $("#f_search").val(),
+                page: page
             },
             dataType: "json",
-            success: function (response) {
-                if (response.result == 1) {
-                    RenderListCourse(response.data);
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
                 } else {
-                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
                 }
             },
-            complete: function () { HideLoadingOverlay("#GetTable"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
             error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
     }
 
-    function RenderListCourse(data) {
-        const payload = { list_data: data.list_data };
-
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
         $.ajax({
-            beforeSend: function () { ShowLoadingOverlay("#GetTable"); },
             type: "POST",
             url: "view/listCourseCategory/GetTable.php",
-            data: JSON.stringify(payload),
-            contentType: "application/json; charset=utf-8",
-            processData: false,
-            dataType: "html",
-            success: function (response) {
-                $("#GetTable").html(response);
-                $("#PageTable").DataTable({
-                    responsive: true,
-                    autoWidth: false,
-                    pageLength: 10,
-                    language: { url: '../template/assets/js/data-table-th.json' },
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]]
-                });
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
             },
-            complete: function () { HideLoadingOverlay("#GetTable"); },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
             error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
+    }
+
+    // compatibility: modal เพิ่ม/แก้ไข (GetModalAdd.php / GetModalEdit.php) เรียก LoadData() หลังบันทึก
+    // เพิ่ม -> กลับหน้าแรก, แก้ไข -> คงหน้าเดิม
+    function LoadData() {
+        if (addMode) { addMode = false; GetData(1); }
+        else { GetData(currentPage); }
     }
 
     function GetModalAdd() {
+        addMode = true;
         $.ajax({
             beforeSend: function () { ShowLoadingOverlay("#myModal"); },
             type: "POST",
@@ -96,6 +136,7 @@
 
     // แก้ไขหมวดหมู่ -> โหลด modal พร้อมข้อมูลเดิม
     function GetEditCategory(group_id) {
+        addMode = false;
         $.ajax({
             beforeSend: function () { ShowLoadingOverlay("#myModal"); },
             type: "POST",
@@ -136,7 +177,7 @@
                 dataType: "json",
                 success: function (response) {
                     if (response.result == 1) {
-                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true }).then(() => { LoadData(); });
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true }).then(() => { GetData(currentPage); });
                     } else {
                         Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
                     }

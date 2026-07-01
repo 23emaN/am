@@ -288,37 +288,10 @@
             OpenVerifyModal();
         }
 
-        InitTabTables();
-
-        // ปรับความกว้างคอลัมน์เมื่อสลับแท็บ (DataTable ในแท็บที่ซ่อนอยู่จะคำนวณความกว้างผิด)
-        $('#userTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = $(e.target).attr('data-bs-target');
-            $(target).find('table.user-tab-table').each(function () {
-                if ($.fn.DataTable.isDataTable(this)) {
-                    $(this).DataTable().columns.adjust().responsive.recalc();
-                }
-            });
-        });
-
         if (USER_ID) {
             LoadUser();
         }
     });
-
-    function InitTabTables() {
-        var dtOptions = {
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            language: { url: '../template/assets/js/data-table-th.json' },
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]]
-        };
-        $(".user-tab-table").each(function () {
-            if (!$.fn.DataTable.isDataTable(this)) {
-                $(this).DataTable(dtOptions);
-            }
-        });
-    }
 
     // โหลดข้อมูลผู้ใช้มาเติมในฟอร์ม + แท็บ
     function LoadUser() {
@@ -357,38 +330,44 @@
         f.find('[name="user_password_confirm"]').val("");
     }
 
-    // เติมแท็บ "สิทธิ์เข้าคอร์สเรียน"
+    // เติมแท็บ "สิทธิ์เข้าคอร์สเรียน" (ตารางธรรมดา render ทุกแถวฝั่ง client)
     function FillEnrollTab(rows) {
-        var table = $("#TableEnroll").DataTable();
-        table.clear();
-        rows.forEach(function (r, i) {
-            table.row.add([
-                '<div class="text-center">' + (i + 1) + '</div>',
-                EscapeHTML(r.sku || r.course_name || 'ไม่มีข้อมูล')
-            ]);
-        });
-        table.draw();
+        var html = '';
+        if (!rows || rows.length === 0) {
+            html = '<tr><td colspan="2" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+        } else {
+            rows.forEach(function (r, i) {
+                html += '<tr>'
+                    + '<td class="text-center">' + (i + 1) + '</td>'
+                    + '<td>' + EscapeHTML(r.sku || r.course_name || 'ไม่มีข้อมูล') + '</td>'
+                    + '</tr>';
+            });
+        }
+        $("#TableEnroll tbody").html(html);
     }
 
-    // เติมแท็บ "ประวัติการสอบ/ใบรับรอง"
+    // เติมแท็บ "ประวัติการสอบ/ใบรับรอง" (ตารางธรรมดา render ทุกแถวฝั่ง client)
     function FillExamTab(rows) {
-        var table = $("#TableExam").DataTable();
-        table.clear();
-        rows.forEach(function (r, i) {
-            var status = (String(r.pass) === '1')
-                ? '<span class="badge bg-success">ผ่าน</span>'
-                : '<span class="badge bg-danger">ไม่ผ่าน</span>';
-            table.row.add([
-                '<div class="text-center">' + (i + 1) + '</div>',
-                '-',
-                EscapeHTML(r.course_name || '-'),
-                '-',
-                '<div class="text-center">' + EscapeHTML(r.score != null ? String(r.score) : '-') + '</div>',
-                '<div class="text-center">' + status + '</div>',
-                '<div class="text-center">-</div>'
-            ]);
-        });
-        table.draw();
+        var html = '';
+        if (!rows || rows.length === 0) {
+            html = '<tr><td colspan="7" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+        } else {
+            rows.forEach(function (r, i) {
+                var status = (String(r.pass) === '1')
+                    ? '<span class="badge bg-success">ผ่าน</span>'
+                    : '<span class="badge bg-danger">ไม่ผ่าน</span>';
+                html += '<tr>'
+                    + '<td class="text-center">' + (i + 1) + '</td>'
+                    + '<td>-</td>'
+                    + '<td>' + EscapeHTML(r.course_name || '-') + '</td>'
+                    + '<td>-</td>'
+                    + '<td class="text-center">' + EscapeHTML(r.score != null ? String(r.score) : '-') + '</td>'
+                    + '<td class="text-center">' + status + '</td>'
+                    + '<td class="text-center">-</td>'
+                    + '</tr>';
+            });
+        }
+        $("#TableExam tbody").html(html);
     }
 
     // บันทึกการแก้ไขข้อมูล
