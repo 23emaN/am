@@ -1,0 +1,88 @@
+<?php
+// หน้าแรก (dashboard) — สถิติ + ยอดขายรายวัน ตามช่วงวันที่
+// สมาชิกใหม่: tbl_user.create_at / คำสั่งซื้อใหม่: tbl_orders.created_at
+// ยอดเงิน + กราฟ: tbl_orders ที่ payment_status='1' (จ่ายแล้ว)
+
+use App\Utility\Auth;
+use App\Utility\Response;
+use App\Database\Connection;
+
+$access_token = Auth::requireUserToken();
+$admin_id = $access_token->user_id ?? null;
+if (!$admin_id) {
+    Response::json(0, 'Unauthorized', null);
+}
+
+$db_instance = new Connection();
+$pdo_connect = $db_instance->getPdo();
+if (!$pdo_connect) {
+    Response::json(0, 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', null);
+}
+
+// แปลง d/m/Y (หรือ Y-m-d) -> Y-m-d
+$parse = function ($d) {
+    $d = trim((string) $d);
+    if ($d === '') { return null; }
+    if (preg_match('#^(\d{2})/(\d{2})/(\d{4})$#', $d, $m)) { return $m[3] . '-' . $m[2] . '-' . $m[1]; }
+    if (preg_match('#^\d{4}-\d{2}-\d{2}$#', $d)) { return $d; }
+    return null;
+};
+$from = $parse($_POST['date_from'] ?? '') ?: date('Y-m-d', strtotime('-29 days'));
+$to   = $parse($_POST['date_to']   ?? '') ?: date('Y-m-d');
+if ($from > $to) { [$from, $to] = [$to, $from]; }
+
+try {
+    // สมาชิกใหม่ (สมัครในช่วง)
+    $st = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_user WHERE delete_at IS NULL AND DATE(create_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $from, ':t' => $to]);
+    $new_members = (int) $st->fetchColumn();
+    $st->closeCursor();
+
+    // คำสั่งซื้อใหม่ (ทั้งหมดในช่วง)
+    $st = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_orders WHERE DATE(created_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $from, ':t' => $to]);
+    $new_orders = (int) $st->fetchColumn();
+    $st->closeCursor();
+
+    // ยอดเงิน (เฉพาะจ่ายแล้ว)
+    $st = $pdo_connect->prepare("SELECT COALESCE(SUM(total_price),0) FROM tbl_orders WHERE payment_status = '1' AND DATE(created_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $from, ':t' => $to]);
+    $revenue = (float) $st->fetchColumn();
+    $st->closeCursor();
+
+    // ยอดขายรายวัน (จ่ายแล้ว)
+    $st = $pdo_connect->prepare("SELECT DATE(created_at) AS d, COALESCE(SUM(total_price),0) AS s
+                                 FROM tbl_orders
+                                 WHERE payment_status = '1' AND DATE(created_at) BETWEEN :f AND :t
+                                 GROUP BY DATE(created_at)");
+    $st->execute([':f' => $from, ':t' => $to]);
+    $map = [];
+    foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $r) { $map[$r['d']] = (float) $r['s']; }
+    $st->closeCursor();
+
+    // เติมวันให้ครบช่วง (กันช่องว่างในกราฟ) — จำกัดไม่เกิน 400 วันกันช่วงยาวผิดปกติ
+    $days = [];
+    $sales = [];
+    $cur = strtotime($from);
+    $end = strtotime($to);
+    $guard = 0;
+    while ($cur <= $end && $guard < 400) {
+        $ymd = date('Y-m-d', $cur);
+        $days[]  = date('d/m', $cur);
+        $sales[] = $map[$ymd] ?? 0;
+        $cur = strtotime('+1 day', $cur);
+        $guard++;
+    }
+
+    Response::json(1, 'สำเร็จ', [
+        'new_members' => $new_members,
+        'new_orders'  => $new_orders,
+        'revenue'     => $revenue,
+        'days'        => $days,
+        'sales'       => $sales,
+    ]);
+
+} catch (\Throwable $e) {
+    error_log('GetDashboard Error: ' . $e->getMessage());
+    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+}

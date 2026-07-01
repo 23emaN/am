@@ -1,7 +1,7 @@
 // แนบ access token จาก localStorage ไปกับทุก request ของ jQuery
 // ใช้ ajaxSend เพราะจะทำงานเสมอ แม้ request นั้นจะกำหนด beforeSend ของตัวเองไว้
 $(document).ajaxSend(function(event, jqXHR, settings) {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("bo_access_token");
     if (token) {
         jqXHR.setRequestHeader("Authorization", "Bearer " + token);
     }
@@ -143,7 +143,7 @@ async function KeepSessionAlive() {
             method: "POST",
             headers: {
                 "Cache-Control": "no-cache",
-                "Authorization": "Bearer " + (localStorage.getItem("access_token") || "")
+                "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "")
             }
         });
         if (response.ok) {

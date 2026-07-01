@@ -11,12 +11,17 @@ $request_function = isset($_POST['request_function']) ? trim($_POST['request_fun
 $router = new Router();
 
 $routes = [
+    'dashboard'                => [
+        'get_dashboard' => __DIR__ . '/core/dashboard/GetDashboard.php',
+    ],
+
     'list_user'                => [
         'user_profile'   => __DIR__ . '/core/listUser/UserProfile.php',
         'get_list_user'  => __DIR__ . '/core/listUser/GetListUser.php',
         'get_user'       => __DIR__ . '/core/listUser/GetUser.php',
         'update_user'    => __DIR__ . '/core/listUser/UpdateUser.php',
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
+        'login_as_user'  => __DIR__ . '/core/listUser/LoginAsUser.php',
     ],
   
       'list_enrollment'          => [

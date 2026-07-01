@@ -266,7 +266,7 @@
     function DownloadReport() {
         var body = new URLSearchParams({ request_state: "list_enrollment", request_function: "export_report", f_course: $("#f_course").val() || "", f_member: $("#f_member").val() || "" });
         Swal.fire({ title: "กำลังสร้างรายงาน...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
-        fetch("core.php", { method: "POST", headers: { "Authorization": "Bearer " + (localStorage.getItem("access_token") || "") }, body: body })
+        fetch("core.php", { method: "POST", headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") }, body: body })
             .then(function (res) {
                 var ct = res.headers.get("Content-Type") || "";
                 if (ct.indexOf("application/json") !== -1) { return res.json().then(function (j) { throw new Error(j.msg || "ดาวน์โหลดไม่สำเร็จ"); }); }

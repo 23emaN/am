@@ -178,7 +178,7 @@
         Swal.fire({ title: "กำลังสร้างรายงาน...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
         fetch("core.php", {
             method: "POST",
-            headers: { "Authorization": "Bearer " + (localStorage.getItem("access_token") || "") },
+            headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") },
             body: body
         }).then(function (res) {
             var ct = res.headers.get("Content-Type") || "";

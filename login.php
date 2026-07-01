@@ -314,7 +314,7 @@
 
                         if(response.result == 1){
 
-                            localStorage.setItem("access_token", response.data.access_token);
+                            localStorage.setItem("bo_access_token", response.data.access_token);
 
                             Swal.fire({
 
