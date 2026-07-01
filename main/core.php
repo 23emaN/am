@@ -38,6 +38,15 @@ $routes = [
         'export_etax'    => __DIR__ . '/core/listEtax/ExportEtax.php',
     ],
 
+    'list_etax_link'           => [
+        'get_list'    => __DIR__ . '/core/listEtaxLink/GetListEtaxLink.php',
+        'create'      => __DIR__ . '/core/listEtaxLink/CreateEtaxLink.php',
+        'get'         => __DIR__ . '/core/listEtaxLink/GetEtaxLink.php',
+        'export'      => __DIR__ . '/core/listEtaxLink/ExportEtaxLink.php',
+        'toggle_link' => __DIR__ . '/core/listEtaxLink/ToggleLinkStatus.php',
+        'delete'      => __DIR__ . '/core/listEtaxLink/DeleteEtaxLink.php',
+    ],
+
     'list_order'               => [
         'get_list_order'   => __DIR__ . '/core/listOrder/GetListOrder.php',
         'get_list_pending' => __DIR__ . '/core/listOrder/GetListPending.php',

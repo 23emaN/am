@@ -5,6 +5,7 @@
 <?php $order_pending_pages = ['order_pending']; ?>
 <?php $certificate_pages = ['course_certificate']; ?>
 <?php $etax_pages = ['etax', 'etax_view', 'etax_edit']; ?>
+<?php $etax_link_pages = ['etax_link', 'etax_link_fromadd', 'etax_link_view']; ?>
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $history_pages = ['verify_history']; ?>
 <?php $verify_pages = ['verify_request']; ?>
@@ -115,6 +116,13 @@
                 <a href="etax" class="menu-link <?php echo in_array($now_page, $etax_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">description</span>
                     <span class="title">ใบกำกับภาษี (E-Tax)</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $etax_link_pages) ? 'open' : '' ?>">
+                <a href="etax_link" class="menu-link <?php echo in_array($now_page, $etax_link_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">link</span>
+                    <span class="title">ลิ้งค์ออกใบกำกับภาษี</span>
                 </a>
             </li>
 
