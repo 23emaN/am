@@ -30,6 +30,8 @@ $routes = [
     'list_certificate'         => [
         'get_list_certificate' => __DIR__ . '/core/listCertificate/GetListCertificate.php',
         'get_certificate'      => __DIR__ . '/core/listCertificate/GetCertificate.php',
+        'approve_certificate'  => __DIR__ . '/core/listCertificate/ApproveCertificate.php',
+        'update_identity'      => __DIR__ . '/core/listCertificate/UpdateCertIdentity.php',
         'export_certificate'   => __DIR__ . '/core/listCertificate/ExportCertificate.php',
     ],
     'list_etax'                => [
