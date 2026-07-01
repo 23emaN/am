@@ -53,7 +53,9 @@ html, body { overflow-x: hidden; max-width: 100%; }
     border-top: 1px solid #eef0f3;
 }
 .sidebar-user .logout-btn { line-height: 0; }
-.layout-menu { padding-bottom: 84px; }
+/* เว้นที่ท้ายลิสต์เมนูให้พ้นกล่องโปรไฟล์ (footer สูง ~75px) — ใส่ที่ .menu-inner ซึ่งอยู่ใน
+   พื้นที่ scroll จริงของ SimpleBar (padding บน .layout-menu ตัวนอกไม่เพิ่มพื้นที่เลื่อน) */
+.layout-menu .menu-inner { padding-bottom: 92px; }
 
 /* #6 narrow the sidebar: theme default 260/250px -> 200px.
    scoped to >=1200px (where the sidebar is shown) so mobile off-canvas stays intact.
