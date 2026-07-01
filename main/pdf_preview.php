@@ -50,7 +50,7 @@
 
         (function () {
             if (!CFG || !DOC_ID) { showError("ไม่พบเอกสารที่ต้องการ"); return; }
-            var token = localStorage.getItem("access_token") || "";
+            var token = localStorage.getItem("bo_access_token") || "";
             if (!token) { showError("กรุณาเข้าสู่ระบบใหม่"); return; }
 
             var body = new URLSearchParams();

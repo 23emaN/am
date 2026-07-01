@@ -427,9 +427,31 @@
         });
     }
 
-    // ล็อกอินเข้าเว็บไซต์ + ยืนยันตัวตน — ยังเป็นโครง รอเชื่อมระบบฝั่งเว็บไซต์
+    // ล็อกอินเข้าเว็บไซต์ (cpdth) แทนผู้ใช้ — มินต์ token แล้วเปิดเว็บไซต์เป็นผู้ใช้นั้น
     function LoginAsUser(user_id) {
-        Swal.fire({ title: "ล็อกอินเข้าเว็บไซต์", html: '<span class="text-secondary">ฟังก์ชันนี้ยังไม่เปิดใช้งาน (รอเชื่อมระบบฝั่งเว็บไซต์)</span>', icon: "info", confirmButtonText: "ตกลง" });
+        Swal.fire({
+            title: "เข้าสู่ระบบเว็บไซต์แทนผู้ใช้",
+            html: '<span class="text-secondary">จะเปิดเว็บไซต์ (หน้าลูกค้า) ในชื่อผู้ใช้นี้ในแท็บใหม่<br>',
+            icon: "warning", showCancelButton: true, confirmButtonText: "เปิดเว็บไซต์", cancelButtonText: "ยกเลิก"
+        }).then(function (res) {
+            if (!res.isConfirmed) { return; }
+            $.ajax({
+                type: "POST", url: "core.php",
+                data: { request_state: "list_user", request_function: "login_as_user", user_id: user_id },
+                dataType: "json",
+                success: function (r) {
+                    if (r.result != 1) {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สำเร็จ') + '</span>', icon: "error" });
+                        return;
+                    }
+                    var token = r.data.token;
+                    document.cookie = "access_token=" + token + "; path=/; max-age=25200";
+                    try { localStorage.setItem("access_token", token); } catch (e) {}
+                    window.open("../../cpdth/index.php", "_blank");
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
+        });
     }
 
     // ===== ตรวจสอบเอกสารยืนยันตัวตน (modal) =====

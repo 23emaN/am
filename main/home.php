@@ -1,4 +1,11 @@
-<?php $breadcrumbs = [['label' => 'หน้าแรก']]; ?>
+<?php
+    $breadcrumbs = [['label' => 'หน้าแรก']];
+    // ช่วงวันที่เริ่มต้น = 30 วันล่าสุด
+    $dash_from_ymd  = date('Y-m-d', strtotime('-29 days'));
+    $dash_to_ymd    = date('Y-m-d');
+    $dash_from_disp = date('d/m/Y', strtotime('-29 days'));
+    $dash_to_disp   = date('d/m/Y');
+?>
 <?php include "header.php"; ?>
 
 <div class="container-fluid">
@@ -15,7 +22,7 @@
                         <div>
                             <h3 class="text-white fw-semibold mb-1">ยินดีต้อนรับ <span class="ShowUserFullname">Admin</span></h3>
                             <p class="text-light mb-0">
-                                ภาพรวมข้อมูล ตั้งแต่ <span id="DashDateFrom">01/06/2026</span> ถึง <span id="DashDateTo">25/06/2026</span>
+                                ภาพรวมข้อมูล ตั้งแต่ <span id="DashDateFrom"><?php echo $dash_from_disp; ?></span> ถึง <span id="DashDateTo"><?php echo $dash_to_disp; ?></span>
                             </p>
                         </div>
                         <div class="position-relative">
@@ -88,13 +95,13 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-secondary fs-14 mb-2">ยอดเงิน OTP คงเหลือ</p>
-                                    <h3 class="mb-0"><span id="StatOtpBalance">24</span> <small class="fs-14 fw-normal text-secondary">USD</small></h3>
+                                    <h3 class="mb-0"><span id="StatOtpBalance">—</span> <small class="fs-14 fw-normal text-secondary">USD</small></h3>
                                 </div>
                                 <div class="stat-icon" style="background:#e6f6fb; color:#0ea5e9;">
                                     <span class="material-symbols-outlined">sms</span>
                                 </div>
                             </div>
-                            <span class="stat-trend down mt-3"><span class="material-symbols-outlined" style="font-size:16px;">trending_down</span> เหลือน้อย ควรเติม</span>
+                            <span class="stat-trend mt-3 text-secondary"><span class="material-symbols-outlined" style="font-size:16px;">info</span> รอเชื่อม API ผู้ให้บริการ OTP</span>
                         </div>
                     </div>
                 </div>
@@ -151,66 +158,83 @@
 </html>
 
 <script>
-    $(document).ready(function () {
+    var salesChart = null;
 
-        /* ===== กราฟยอดขายรายวัน (mock) =====
-           ข้อมูลจริงให้แทนที่ DASH_DAYS / DASH_SALES ด้วยผลจาก API ภายหลัง */
-        var DASH_DAYS = [
-            "Jun '26", "02 Jun", "03 Jun", "04 Jun", "05 Jun", "06 Jun", "07 Jun",
-            "08 Jun", "09 Jun", "10 Jun", "11 Jun", "12 Jun", "13 Jun", "14 Jun",
-            "15 Jun", "16 Jun", "17 Jun", "18 Jun", "19 Jun", "20 Jun", "21 Jun",
-            "22 Jun", "23 Jun", "24 Jun"
-        ];
-        var DASH_SALES = [
-            400, 2000, 2400, 850, 1600, 1150, 450, 1300, 2400, 800, 50, 3200,
-            1600, 2800, 2800, 3200, 3200, 1750, 800, 3200, 1550, 1100, 400, 3600
-        ];
-
-        if (typeof ApexCharts !== "undefined" && document.getElementById("DashSalesChart")) {
-            var salesChart = new ApexCharts(document.getElementById("DashSalesChart"), {
-                chart: { type: "area", height: 360, fontFamily: "'Kanit', sans-serif", toolbar: { show: false }, zoom: { enabled: false } },
-                series: [{ name: "ยอดขาย", data: DASH_SALES }],
-                colors: ["#605DFF"],
-                stroke: { curve: "smooth", width: 3 },
-                fill: {
-                    type: "gradient",
-                    gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] }
-                },
-                grid: { borderColor: "#eef0f3", strokeDashArray: 4, padding: { left: 8, right: 8 } },
-                dataLabels: { enabled: false },
-                markers: { size: 0, hover: { size: 5 } },
-                xaxis: {
-                    categories: DASH_DAYS,
-                    tickPlacement: "on",
-                    labels: { rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: "12px", colors: "#94a3b8" } },
-                    axisBorder: { show: false },
-                    axisTicks: { show: false }
-                },
-                yaxis: {
-                    min: 0,
-                    tickAmount: 4,
-                    labels: { style: { colors: "#94a3b8" }, formatter: function (v) { return (typeof NumberFormat === "function") ? NumberFormat(Math.round(v)) : Math.round(v); } }
-                },
-                tooltip: { y: { formatter: function (v) { return ((typeof NumberFormat === "function") ? NumberFormat(v) : v) + " ฿"; } } }
-            });
-            salesChart.render();
+    // สร้าง/อัปเดตกราฟยอดขายรายวัน
+    function RenderSalesChart(days, sales) {
+        if (typeof ApexCharts === "undefined" || !document.getElementById("DashSalesChart")) { return; }
+        if (salesChart) {
+            salesChart.updateOptions({ series: [{ name: "ยอดขาย", data: sales }], xaxis: { categories: days } });
+            return;
         }
+        salesChart = new ApexCharts(document.getElementById("DashSalesChart"), {
+            chart: { type: "area", height: 360, fontFamily: "'Kanit', sans-serif", toolbar: { show: false }, zoom: { enabled: false } },
+            series: [{ name: "ยอดขาย", data: sales }],
+            colors: ["#605DFF"],
+            stroke: { curve: "smooth", width: 3 },
+            fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] } },
+            grid: { borderColor: "#eef0f3", strokeDashArray: 4, padding: { left: 8, right: 8 } },
+            dataLabels: { enabled: false },
+            markers: { size: 0, hover: { size: 5 } },
+            xaxis: {
+                categories: days,
+                tickPlacement: "on",
+                labels: { rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: "12px", colors: "#94a3b8" } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                min: 0,
+                tickAmount: 4,
+                labels: { style: { colors: "#94a3b8" }, formatter: function (v) { return (typeof NumberFormat === "function") ? NumberFormat(Math.round(v)) : Math.round(v); } }
+            },
+            tooltip: { y: { formatter: function (v) { return ((typeof NumberFormat === "function") ? NumberFormat(v) : v) + " ฿"; } } }
+        });
+        salesChart.render();
+    }
 
-        /* ===== ปุ่มเลือกช่วงวันที่ (flatpickr range) — อัปเดตข้อความช่วงวันที่ด้านบน ===== */
+    // โหลดข้อมูลจริงตามช่วงวันที่ (อ่านจากข้อความช่วงวันที่ด้านบน)
+    function LoadDashboard() {
+        var nf = function (v) { return (typeof NumberFormat === "function") ? NumberFormat(v) : v; };
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "dashboard",
+                request_function: "get_dashboard",
+                date_from: $("#DashDateFrom").text(),
+                date_to: $("#DashDateTo").text()
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result != 1) { return; }
+                var d = r.data;
+                $("#StatNewMembers").text(nf(d.new_members));
+                $("#StatNewOrders").text(nf(d.new_orders));
+                $("#StatNewRevenue").text(nf(Math.round(d.revenue)));
+                RenderSalesChart(d.days || [], d.sales || []);
+            },
+            error: function (j, e) { if (typeof ShowErrorAjax === "function") { ShowErrorAjax(j, e); } }
+        });
+    }
+
+    $(document).ready(function () {
+        /* ===== ปุ่มเลือกช่วงวันที่ (flatpickr range) -> โหลดข้อมูลใหม่ ===== */
         if (typeof flatpickr !== "undefined") {
             var fp = flatpickr("#DashDateRange", {
                 mode: "range",
                 dateFormat: "d/m/Y",
-                defaultDate: ["2026-06-01", "2026-06-25"],
+                defaultDate: ["<?php echo $dash_from_ymd; ?>", "<?php echo $dash_to_ymd; ?>"],
                 onClose: function (selectedDates) {
                     if (selectedDates.length === 2) {
                         $("#DashDateFrom").text(fp.formatDate(selectedDates[0], "d/m/Y"));
                         $("#DashDateTo").text(fp.formatDate(selectedDates[1], "d/m/Y"));
-                        // TODO: ยิง API โหลดสถิติ/กราฟตามช่วงวันที่ใหม่
+                        LoadDashboard();
                     }
                 }
             });
             $("#DashDateBtn").on("click", function () { fp.open(); });
         }
+
+        LoadDashboard();
     });
 </script>

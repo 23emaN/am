@@ -7,7 +7,7 @@
 <body>
     <script>
         // ออกจากระบบ: ลบ access token ที่เก็บไว้ใน localStorage แล้วกลับไปหน้า login
-        localStorage.removeItem("access_token");
+        localStorage.removeItem("bo_access_token");
         window.location.replace("../index");
     </script>
 </body>
