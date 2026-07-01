@@ -55,7 +55,7 @@
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-        <link rel="stylesheet" href="../template/assets/css/custom.css">
+        <link rel="stylesheet" href="../template/assets/css/custom.css?ver=<?php echo @filemtime(dirname(__DIR__) . '/template/assets/css/custom.css') ?: time(); ?>">
 
         <link rel="stylesheet" href="../template/assets/css/web.css">
 

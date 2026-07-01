@@ -73,25 +73,37 @@ html, body { overflow-x: hidden; max-width: 100%; }
     padding-top: 1.5rem;
 }
 
-/* ===== Top loading bar (แบบ delay) — แทน spinner/skeleton ===== */
-/* แถบบางด้านบนจอ โผล่เฉพาะตอนโหลดนานเกิน ~300ms (คุมด้วย JS ใน loading.js) */
-#cpdth-topbar {
+/* ===== Global loading: spinner หมุนกลางจอ (full-screen) — ทุกหน้า/ทุก ajax =====
+   คุมด้วย JS ใน loading.js: โผล่อัตโนมัติทุก ajax แบบมี delay (โหลดเร็วจะไม่เห็น) */
+#cpdth-loading {
     position: fixed;
-    top: 0;
-    left: 0;
-    height: 3px;
-    width: 0;
-    background: linear-gradient(90deg, #605DFF, #8b89ff);
-    box-shadow: 0 0 10px rgba(96, 93, 255, 0.6);
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(1px);
     z-index: 99999;
-    opacity: 0;
-    pointer-events: none;
+}
+#cpdth-loading.show {
+    display: flex;
+}
+#cpdth-loading .cpdth-loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3em;
+    color: #605DFF;
 }
 
 /* ปุ่มระหว่างโหลด */
 .cpdth-btn-loading {
     opacity: 0.65;
     pointer-events: none;
+}
+
+/* DataTables: ซ่อนกล่อง "กำลังดำเนินการ..." กลางตาราง — ใช้ spinner กลางจอแทน */
+.dataTables_processing {
+    display: none !important;
 }
 
 /* #7 sidebar แคบ (200px): เมนูที่ข้อความยาว เช่น "คำขอยืนยันตัวตนผู้ใช้งาน"

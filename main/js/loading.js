@@ -1,60 +1,67 @@
 /**
  * loading.js
  * -----------------------------------------------------------------------------
- * แถบโหลดด้านบน (top progress bar) แบบมี delay — แทน spinner/skeleton
- * โชว์เฉพาะตอนโหลด "นานเกิน DELAY ms" เท่านั้น (โหลดเร็วจะไม่เห็นอะไร ไม่กระพริบ)
+ * โหลดแบบ spinner หมุนอยู่กลางจอ (full-screen) — ใช้เหมือนกันทั้ง backoffice
+ * โผล่อัตโนมัติทุก ajax ของ jQuery (รวม DataTables serverSide) แบบมี delay
+ * โชว์เฉพาะตอนโหลด "นานเกิน DELAY ms" (โหลดเร็วจะไม่เห็นอะไร ไม่กระพริบ)
  * override ShowLoadingOverlay/HideLoadingOverlay จาก main.js (โหลดไฟล์นี้หลัง main.js)
  */
 (function () {
     "use strict";
 
-    var DELAY = 300;          // ms: ถ้าโหลดเสร็จก่อนเวลานี้ จะไม่โชว์แถบเลย
+    // โชว์ทันทีที่เริ่มโหลด แล้วค้างไว้อย่างน้อย MIN_SHOW ms
+    // (เครื่อง local โหลดเร็วมาก ~30-70ms ถ้าหน่วงก่อนโชว์จะไม่ทันเห็น spinner)
+    var MIN_SHOW = 350;       // ms: โชว์แล้วค้างอย่างน้อยเท่านี้ กันกระพริบ + ให้ทันเห็น
     var active = 0;           // นับจำนวน request ที่กำลังโหลด (รองรับซ้อนกัน)
-    var timer = null;
-    var $bar = null;
+    var shownAt = 0;          // เวลาที่เริ่มโชว์ spinner (ms)
+    var hideTimer = null;
+    var $overlay = null;
 
-    function bar() {
-        if (!$bar) $bar = $('<div id="cpdth-topbar"></div>').appendTo('body');
-        return $bar;
+    function overlay() {
+        if (!$overlay) {
+            $overlay = $(
+                '<div id="cpdth-loading">' +
+                    '<div class="cpdth-loading-spinner spinner-border" role="status">' +
+                        '<span class="visually-hidden">กำลังโหลด...</span>' +
+                    '</div>' +
+                '</div>'
+            ).appendTo('body');
+        }
+        return $overlay;
     }
 
-    function start() {
-        var $b = bar();
-        $b.css({ transition: 'none', width: '0%', opacity: 1 });
-        $b[0].offsetWidth; // reflow ก่อนเริ่ม animate
-        // ค่อย ๆ คืบไป 90% (ช้าลงเรื่อย ๆ เหมือน progress จริง)
-        $b.css({ transition: 'width 3s cubic-bezier(.1,.7,.1,1), opacity .3s ease', width: '90%' });
+    function reallyShow() {
+        // ถ้าหน้าไหนเปิด SweetAlert (เช่น loader ของตัวเอง) ค้างอยู่แล้ว -> ไม่ต้องซ้อน spinner
+        if (window.Swal && typeof Swal.isVisible === "function" && Swal.isVisible()) { return; }
+        if (hideTimer !== null) { clearTimeout(hideTimer); hideTimer = null; }
+        shownAt = Date.now();
+        overlay().addClass('show');
     }
 
-    function finish() {
-        if (!$bar) return;
-        $bar.css({ transition: 'width .3s ease, opacity .4s ease', width: '100%' });
-        setTimeout(function () {
-            $bar.css('opacity', 0);
-            setTimeout(function () {
-                $bar.css({ transition: 'none', width: '0%' });
-            }, 400);
-        }, 200);
-    }
-
-    window.ShowLoadingOverlay = function () {
+    function show() {
         active++;
-        if (active === 1 && timer === null) {
-            timer = setTimeout(function () { timer = null; start(); }, DELAY);
-        }
-    };
+        if (active === 1) { reallyShow(); }
+    }
 
-    window.HideLoadingOverlay = function () {
+    function hide() {
         active = Math.max(0, active - 1);
-        if (active === 0) {
-            if (timer !== null) {
-                clearTimeout(timer); // โหลดเสร็จก่อน DELAY -> ไม่ต้องโชว์แถบ
-                timer = null;
-            } else {
-                finish();            // โชว์ไปแล้ว -> ปิดแถบให้เต็มแล้วเฟดออก
-            }
-        }
-    };
+        if (active !== 0) { return; }
+        // ค้าง spinner ให้ครบ MIN_SHOW ก่อนซ่อน (ถ้าโหลดเสร็จเร็วกว่านั้น)
+        var wait = Math.max(0, MIN_SHOW - (Date.now() - shownAt));
+        if (hideTimer !== null) { clearTimeout(hideTimer); }
+        hideTimer = setTimeout(function () {
+            hideTimer = null;
+            if (active === 0 && $overlay) { $overlay.removeClass('show'); }
+        }, wait);
+    }
+
+    // โชว์ spinner อัตโนมัติทุก ajax ของ jQuery (รวม DataTables) — ไม่ต้องแก้ทีละหน้า
+    $(document).ajaxStart(show);
+    $(document).ajaxStop(hide);
+
+    // helper เดิม -> ชี้มาที่ spinner กลางจอ (เดิมเป็น section overlay / top-bar)
+    window.ShowLoadingOverlay = function () { show(); };
+    window.HideLoadingOverlay = function () { hide(); };
 
     // ปุ่ม: เอาวงกลมหมุนออก เหลือแค่ disable + หรี่จาง
     window.ShowLoadingButton = function (selector) {
@@ -100,4 +107,28 @@
         return origFire.apply(Swal, arguments);
     };
     Swal.__cpdthTimerPatched = true;
+})();
+
+/**
+ * DataTables: จัดการข้อความในตาราง (ใช้ spinner กลางจอเป็นตัวบอกโหลดแทน)
+ * ----------------------------------------------------------------------------
+ * 1) preInit.dt (ก่อนวาดตารางครั้งแรก): ล้างข้อความ sLoadingRecords เป็นค่าว่าง
+ *    -> ตอนกำลังโหลดครั้งแรก tbody จะว่าง ไม่โชว์ "กำลังโหลดข้อมูล..." (spinner กลางจอทำหน้าที่แทน)
+ * 2) xhr.dt (หลังได้ข้อมูลแต่ "ก่อน" วาดตาราง): ตั้ง sLoadingRecords = sEmptyTable
+ *    -> แก้บั๊ก DataTables ที่ตาราง serverSide draw แรก (iDraw==1) ถ้าผลว่างจะค้างข้อความ
+ *    loadingRecords แทน emptyTable -> ให้โชว์ "ไม่มีข้อมูลในตาราง" ถูกต้อง
+ */
+(function () {
+    "use strict";
+    if (typeof $ === "undefined") { return; }
+    $(document).on('preInit.dt', function (e, settings) {
+        if (settings && settings.oLanguage) {
+            settings.oLanguage.sLoadingRecords = '';
+        }
+    });
+    $(document).on('xhr.dt', function (e, settings) {
+        if (settings && settings.oLanguage) {
+            settings.oLanguage.sLoadingRecords = settings.oLanguage.sEmptyTable;
+        }
+    });
 })();
