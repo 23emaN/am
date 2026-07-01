@@ -7,19 +7,25 @@ $(document).ajaxSend(function(event, jqXHR, settings) {
     }
 });
 
+const PROFILE_CACHE_KEY = "cpdth_profile";
+
 document.addEventListener("DOMContentLoaded", function() {
 
+    // 1) ใช้โปรไฟล์/สิทธิ์จาก cache ทันที (ถ้ามี) -> sidebar ไม่รอ ajax, ไม่กระพริบ/ไม่เด้งขึ้นบน
+    //    ไม่ guard จาก cache (กัน false-deny ถ้าสิทธิ์ใน cache เก่า) — guard ทำตอนได้ข้อมูลจริงเท่านั้น
+    try {
+        var cachedProfile = JSON.parse(localStorage.getItem(PROFILE_CACHE_KEY) || "null");
+        if (cachedProfile) { ApplyProfile(cachedProfile, false); }
+    } catch (e) {}
+
+    // 2) ดึงโปรไฟล์ล่าสุดมา refresh cache + ตรวจสิทธิ์หน้าด้วยข้อมูลจริง (ทำเบื้องหลัง ไม่บล็อก UI)
     $.post("core.php", { "request_state": "list_user", "request_function": "user_profile", }, function (response) {
         if(response.result == 1){
-            $(".ShowUserFullname").html(response.data.full_name);
-            $(".ShowUserRole").html(response.data.role_name);
-            $(".ShowUserAvatar").attr("src", response.data.avatar || "../template/assets/images/administrator.jpg");
-
-            FilterSidebarByAccess(response.data.access_menus);
-            GuardPageByAccess(response.data.access_menus, response.data.menu_map);
-
+            try { localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(response.data)); } catch (e) {}
+            ApplyProfile(response.data, true);
             setInterval(KeepSessionAlive, 30000);
         }else{
+            try { localStorage.removeItem(PROFILE_CACHE_KEY); } catch (e) {}
             Swal.fire({
                 title: "แจ้งเตือน",
                 html: '<span class="fw-bold text-danger">'+response.msg+'</span>',
@@ -35,6 +41,56 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     },"json");
 });
+
+// เขียนชื่อ/บทบาท/รูป + กรองเมนูตามสิทธิ์
+// doGuard = true เฉพาะเมื่อเป็นข้อมูลจริงจาก server (กัน false-deny จาก cache เก่า)
+function ApplyProfile(data, doGuard) {
+    if (!data) { return; }
+    $(".ShowUserFullname").html(data.full_name || "");
+    $(".ShowUserRole").html(data.role_name || "");
+    $(".ShowUserAvatar").attr("src", data.avatar || "../template/assets/images/administrator.jpg");
+    FilterSidebarByAccess(data.access_menus);
+    if (doGuard) { GuardPageByAccess(data.access_menus, data.menu_map); }
+}
+
+// จำตำแหน่งเลื่อนของ sidebar ข้ามการเปลี่ยนหน้า -> ไม่เด้งขึ้นบนสุดเวลาเลือกเมนูล่าง ๆ
+(function () {
+    var KEY = "cpdth_sidebar_scroll";
+    function scroller() {
+        var el = document.getElementById("layout-menu");
+        if (!el) { return null; }
+        // SimpleBar ย้าย scroll ไปที่ wrapper ด้านใน (ถ้ายังไม่ init ใช้ตัว element เอง)
+        return el.querySelector(".simplebar-content-wrapper") || el;
+    }
+    // เก็บตำแหน่งก่อนออกจากหน้า (ครอบคลุมทุกการนำทาง)
+    window.addEventListener("beforeunload", function () {
+        var s = scroller();
+        if (s) { try { sessionStorage.setItem(KEY, String(s.scrollTop)); } catch (e) {} }
+    });
+    // คืนตำแหน่งหลังโหลด; ถ้าไม่มีค่าเก็บไว้ เลื่อนให้เมนูที่เลือกอยู่กลางมุมมอง
+    function restore() {
+        var s = scroller();
+        if (!s) { return; }
+        var v = null;
+        try { v = sessionStorage.getItem(KEY); } catch (e) {}
+        if (v !== null) {
+            s.scrollTop = parseInt(v, 10) || 0;
+        } else {
+            var active = document.querySelector("#layout-menu .menu-link.active");
+            if (active) { s.scrollTop = Math.max(0, active.offsetTop - s.clientHeight / 2); }
+        }
+    }
+    function schedule() {
+        if (window.requestAnimationFrame) { requestAnimationFrame(restore); } else { setTimeout(restore, 0); }
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", schedule);
+    } else {
+        schedule();
+    }
+    // เผื่อ SimpleBar init/รีเซ็ตหลัง DOMContentLoaded -> คืนตำแหน่งอีกครั้งตอน load เสร็จ
+    window.addEventListener("load", schedule);
+})();
 
 // ซ่อนเมนู sidebar ที่ผู้ใช้ไม่มีสิทธิ์ (จับคู่ด้วยข้อความ .title = menu_name)
 // fail-open: ถ้าไม่มีข้อมูลสิทธิ์ (ว่าง) จะไม่กรอง (โชว์ครบ กันล็อกผู้ใช้)
