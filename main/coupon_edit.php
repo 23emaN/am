@@ -13,7 +13,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
                     <h2 class="mb-0">รายละเอียดคูปองส่วนลด</h2>
                     <button type="button" class="btn btn-danger" onclick="DeleteCoupon('<?php echo $coupon_id; ?>');">ลบคูปอง</button>
@@ -23,17 +23,17 @@
                     <form id="FormEditCoupon" autocomplete="off">
                         <input type="hidden" name="coupon_id" value="<?php echo $coupon_id; ?>">
 
-                        <h5 class="mb-3">ข้อมูลคูปอง</h5>
+                        <h4 class="mb-3">ข้อมูลคูปอง</h4>
                         <div class="row g-3 mb-2">
                             <div class="col-md-3">
-                                <label class="form-label">Code <span class="text-danger">*</span>
+                                <label for="coupon_code" class="form-label">Code <span class="text-danger">*</span>
                                     <a href="javascript:void(0)" class="small ms-1" onclick="GenerateCode();">(สุ่มสร้างรหัส)</a>
                                 </label>
-                                <input type="text" class="form-control" name="coupon_code" maxlength="10">
+                                <input type="text" class="form-control" id="coupon_code" name="coupon_code" maxlength="10">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">รายละเอียดคูปอง <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="coupon_detail" maxlength="255">
+                                <label for="coupon_detail" class="form-label">รายละเอียดคูปอง <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="coupon_detail" name="coupon_detail" maxlength="255">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label d-block">ประเภทส่วนลด <span class="text-danger">*</span></label>
@@ -47,8 +47,8 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label">จำนวนส่วนลด <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" min="0" class="form-control" name="coupon_no" placeholder="0">
+                                <label for="coupon_no" class="form-label">จำนวนส่วนลด <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="coupon_no" name="coupon_no" placeholder="0">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label d-block">สถานะ <span class="text-danger">*</span></label>
@@ -63,35 +63,35 @@
                             </div>
                         </div>
 
-                        <h5 class="mb-3 mt-4">เงื่อนไขเพิ่มเติม</h5>
+                        <h4 class="mb-3 mt-4">เงื่อนไขเพิ่มเติม</h4>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label class="form-label">ลิมิตการใช้ (ทั้งคูปอง)</label>
-                                <input type="number" min="0" class="form-control" name="coupon_limit">
+                                <label for="coupon_limit" class="form-label">ลิมิตการใช้ (ทั้งคูปอง)</label>
+                                <input type="number" min="0" class="form-control" id="coupon_limit" name="coupon_limit">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">ลิมิตการใช้ (ต่อผู้ใช้หนึ่งคน)</label>
-                                <input type="number" min="0" class="form-control" name="coupon_limit_person">
+                                <label for="coupon_limit_person" class="form-label">ลิมิตการใช้ (ต่อผู้ใช้หนึ่งคน)</label>
+                                <input type="number" min="0" class="form-control" id="coupon_limit_person" name="coupon_limit_person">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">ยอดรวมขั้นต่ำในการใช้คูปอง</label>
-                                <input type="number" step="0.01" min="0" class="form-control" name="coupon_min">
+                                <label for="coupon_min" class="form-label">ยอดรวมขั้นต่ำในการใช้คูปอง</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="coupon_min" name="coupon_min">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">ส่วนลดสูงสุด (กรณีคิดเป็นเปอร์เซ็นต์)</label>
-                                <input type="number" step="0.01" min="0" class="form-control" name="coupon_max">
+                                <label for="coupon_max" class="form-label">ส่วนลดสูงสุด (กรณีคิดเป็นเปอร์เซ็นต์)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" id="coupon_max" name="coupon_max">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">เริ่มใช้เมื่อ</label>
-                                <input type="text" class="form-control datepicker" name="coupon_start" placeholder="วว/ดด/ปปปป" autocomplete="off">
+                                <label for="coupon_start" class="form-label">เริ่มใช้เมื่อ</label>
+                                <input type="text" class="form-control datepicker" id="coupon_start" name="coupon_start" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">สิ้นสุดเมื่อ</label>
-                                <input type="text" class="form-control datepicker" name="coupon_end" placeholder="วว/ดด/ปปปป" autocomplete="off">
+                                <label for="coupon_end" class="form-label">สิ้นสุดเมื่อ</label>
+                                <input type="text" class="form-control datepicker" id="coupon_end" name="coupon_end" placeholder="วว/ดด/ปปปป" autocomplete="off">
                             </div>
 
                             <div class="col-12 mt-4">
-                                <button type="submit" class="btn btn-primary w-100">ยืนยันการแก้ไขคูปอง</button>
+                                <button type="submit" class="btn btn-primary w-100 py-2">ยืนยันการแก้ไขคูปอง</button>
                             </div>
                         </div>
                     </form>

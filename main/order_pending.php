@@ -5,7 +5,7 @@
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คำสั่งซื้อรอยืนยัน</h4>
                 </div>
@@ -14,15 +14,15 @@
                     <!-- ===== FILTER ROW ===== -->
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">หมายเลขคำสั่งซื้อ</label>
+                            <label class="form-label fw-medium" for="f_order">หมายเลขคำสั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_order" placeholder="เช่น ORD-..." autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">ลูกค้า</label>
+                            <label class="form-label fw-medium" for="f_customer">ลูกค้า</label>
                             <input type="text" class="form-control" id="f_customer" placeholder="ชื่อลูกค้า" autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">วันที่สั่งซื้อ</label>
+                            <label class="form-label fw-medium" for="f_date">วันที่สั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_date" placeholder="วัน/เดือน/ปี" autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg-auto">
@@ -30,24 +30,8 @@
                         </div>
                     </div>
 
-                    <!-- TABLE -->
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width:60px;">ลำดับ</th>
-                                        <th scope="col" style="min-width:160px;">ชื่อลูกค้า</th>
-                                        <th scope="col" style="min-width:280px;">คอร์สเรียน</th>
-                                        <th scope="col" class="text-end text-nowrap" style="width:1%;">ยอดรวม</th>
-                                        <th scope="col" class="text-nowrap" style="width:1%;">สั่งซื้อเมื่อ</th>
-                                        <th scope="col" class="text-center text-nowrap" style="width:1%;">ดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- ตาราง + pagination render จาก view/listOrder/ViewPending.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -61,48 +45,63 @@
 </html>
 
 <script>
-    var orderTable = null;
+    var currentPage = 1;
 
     $(document).ready(function () {
         if (typeof flatpickr !== "undefined") {
             flatpickr("#f_date", { dateFormat: "d/m/Y", allowInput: true });
         }
-
-        orderTable = $("#PageTable").DataTable({
-            processing: true,
-            serverSide: true,
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            order: [[4, "desc"]], // ใหม่สุดก่อน (สั่งซื้อเมื่อ)
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            ajax: {
-                url: "core.php",
-                type: "POST",
-                data: function (d) {
-                    d.request_state = "list_order";
-                    d.request_function = "get_list_pending";
-                    d.f_order = $("#f_order").val();
-                    d.f_customer = $("#f_customer").val();
-                    d.f_date = $("#f_date").val();
-                    return d;
-                },
-                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-            },
-            columns: [
-                { data: "no", className: "text-center", orderable: false },
-                { data: "customer", className: "fw-medium" },
-                { data: "courses", className: "text-secondary", orderable: false },
-                { data: "total", className: "text-end text-nowrap" },
-                { data: "created", className: "text-nowrap" },
-                { data: "action", className: "text-center text-nowrap", orderable: false }
-            ]
-        });
+        $('#f_order, #f_customer').on('keypress', function (e) { if (e.which === 13) { GetData(1); } });
+        GetData(1);
     });
 
-    function SearchOrder() {
-        if (orderTable) { orderTable.ajax.reload(); }
+    function SearchOrder() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "list_order",
+                request_function: "get_list_pending",
+                f_order: $("#f_order").val(),
+                f_customer: $("#f_customer").val(),
+                f_date: $("#f_date").val(),
+                page: page
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
+                } else {
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/listOrder/ViewPending.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
     }
 
     // ยกเลิกคำสั่งซื้อจากตาราง
@@ -124,7 +123,7 @@
                 success: function (res) {
                     if (res.result == 1) {
                         Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + res.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 })
-                            .then(function () { if (orderTable) { orderTable.ajax.reload(null, false); } });
+                            .then(function () { GetData(currentPage); });
                     } else {
                         Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + res.msg + '</span>', icon: "error", showConfirmButton: true });
                     }

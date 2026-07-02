@@ -27,7 +27,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คอร์สเรียนคงเหลือในระบบ</h4>
                     <button type="button" class="btn btn-success" onclick="OpenAdd()">เพิ่มสิทธิ์การเข้าถึงคอร์สเรียน</button>
@@ -36,7 +36,7 @@
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-5">
-                            <label class="form-label fw-medium">คอร์สเรียน</label>
+                            <label class="form-label fw-medium" for="f_course">คอร์สเรียน</label>
                             <select class="form-select tom-course" id="f_course">
                                 <option value="">ทั้งหมด</option>
                                 <?php foreach ($course_options as $c): ?>
@@ -45,7 +45,7 @@
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label fw-medium">สมาชิก</label>
+                            <label class="form-label fw-medium" for="f_member">สมาชิก</label>
                             <select class="form-select tom-member" id="f_member">
                                 <option value="">ทั้งหมด</option>
                                 <?php foreach ($member_options as $m): ?>
@@ -56,32 +56,13 @@
                         <div class="col-md-2 d-flex gap-2">
                             <button type="button" class="btn btn-primary flex-grow-1" onclick="SearchData()">ค้นหา</button>
                             <button type="button" class="btn btn-info text-white" onclick="DownloadReport()" title="ดาวน์โหลด">
-                                <span class="material-symbols-outlined align-middle" style="font-size:18px;">download</span>
+                                <span class="material-symbols-outlined align-middle" style="font-size:18px;" aria-hidden="true">download</span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="default-table-area">
-                        <div class="table-responsive">
-                            <table class="table align-middle w-100" id="PageTable">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" class="text-center" style="width:60px;">ลำดับ</th>
-                                        <th scope="col">ชื่อสมาชิก</th>
-                                        <th scope="col">เบอร์โทรติดต่อ</th>
-                                        <th scope="col">ชื่อคอร์ส</th>
-                                        <th scope="col">วันที่ซื้อ</th>
-                                        <th scope="col">วันที่เปิดใช้</th>
-                                        <th scope="col">วันหมดอายุ</th>
-                                        <th scope="col" class="text-center">อายุคงเหลือ (วัน)</th>
-                                        <th scope="col" class="text-end">ราคา</th>
-                                        <th scope="col" class="text-center" style="width:90px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <!-- ตาราง + pagination render จาก view/listEnrollment/ViewData.php -->
+                    <div id="result_box"></div>
                 </div>
             </div>
         </div>
@@ -97,7 +78,7 @@
             <div class="modal-header"><h5 class="modal-title">เพิ่มสิทธิ์การเข้าถึงคอร์สใหม่</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body p-4">
                 <div class="mb-3">
-                    <label class="form-label fw-medium">คอร์สเรียน</label>
+                    <label class="form-label fw-medium" for="add_course">คอร์สเรียน</label>
                     <select class="form-select tom-course" id="add_course">
                         <option value="">--- กรุณาเลือกคอร์สเรียน ---</option>
                         <?php foreach ($course_options as $c): ?>
@@ -106,7 +87,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-medium">สมาชิก</label>
+                    <label class="form-label fw-medium" for="add_member">สมาชิก</label>
                     <select class="form-select tom-member" id="add_member">
                         <option value="">--- กรุณาเลือกลูกค้า ---</option>
                         <?php foreach ($member_options as $m): ?>
@@ -115,7 +96,7 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-medium">วันที่หมดอายุ (หากปล่อยว่างจะเป็นไม่มีกำหนด)</label>
+                    <label class="form-label fw-medium" for="add_expiry">วันที่หมดอายุ (หากปล่อยว่างจะเป็นไม่มีกำหนด)</label>
                     <input type="text" class="form-control" id="add_expiry" placeholder="วัน/เดือน/ปี" autocomplete="off">
                 </div>
                 <div class="alert alert-danger small mb-0">กรุณาตรวจสอบข้อมูลก่อนกดบันทึก จะมีการเพิ่มสิทธิ์พร้อมส่งอีเมลแจ้งผู้ใช้งานทันทีหลังมีการบันทึกข้อมูล</div>
@@ -133,14 +114,14 @@
             <div class="modal-body p-4">
                 <input type="hidden" id="edit_id">
                 <div class="mb-3">
-                    <label class="form-label fw-medium">สถานะ</label>
+                    <label class="form-label fw-medium" for="edit_status">สถานะ</label>
                     <select class="form-select" id="edit_status">
                         <option value="1">ให้สิทธิ์การใช้งาน</option>
                         <option value="0">ยกเลิกสิทธิ์การใช้งาน</option>
                     </select>
                 </div>
                 <div class="mb-3" id="edit_expiry_wrap">
-                    <label class="form-label fw-medium">วันที่หมดอายุ (หากปล่อยว่างจะเป็นไม่มีกำหนด)</label>
+                    <label class="form-label fw-medium" for="edit_expiry">วันที่หมดอายุ (หากปล่อยว่างจะเป็นไม่มีกำหนด)</label>
                     <input type="text" class="form-control" id="edit_expiry" placeholder="วัน/เดือน/ปี" autocomplete="off">
                 </div>
                 <div class="alert alert-danger small mb-0">หากยกเลิกสิทธิ์การเข้าถึงคอร์สแล้วจะไม่สามารถยกเลิกได้ภายหลัง กรุณาตรวจสอบข้อมูลก่อนดำเนินการ</div>
@@ -157,7 +138,7 @@
 </html>
 
 <script>
-    var enrollTable = null;
+    var currentPage = 1;
 
     $(document).ready(function () {
         // dropdown ค้นหาได้ (tom-select)
@@ -170,41 +151,56 @@
             flatpickr("#add_expiry", { dateFormat: "d/m/Y", allowInput: true });
             flatpickr("#edit_expiry", { dateFormat: "d/m/Y", allowInput: true });
         }
-
-        enrollTable = $("#PageTable").DataTable({
-            processing: true, serverSide: true, responsive: true, autoWidth: false,
-            pageLength: 10, order: [[0, "desc"]],
-            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-            language: { url: '../template/assets/js/data-table-th.json' },
-            ajax: {
-                url: "core.php", type: "POST",
-                data: function (d) {
-                    d.request_state = "list_enrollment";
-                    d.request_function = "get_list_enrollment";
-                    d.f_course = $("#f_course").val();
-                    d.f_member = $("#f_member").val();
-                    return d;
-                },
-                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-            },
-            columns: [
-                { data: "no", className: "text-center", orderable: false },
-                { data: "member", className: "fw-medium" },
-                { data: "phone" },
-                { data: "course" },
-                { data: "buy_at" },
-                { data: "open_at" },
-                { data: "expiry" },
-                { data: "remain", className: "text-center" },
-                { data: "price", className: "text-end" },
-                { data: "enroll_id", className: "text-center", orderable: false, render: function (d) {
-                    return '<button type="button" class="btn btn-sm btn-info text-white" onclick="OpenEdit(' + d + ')">แก้ไข</button>';
-                } }
-            ]
-        });
+        GetData(1);
     });
 
-    function SearchData() { if (enrollTable) { enrollTable.ajax.reload(); } }
+    function SearchData() { GetData(1); }
+
+    // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
+    function GetData(page) {
+        page = page || 1;
+        currentPage = page;
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#result_box"); },
+            type: "POST", url: "core.php",
+            data: {
+                request_state: "list_enrollment",
+                request_function: "get_list_enrollment",
+                f_course: $("#f_course").val(),
+                f_member: $("#f_member").val(),
+                page: page
+            },
+            dataType: "json",
+            success: function (r) {
+                if (r.result == 1) {
+                    view_data(r.data);
+                } else {
+                    $("#result_box").html('');
+                    HideLoadingOverlay("#result_box");
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                }
+            },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
+
+    // สเต็ป 2: ส่งข้อมูลไป render เป็น HTML แล้วแปะใน #result_box
+    function view_data(payload) {
+        $.ajax({
+            type: "POST", url: "view/listEnrollment/ViewData.php",
+            data: {
+                data:     payload.list,
+                total:    payload.total,
+                page:     payload.page,
+                per_page: payload.per_page
+            },
+            dataType: "html",
+            success: function (html) { $("#result_box").html(html); HideLoadingOverlay("#result_box"); },
+            complete: function () { HideLoadingOverlay("#result_box"); },
+            error: function (j, e) { ShowErrorAjax(j, e); }
+        });
+    }
 
     // ===== เพิ่มสิทธิ์ =====
     function OpenAdd() {
@@ -225,7 +221,7 @@
             success: function (r) {
                 if (r.result == 1) {
                     bootstrap.Modal.getInstance(document.getElementById("modalAdd")).hide();
-                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1800 }).then(function () { enrollTable.ajax.reload(); });
+                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1800 }).then(function () { GetData(1); });
                 } else { Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + r.msg + '</span>', icon: "error", showConfirmButton: true }); }
             },
             complete: function () { HideLoadingButton('.BtnAdd'); },
@@ -258,7 +254,7 @@
             success: function (r) {
                 if (r.result == 1) {
                     bootstrap.Modal.getInstance(document.getElementById("modalEdit")).hide();
-                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 }).then(function () { enrollTable.ajax.reload(); });
+                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 }).then(function () { GetData(currentPage); });
                 } else { Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + r.msg + '</span>', icon: "error", showConfirmButton: true }); }
             },
             complete: function () { HideLoadingButton('.BtnEdit'); },
@@ -270,7 +266,7 @@
     function DownloadReport() {
         var body = new URLSearchParams({ request_state: "list_enrollment", request_function: "export_report", f_course: $("#f_course").val() || "", f_member: $("#f_member").val() || "" });
         Swal.fire({ title: "กำลังสร้างรายงาน...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
-        fetch("core.php", { method: "POST", headers: { "Authorization": "Bearer " + (localStorage.getItem("access_token") || "") }, body: body })
+        fetch("core.php", { method: "POST", headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") }, body: body })
             .then(function (res) {
                 var ct = res.headers.get("Content-Type") || "";
                 if (ct.indexOf("application/json") !== -1) { return res.json().then(function (j) { throw new Error(j.msg || "ดาวน์โหลดไม่สำเร็จ"); }); }

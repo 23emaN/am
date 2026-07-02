@@ -12,7 +12,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white p-4">
                     <h2 class="mb-0">เพิ่มแบนเนอร์ใหม่</h2>
                 </div>
@@ -20,7 +20,7 @@
                 <div class="card-body p-4">
                     <form id="FormAddBanner" autocomplete="off" enctype="multipart/form-data">
 
-                        <h5 class="mb-3">ข้อมูลทั่วไป</h5>
+                        <h4 class="mb-3 fw-bold">ข้อมูลทั่วไป</h4>
                         <div class="row g-3 mb-2">
                             <div class="col-md-3">
                                 <label class="form-label">ลำดับการแสดง <span class="text-danger">*</span>
@@ -33,7 +33,7 @@
                                 <input type="text" class="form-control" name="banner_url">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">รูปแบนเนอร์ <span class="text-danger">*</span>
+                                <label class="form-label" for="banner_image_input">รูปแบนเนอร์ <span class="text-danger">*</span>
                                     <small class="text-muted">(ขนาด 2036 x 500 px เท่านั้น)</small>
                                 </label>
                                 <input type="file" class="form-control" name="banner_image" id="banner_image_input" accept="image/*">
@@ -57,7 +57,7 @@
                                 <div id="BannerPreviewWrap" class="border rounded-3 p-3 bg-light text-center" style="min-height: 160px; display: flex; align-items: center; justify-content: center;">
                                     <span class="text-muted" id="BannerPreviewEmpty">ยังไม่ได้เลือกรูปแบนเนอร์</span>
                                     <img id="BannerPreviewImg" src="" alt="banner preview"
-                                         style="max-width: 100%; max-height: 300px; display: none; border-radius: 6px;">
+                                         style="max-width: 100%; max-height: 300px; display: none; border-radius: var(--radius-md); border: 1px solid var(--border);">
                                 </div>
                             </div>
                         </div>

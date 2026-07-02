@@ -53,7 +53,9 @@ html, body { overflow-x: hidden; max-width: 100%; }
     border-top: 1px solid #eef0f3;
 }
 .sidebar-user .logout-btn { line-height: 0; }
-.layout-menu { padding-bottom: 84px; }
+/* เว้นที่ท้ายลิสต์เมนูให้พ้นกล่องโปรไฟล์ (footer สูง ~75px) — ใส่ที่ .menu-inner ซึ่งอยู่ใน
+   พื้นที่ scroll จริงของ SimpleBar (padding บน .layout-menu ตัวนอกไม่เพิ่มพื้นที่เลื่อน) */
+.layout-menu .menu-inner { padding-bottom: 92px; }
 
 /* #6 narrow the sidebar: theme default 260/250px -> 200px.
    scoped to >=1200px (where the sidebar is shown) so mobile off-canvas stays intact.
@@ -140,25 +142,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
     vertical-align: middle;
 }
 
-/* ===== Dashboard (หน้าแรก) ===== */
-/* การ์ดสถิติ: ไอคอนวงกลมพื้นสีอ่อน + ป้ายแนวโน้ม */
-.stat-card { transition: box-shadow .2s ease, transform .2s ease; }
-.stat-card:hover { box-shadow: 0 .5rem 1.25rem rgba(16, 24, 40, .08); transform: translateY(-2px); }
-.stat-card .stat-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.stat-card .stat-icon .material-symbols-outlined { font-size: 28px; }
-.stat-trend { font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
-.stat-trend.up { color: #16a34a; }
-.stat-trend.down { color: #dc2626; }
-/* welcome-box: เผื่อธีมไม่ได้ไล่เฉด ให้พื้นหลังไล่สีม่วงสวยขึ้น */
-.welcome-box.bg-primary { background: linear-gradient(120deg, #605DFF 0%, #8b89ff 100%) !important; }
+/* ===== Dashboard (หน้าแรก) — ย้ายไป template/assets/css/ui.css แล้ว (แหล่งเดียว + ใช้ token/คุมคอนทราสต์) ===== */
 
 /* #8 DataTables: ไอคอนลูกศร sort (▲▼) ถูก render ด้วยฟอนต์ K2D ของธีม ทำให้ตัวอักษร
    เพี้ยน (ดูเหมือน encoding error) -> บังคับใช้ฟอนต์ที่มี glyph สามเหลี่ยมปกติ */

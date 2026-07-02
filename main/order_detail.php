@@ -31,36 +31,36 @@
             <!-- แถบบน: กลับ + ปุ่มจัดการ -->
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <a href="order" class="btn btn-light d-inline-flex align-items-center gap-1">
-                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> กลับ
+                    <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ
                 </a>
                 <div class="d-flex flex-wrap gap-2">
                     <button type="button" id="BtnConfirmPayment" class="btn btn-success d-inline-flex align-items-center gap-1 d-none" onclick="ConfirmPayment()">
-                        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> ยืนยันการชำระเงิน
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">check_circle</span> ยืนยันการชำระเงิน
                     </button>
                     <a href="etax_view.php?id=<?php echo $order_id; ?>" id="BtnEtax" class="btn btn-info text-white d-inline-flex align-items-center gap-1 d-none">
-                        <span class="material-symbols-outlined" style="font-size:18px;">receipt</span> ใบกำกับภาษี E-TAX
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">receipt</span> ใบกำกับภาษี E-TAX
                     </a>
                     <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" onclick="OpenEditAddress()">
-                        <span class="material-symbols-outlined" style="font-size:18px;">edit_location</span> แก้ไขที่อยู่
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">edit_location</span> แก้ไขที่อยู่
                     </button>
                     <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1" onclick="OpenEditNote()">
-                        <span class="material-symbols-outlined" style="font-size:18px;">edit_note</span> แก้ไขหมายเหตุ
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">edit_note</span> แก้ไขหมายเหตุ
                     </button>
                     <button type="button" id="BtnCancelOrder" class="btn btn-danger d-inline-flex align-items-center gap-1 d-none" onclick="CancelOrder()">
-                        <span class="material-symbols-outlined" style="font-size:18px;">cancel</span> ยกเลิกคำสั่งซื้อ
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">cancel</span> ยกเลิกคำสั่งซื้อ
                     </button>
                 </div>
             </div>
 
             <!-- หัว: เลขออเดอร์ + ยอดรวม + สถานะ -->
-            <div class="card od-hero bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card od-hero bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
                     <div class="row align-items-center g-3">
                         <div class="col-md-7">
                             <div class="text-secondary fs-14 mb-1">คำสั่งซื้อ</div>
                             <div class="od-num" id="OrdRefTitle">#-</div>
                             <div class="text-secondary fs-14 mt-1">
-                                <span class="material-symbols-outlined align-middle" style="font-size:16px;">schedule</span>
+                                <span class="material-symbols-outlined align-middle" style="font-size:16px;" aria-hidden="true">schedule</span>
                                 สั่งซื้อเมื่อ <span id="OrdCreated">-</span>
                             </div>
                         </div>
@@ -79,10 +79,10 @@
             <div class="row g-4">
                 <!-- ข้อมูลทั่วไป -->
                 <div class="col-lg-6">
-                    <div class="card bg-white border-0 rounded-3 h-100">
+                    <div class="card app-card bg-white border-0 rounded-3 h-100">
                         <div class="card-body p-4">
                             <div class="od-section-title mb-3">
-                                <span class="material-symbols-outlined">receipt_long</span> ข้อมูลทั่วไป
+                                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span> ข้อมูลทั่วไป
                             </div>
                             <div class="od-row"><div class="od-label">หมายเลขคำสั่งซื้อ</div><div class="od-value" id="OrdRef">-</div></div>
                             <div class="od-row"><div class="od-label">ชื่อลูกค้า</div><div class="od-value" id="OrdCustomer">-</div></div>
@@ -94,10 +94,10 @@
 
                 <!-- ข้อมูลใบกำกับภาษี -->
                 <div class="col-lg-6">
-                    <div class="card bg-white border-0 rounded-3 h-100">
+                    <div class="card app-card bg-white border-0 rounded-3 h-100">
                         <div class="card-body p-4">
                             <div class="od-section-title mb-3">
-                                <span class="material-symbols-outlined">description</span> ข้อมูลใบเสร็จ/ใบกำกับภาษี
+                                <span class="material-symbols-outlined" aria-hidden="true">description</span> ข้อมูลใบเสร็จ/ใบกำกับภาษี
                             </div>
                             <div class="od-row"><div class="od-label">ประเภท</div><div class="od-value" id="RcType">-</div></div>
                             <div class="od-row"><div class="od-label">เลขประจำตัวผู้เสียภาษี</div><div class="od-value" id="RcTaxId">-</div></div>
@@ -111,7 +111,7 @@
             </div>
 
             <!-- แท็บ: รายการ / ธุรกรรม -->
-            <div class="card bg-white border-0 rounded-3 mt-4 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mt-4 mb-4">
                 <div class="card-body p-4">
                     <ul class="nav nav-tabs mb-3" role="tablist">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-items" type="button">รายการในคำสั่งซื้อ</button></li>
@@ -177,7 +177,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <label class="form-label fw-medium">หมายเหตุภายใน</label>
+                <label for="note_internal" class="form-label fw-medium">หมายเหตุภายใน</label>
                 <textarea class="form-control" id="note_internal" rows="4"></textarea>
             </div>
             <div class="modal-footer p-3">
@@ -200,46 +200,46 @@
                     <input type="hidden" id="addr_id">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">ชื่อ/บริษัท</label>
+                            <label for="addr_name" class="form-label fw-medium">ชื่อ/บริษัท</label>
                             <input type="text" class="form-control" id="addr_name">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">ประเภท</label>
+                            <label for="addr_type" class="form-label fw-medium">ประเภท</label>
                             <select class="form-select" id="addr_type">
                                 <option value="1">บุคคลธรรมดา</option>
                                 <option value="2">นิติบุคคล</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">เลขประจำตัวผู้เสียภาษี</label>
+                            <label for="addr_tax_id" class="form-label fw-medium">เลขประจำตัวผู้เสียภาษี</label>
                             <input type="text" class="form-control" id="addr_tax_id">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">สาขาที่</label>
+                            <label for="addr_branch" class="form-label fw-medium">สาขาที่</label>
                             <input type="text" class="form-control" id="addr_branch" placeholder="เช่น สำนักงานใหญ่">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">เบอร์ติดต่อ</label>
+                            <label for="addr_phone" class="form-label fw-medium">เบอร์ติดต่อ</label>
                             <input type="text" class="form-control" id="addr_phone">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
+                            <label for="addr_zipcode" class="form-label fw-medium">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="addr_zipcode">
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-medium">ที่อยู่</label>
+                            <label for="addr_detail" class="form-label fw-medium">ที่อยู่</label>
                             <textarea class="form-control" id="addr_detail" rows="2"></textarea>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-medium">ตำบล/แขวง <span class="text-danger">*</span></label>
+                            <label for="addr_subdistrict" class="form-label fw-medium">ตำบล/แขวง <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="addr_subdistrict">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-medium">อำเภอ/เขต <span class="text-danger">*</span></label>
+                            <label for="addr_district" class="form-label fw-medium">อำเภอ/เขต <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="addr_district">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-medium">จังหวัด <span class="text-danger">*</span></label>
+                            <label for="addr_province" class="form-label fw-medium">จังหวัด <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="addr_province">
                         </div>
                     </div>

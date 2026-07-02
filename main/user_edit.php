@@ -20,7 +20,7 @@
             -->
 
             <!-- การ์ดที่ 1: รายละเอียด + ฟอร์มแก้ไข -->
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
@@ -95,7 +95,7 @@
             </div>
 
             <!-- การ์ดที่ 2: แท็บข้อมูลที่เกี่ยวข้อง -->
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
 
                     <ul class="nav nav-tabs mb-3" id="userTab" role="tablist">
@@ -198,7 +198,7 @@
 <!-- Modal: ตรวจสอบเอกสารยืนยันตัวตน -->
 <div class="modal fade" id="VerifyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content app-card">
             <div class="modal-header">
                 <h5 class="modal-title">ยืนยันตัวตนผู้ใช้</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -212,24 +212,24 @@
                         <input type="text" class="form-control bg-light" value="ยืนยันด้วยบัตรประชาชน" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">หมายเลขเอกสาร</label>
+                        <label class="form-label" for="verify_citizen_id">หมายเลขเอกสาร</label>
                         <input type="text" class="form-control bg-light" id="verify_citizen_id" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">วันหมดอายุของเอกสาร</label>
+                        <label class="form-label" for="verify_expiry">วันหมดอายุของเอกสาร</label>
                         <input type="text" class="form-control bg-light" id="verify_expiry" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">รูปเอกสาร</label>
                         <div>
-                            <img id="verify_id_image" src="" alt="รูปเอกสาร" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <img id="verify_id_image" src="" alt="รูปเอกสาร" class="img-fluid w-100" style="object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border);">
                             <div id="verify_id_image_empty" class="text-muted small d-none">ไม่มีรูปเอกสาร</div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">รูปหน้ายืนยัน</label>
                         <div>
-                            <img id="verify_photo" src="" alt="รูปหน้ายืนยัน" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <img id="verify_photo" src="" alt="รูปหน้ายืนยัน" class="img-fluid w-100" style="object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border);">
                             <div id="verify_photo_empty" class="text-muted small d-none">ไม่มีรูปหน้ายืนยัน</div>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
 
                     <!-- หมายเหตุ: บังคับกรอกเมื่อเลือก "ไม่อนุมัติ" (เหตุผลการปฏิเสธ) -->
                     <div class="mb-2 d-none" id="remark_wrap">
-                        <label class="form-label">หมายเหตุ (เหตุผลที่ไม่อนุมัติ) <span class="text-danger">*</span></label>
+                        <label class="form-label" for="verify_remark">หมายเหตุ (เหตุผลที่ไม่อนุมัติ) <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="remark" id="verify_remark" rows="2" placeholder="ระบุเหตุผลการปฏิเสธ"></textarea>
                     </div>
                 </form>
@@ -288,37 +288,10 @@
             OpenVerifyModal();
         }
 
-        InitTabTables();
-
-        // ปรับความกว้างคอลัมน์เมื่อสลับแท็บ (DataTable ในแท็บที่ซ่อนอยู่จะคำนวณความกว้างผิด)
-        $('#userTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = $(e.target).attr('data-bs-target');
-            $(target).find('table.user-tab-table').each(function () {
-                if ($.fn.DataTable.isDataTable(this)) {
-                    $(this).DataTable().columns.adjust().responsive.recalc();
-                }
-            });
-        });
-
         if (USER_ID) {
             LoadUser();
         }
     });
-
-    function InitTabTables() {
-        var dtOptions = {
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            language: { url: '../template/assets/js/data-table-th.json' },
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "ทั้งหมด"]]
-        };
-        $(".user-tab-table").each(function () {
-            if (!$.fn.DataTable.isDataTable(this)) {
-                $(this).DataTable(dtOptions);
-            }
-        });
-    }
 
     // โหลดข้อมูลผู้ใช้มาเติมในฟอร์ม + แท็บ
     function LoadUser() {
@@ -357,38 +330,44 @@
         f.find('[name="user_password_confirm"]').val("");
     }
 
-    // เติมแท็บ "สิทธิ์เข้าคอร์สเรียน"
+    // เติมแท็บ "สิทธิ์เข้าคอร์สเรียน" (ตารางธรรมดา render ทุกแถวฝั่ง client)
     function FillEnrollTab(rows) {
-        var table = $("#TableEnroll").DataTable();
-        table.clear();
-        rows.forEach(function (r, i) {
-            table.row.add([
-                '<div class="text-center">' + (i + 1) + '</div>',
-                EscapeHTML(r.sku || r.course_name || 'ไม่มีข้อมูล')
-            ]);
-        });
-        table.draw();
+        var html = '';
+        if (!rows || rows.length === 0) {
+            html = '<tr><td colspan="2" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+        } else {
+            rows.forEach(function (r, i) {
+                html += '<tr>'
+                    + '<td class="text-center">' + (i + 1) + '</td>'
+                    + '<td>' + EscapeHTML(r.sku || r.course_name || 'ไม่มีข้อมูล') + '</td>'
+                    + '</tr>';
+            });
+        }
+        $("#TableEnroll tbody").html(html);
     }
 
-    // เติมแท็บ "ประวัติการสอบ/ใบรับรอง"
+    // เติมแท็บ "ประวัติการสอบ/ใบรับรอง" (ตารางธรรมดา render ทุกแถวฝั่ง client)
     function FillExamTab(rows) {
-        var table = $("#TableExam").DataTable();
-        table.clear();
-        rows.forEach(function (r, i) {
-            var status = (String(r.pass) === '1')
-                ? '<span class="badge bg-success">ผ่าน</span>'
-                : '<span class="badge bg-danger">ไม่ผ่าน</span>';
-            table.row.add([
-                '<div class="text-center">' + (i + 1) + '</div>',
-                '-',
-                EscapeHTML(r.course_name || '-'),
-                '-',
-                '<div class="text-center">' + EscapeHTML(r.score != null ? String(r.score) : '-') + '</div>',
-                '<div class="text-center">' + status + '</div>',
-                '<div class="text-center">-</div>'
-            ]);
-        });
-        table.draw();
+        var html = '';
+        if (!rows || rows.length === 0) {
+            html = '<tr><td colspan="7" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+        } else {
+            rows.forEach(function (r, i) {
+                var status = (String(r.pass) === '1')
+                    ? '<span class="badge bg-success">ผ่าน</span>'
+                    : '<span class="badge bg-danger">ไม่ผ่าน</span>';
+                html += '<tr>'
+                    + '<td class="text-center">' + (i + 1) + '</td>'
+                    + '<td>-</td>'
+                    + '<td>' + EscapeHTML(r.course_name || '-') + '</td>'
+                    + '<td>-</td>'
+                    + '<td class="text-center">' + EscapeHTML(r.score != null ? String(r.score) : '-') + '</td>'
+                    + '<td class="text-center">' + status + '</td>'
+                    + '<td class="text-center">-</td>'
+                    + '</tr>';
+            });
+        }
+        $("#TableExam tbody").html(html);
     }
 
     // บันทึกการแก้ไขข้อมูล
@@ -448,9 +427,31 @@
         });
     }
 
-    // ล็อกอินเข้าเว็บไซต์ + ยืนยันตัวตน — ยังเป็นโครง รอเชื่อมระบบฝั่งเว็บไซต์
+    // ล็อกอินเข้าเว็บไซต์ (cpdth) แทนผู้ใช้ — มินต์ token แล้วเปิดเว็บไซต์เป็นผู้ใช้นั้น
     function LoginAsUser(user_id) {
-        Swal.fire({ title: "ล็อกอินเข้าเว็บไซต์", html: '<span class="text-secondary">ฟังก์ชันนี้ยังไม่เปิดใช้งาน (รอเชื่อมระบบฝั่งเว็บไซต์)</span>', icon: "info", confirmButtonText: "ตกลง" });
+        Swal.fire({
+            title: "เข้าสู่ระบบเว็บไซต์แทนผู้ใช้",
+            html: '<span class="text-secondary">จะเปิดเว็บไซต์ (หน้าลูกค้า) ในชื่อผู้ใช้นี้ในแท็บใหม่<br>',
+            icon: "warning", showCancelButton: true, confirmButtonText: "เปิดเว็บไซต์", cancelButtonText: "ยกเลิก"
+        }).then(function (res) {
+            if (!res.isConfirmed) { return; }
+            $.ajax({
+                type: "POST", url: "core.php",
+                data: { request_state: "list_user", request_function: "login_as_user", user_id: user_id },
+                dataType: "json",
+                success: function (r) {
+                    if (r.result != 1) {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สำเร็จ') + '</span>', icon: "error" });
+                        return;
+                    }
+                    var token = r.data.token;
+                    document.cookie = "access_token=" + token + "; path=/; max-age=25200";
+                    try { localStorage.setItem("access_token", token); } catch (e) {}
+                    window.open("../../cpdth/index.php", "_blank");
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
+        });
     }
 
     // ===== ตรวจสอบเอกสารยืนยันตัวตน (modal) =====

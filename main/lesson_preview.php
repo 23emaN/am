@@ -31,8 +31,8 @@
         background: #fff; border: 2px solid #e5e7eb; border-radius: 10px;
         padding: 12px 16px; margin-bottom: 10px; cursor: pointer; transition: all .15s;
     }
-    .lp-choice:hover { border-color: #605DFF; }
-    .lp-choice.selected { border-color: #605DFF; background: #eef0ff; }
+    .lp-choice:hover { border-color: var(--brand-500); }
+    .lp-choice.selected { border-color: var(--brand-500); background: var(--brand-soft); }
     .lp-timer-pill {
         display: inline-flex; align-items: center; gap: 6px;
         background: rgba(255,255,255,.15); color: #fff;
@@ -60,7 +60,7 @@
                 </div>
                 <a href="lesson_manage.php?course_id=<?php echo $course_id; ?>&lesson_id=<?php echo $lesson_id; ?>"
                    class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
-                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> กลับไปจัดการบทเรียน
+                    <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับไปจัดการบทเรียน
                 </a>
             </div>
 
@@ -68,7 +68,7 @@
 
                 <!-- ===== เครื่องเล่น ===== -->
                 <div class="col-lg-8">
-                    <div class="card bg-white border-0 rounded-3">
+                    <div class="card app-card bg-white border-0 rounded-3">
                         <div class="card-body p-3">
                             <div class="lp-player-wrap rounded-3 overflow-hidden bg-dark">
                                 <div id="lpPlayer"></div>
@@ -77,7 +77,7 @@
                                 <div class="lp-question-overlay" id="lpOverlay">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <span class="text-white fw-medium" id="lpQNo">คำถามที่ 1</span>
-                                        <span class="lp-timer-pill"><span class="material-symbols-outlined" style="font-size:18px;">timer</span><span id="lpTimer">--</span> วิ</span>
+                                        <span class="lp-timer-pill"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">timer</span><span id="lpTimer">--</span> วิ</span>
                                     </div>
                                     <div class="text-white fs-16 mb-3" id="lpQText"></div>
                                     <div id="lpChoices" class="flex-grow-1"></div>
@@ -92,10 +92,10 @@
                             <div class="mt-3">
                                 <div class="d-flex justify-content-between lp-meta text-secondary mb-1">
                                     <span>ดูแล้วถึง: <span id="lpWatched">0:00</span> / <span id="lpDuration">0:00</span></span>
-                                    <span><span class="material-symbols-outlined align-middle" style="font-size:16px;">lock</span> เลื่อนไปข้างหน้าไม่ได้ (ย้อนกลับได้)</span>
+                                    <span><span class="material-symbols-outlined align-middle" style="font-size:16px;" aria-hidden="true">lock</span> เลื่อนไปข้างหน้าไม่ได้ (ย้อนกลับได้)</span>
                                 </div>
                                 <div class="progress" style="height:6px;border-radius:6px;">
-                                    <div class="progress-bar" id="lpWatchedBar" style="width:0%;background:#605DFF;"></div>
+                                    <div class="progress-bar" id="lpWatchedBar" style="width:0%;background:var(--brand-500);"></div>
                                 </div>
                                 <div class="lp-meta mt-1" id="lpSaveInfo"></div>
                             </div>
@@ -105,12 +105,12 @@
 
                 <!-- ===== แผงตั้งค่า (ทดสอบสด) ===== -->
                 <div class="col-lg-4">
-                    <div class="card bg-white border-0 rounded-3 mb-4">
+                    <div class="card app-card bg-white border-0 rounded-3 mb-4">
                         <div class="card-body p-4">
                             <h6 class="mb-3">ตั้งค่าการทดสอบ</h6>
 
                             <div class="mb-3">
-                                <label class="form-label fw-medium lp-meta">ลิงก์วิดีโอ Vimeo</label>
+                                <label for="lpVideoUrl" class="form-label fw-medium lp-meta">ลิงก์วิดีโอ Vimeo</label>
                                 <input type="text" class="form-control form-control-sm" id="lpVideoUrl"
                                        placeholder="https://vimeo.com/76979871">
                                 <div class="form-text">วางลิงก์ Vimeo หรือใส่เฉพาะรหัสตัวเลขก็ได้</div>
@@ -123,11 +123,11 @@
 
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <label class="form-label fw-medium lp-meta">จำนวนคำถาม</label>
+                                    <label for="lpQuestionLimit" class="form-label fw-medium lp-meta">จำนวนคำถาม</label>
                                     <input type="number" min="0" class="form-control form-control-sm" id="lpQuestionLimit" value="2">
                                 </div>
                                 <div class="col-6">
-                                    <label class="form-label fw-medium lp-meta">เวลาตอบ (วินาที)</label>
+                                    <label for="lpQuestionTime" class="form-label fw-medium lp-meta">เวลาตอบ (วินาที)</label>
                                     <input type="number" min="0" class="form-control form-control-sm" id="lpQuestionTime" value="20">
                                 </div>
                             </div>
@@ -138,18 +138,18 @@
                             </div>
 
                             <button class="btn btn-primary w-100 mb-2" onclick="LpRestart()">
-                                <span class="material-symbols-outlined align-middle" style="font-size:18px;">restart_alt</span> เริ่มทดสอบใหม่
+                                <span class="material-symbols-outlined align-middle" style="font-size:18px;" aria-hidden="true">restart_alt</span> เริ่มทดสอบใหม่
                             </button>
                             <?php if ($lesson_id > 0): ?>
                             <button class="btn btn-outline-primary w-100" onclick="LpLoadReal()">
-                                <span class="material-symbols-outlined align-middle" style="font-size:18px;">cloud_download</span> โหลดข้อมูลจริงจากบทเรียน
+                                <span class="material-symbols-outlined align-middle" style="font-size:18px;" aria-hidden="true">cloud_download</span> โหลดข้อมูลจริงจากบทเรียน
                             </button>
                             <?php endif; ?>
                         </div>
                     </div>
 
                     <!-- สรุปผล -->
-                    <div class="card bg-white border-0 rounded-3">
+                    <div class="card app-card bg-white border-0 rounded-3">
                         <div class="card-body p-4">
                             <h6 class="mb-3">ผลการตอบ</h6>
                             <div id="lpResult" class="lp-meta text-secondary">ยังไม่มีการตอบคำถาม</div>

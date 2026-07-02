@@ -3,18 +3,18 @@
 
 <style>
     /* ===== หน้ารายงาน/เอกสาร: แบ่งซ้าย/ขวา 30/70 ===== */
-    .rp-step-label { font-size: .8rem; font-weight: 600; letter-spacing: .02em; color: #605DFF; text-transform: uppercase; }
+    .rp-step-label { font-size: .8rem; font-weight: 600; letter-spacing: .02em; color: var(--brand-500); text-transform: uppercase; }
     @media (min-width: 992px) {
         .rp-col-left  { flex: 0 0 30%; max-width: 30%; }
-        .rp-col-right { flex: 0 0 70%; max-width: 70%; border-left: 1px solid #ececf3; }
+        .rp-col-right { flex: 0 0 70%; max-width: 70%; border-left: 1px solid var(--border); }
     }
     #rpFilterPanel { animation: rpFade .2s ease; }
     @keyframes rpFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     /* หัวข้อ panel ระบุเงื่อนไข */
-    .rp-panel-head { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; padding-bottom: .9rem; border-bottom: 1px solid #f0f0f5; }
+    .rp-panel-head { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; padding-bottom: .9rem; border-bottom: 1px solid var(--border); }
     .rp-panel-head .rp-head-icon {
         flex-shrink: 0; width: 42px; height: 42px; border-radius: .6rem; display: inline-flex;
-        align-items: center; justify-content: center; background: #eeedff; color: #605DFF;
+        align-items: center; justify-content: center; background: var(--brand-soft); color: var(--brand-500);
     }
     .rp-panel-head .rp-head-icon .material-symbols-outlined { font-size: 24px; }
     /* ช่องกรอกข้อมูล: พื้นหลังขาว
@@ -24,22 +24,22 @@
     .rp-col-right .form-select,
     .rp-col-right .form-control:focus,
     .rp-col-right .form-select:focus { background-color: #fff !important; }
-    .rp-col-right .form-label { color: #495057; }
+    .rp-col-right .form-label { color: var(--text); }
     /* แถบปุ่มดาวน์โหลด */
-    .rp-actions { border-top: 1px solid #f0f0f5; margin-top: 1.5rem; padding-top: 1.25rem; }
-    .rp-empty { color: #9aa0ac; text-align: center; padding: 2.5rem 1rem; }
+    .rp-actions { border-top: 1px solid var(--border); margin-top: 1.5rem; padding-top: 1.25rem; }
+    .rp-empty { color: var(--text-muted); text-align: center; padding: 2.5rem 1rem; }
     .rp-empty .material-symbols-outlined { font-size: 46px; opacity: .5; }
     /* รายการประเภทเอกสารฝั่งซ้าย */
-    .rp-list-label { font-size: .74rem; font-weight: 600; color: #8a8f9a; text-transform: uppercase; letter-spacing: .02em; margin: .25rem 0 .45rem; }
+    .rp-list-label { font-size: .74rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .02em; margin: .25rem 0 .45rem; }
     .rp-type-item {
         display: flex; align-items: center; gap: .55rem; width: 100%; text-align: left;
-        background: #fff; border: 1px solid #ececf3; border-radius: .6rem;
-        padding: .6rem .75rem; margin-bottom: .4rem; cursor: pointer; color: #212529;
+        background: #fff; border: 1px solid var(--border); border-radius: .6rem;
+        padding: .6rem .75rem; margin-bottom: .4rem; cursor: pointer; color: var(--text);
         transition: border-color .12s ease, background .12s ease, box-shadow .12s ease;
     }
-    .rp-type-item:hover { border-color: #b9b7ff; background: #f7f7ff; }
-    .rp-type-item.active { background: #605DFF; border-color: #605DFF; color: #fff; box-shadow: 0 4px 12px rgba(96,93,255,.22); }
-    .rp-item-icon { font-size: 20px; color: #605DFF; flex-shrink: 0; }
+    .rp-type-item:hover { border-color: var(--brand-400); background: var(--brand-soft); }
+    .rp-type-item.active { background: var(--brand-500); border-color: var(--brand-500); color: #fff; box-shadow: 0 4px 12px rgba(96,93,255,.22); }
+    .rp-item-icon { font-size: 20px; color: var(--brand-500); flex-shrink: 0; }
     .rp-type-item.active .rp-item-icon { color: #fff; }
     .rp-item-title { flex-grow: 1; line-height: 1.25; font-size: .9rem; }
 </style>
@@ -48,7 +48,7 @@
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white p-4">
                     <h4 class="mb-1">รายงาน/เอกสาร</h4>
                     <div class="text-secondary small">เลือกประเภทเอกสารที่ต้องการ แล้วกรอกตัวกรองเพื่อสร้างและดาวน์โหลด</div>
@@ -68,14 +68,14 @@
 
                             <!-- ว่าง: ยังไม่เลือกประเภท -->
                             <div id="rpEmpty" class="rp-empty">
-                                <div><span class="material-symbols-outlined">description</span></div>
+                                <div><span class="material-symbols-outlined" aria-hidden="true">description</span></div>
                                 <div class="mt-2">เลือกประเภทเอกสารทางซ้ายเพื่อระบุเงื่อนไข</div>
                             </div>
 
                             <!-- ตัวกรอง + ดาวน์โหลด -->
                             <div id="rpFilterPanel" style="display:none;">
                                 <div class="rp-panel-head">
-                                    <span class="rp-head-icon"><span class="material-symbols-outlined" id="rpPanelIcon">description</span></span>
+                                    <span class="rp-head-icon"><span class="material-symbols-outlined" id="rpPanelIcon" aria-hidden="true">description</span></span>
                                     <div>
                                         <div class="fw-semibold" id="rpPanelTitle"></div>
                                         <div class="text-secondary small" id="rpPanelDesc"></div>
@@ -87,13 +87,13 @@
 
                                     <!-- ข้อความสำหรับประเภทที่ยัง mock (toggle ด้วย d-none เพราะ d-flex เป็น !important) -->
                                     <div class="alert alert-info d-flex align-items-start gap-2 mt-3 d-none" id="rpMockNote">
-                                        <span class="material-symbols-outlined">info</span>
+                                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
                                         <span id="rpMockText"></span>
                                     </div>
 
                                     <div class="rp-actions text-end" id="ReportSubmitWrap" style="display:none;">
                                         <button type="submit" class="btn btn-primary px-4 py-2 BtnDownloadReport">
-                                            <span class="material-symbols-outlined align-middle me-1" style="font-size:20px;">download</span>ดาวน์โหลด
+                                            <span class="material-symbols-outlined align-middle me-1" style="font-size:20px;" aria-hidden="true">download</span>ดาวน์โหลด
                                         </button>
                                     </div>
                                 </form>
@@ -342,7 +342,7 @@
         Swal.fire({ title: "กำลังสร้างรายงาน...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
         fetch("core.php", {
             method: "POST",
-            headers: { "Authorization": "Bearer " + (localStorage.getItem("access_token") || "") },
+            headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") },
             body: body
         }).then(function (res) {
             var ct = res.headers.get("Content-Type") || "";
