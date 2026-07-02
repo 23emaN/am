@@ -175,29 +175,29 @@
                 { id: "email", label: "อีเมล", kind: "text" }
             ]
         },
-        {
-            key: "order_receipt", group: "document", icon: "receipt_long", fileLabel: "อีเมล", mock: true,
-            title: "ใบเสร็จรับเงิน/ใบกำกับภาษี",
-            desc: "ส่งใบเสร็จ/ใบกำกับภาษีให้ลูกค้าทางอีเมล",
-            fields: [
-                { id: "from", label: "จากวันที่ (สั่งซื้อ)", kind: "date" },
-                { id: "to", label: "ถึงวันที่ (สั่งซื้อ)", kind: "date" },
-                { id: "email", label: "อีเมล", kind: "text" },
-                { id: "file_type", label: "ประเภทไฟล์", kind: "select", options: [["", "---กรุณาเลือก---"], ["excel", "Excel"], ["pdf", "PDF"]] },
-                { id: "type", label: "ประเภทเอกสาร", kind: "select", options: [["", "---กรุณาเลือก---"], ["original", "ต้นฉบับ"], ["copy", "สำเนา"]] }
-            ]
-        },
-        {
-            key: "course_certificate", group: "document", icon: "workspace_premium", fileLabel: "อีเมล", mock: true,
-            title: "ใบรับรอง",
-            desc: "ส่งใบรับรองผลการเรียนให้ผู้เรียนทางอีเมล",
-            fields: [
-                { id: "from", label: "จากวันที่ (สั่งซื้อ)", kind: "date" },
-                { id: "to", label: "ถึงวันที่ (สั่งซื้อ)", kind: "date" },
-                { id: "course_id", label: "คอร์สเรียน", kind: "course" },
-                { id: "download_type", label: "ประเภท", kind: "select", options: [["", "---กรุณาเลือก---"], ["all", "ดาวน์โหลดทั้งหมด"], ["cpd", "เฉพาะผู้ทำ (CPD)"], ["cpa", "เฉพาะผู้สอบ (CPA)"]] }
-            ]
-        }
+        // {
+        //     key: "order_receipt", group: "document", icon: "receipt_long", fileLabel: "อีเมล", mock: true,
+        //     title: "ใบเสร็จรับเงิน/ใบกำกับภาษี",
+        //     desc: "ส่งใบเสร็จ/ใบกำกับภาษีให้ลูกค้าทางอีเมล",
+        //     fields: [
+        //         { id: "from", label: "จากวันที่ (สั่งซื้อ)", kind: "date" },
+        //         { id: "to", label: "ถึงวันที่ (สั่งซื้อ)", kind: "date" },
+        //         { id: "email", label: "อีเมล", kind: "text" },
+        //         { id: "file_type", label: "ประเภทไฟล์", kind: "select", options: [["", "---กรุณาเลือก---"], ["excel", "Excel"], ["pdf", "PDF"]] },
+        //         { id: "type", label: "ประเภทเอกสาร", kind: "select", options: [["", "---กรุณาเลือก---"], ["original", "ต้นฉบับ"], ["copy", "สำเนา"]] }
+        //     ]
+        // },
+        // {
+        //     key: "course_certificate", group: "document", icon: "workspace_premium", fileLabel: "อีเมล", mock: true,
+        //     title: "ใบรับรอง",
+        //     desc: "ส่งใบรับรองผลการเรียนให้ผู้เรียนทางอีเมล",
+        //     fields: [
+        //         { id: "from", label: "จากวันที่ (สั่งซื้อ)", kind: "date" },
+        //         { id: "to", label: "ถึงวันที่ (สั่งซื้อ)", kind: "date" },
+        //         { id: "course_id", label: "คอร์สเรียน", kind: "course" },
+        //         { id: "download_type", label: "ประเภท", kind: "select", options: [["", "---กรุณาเลือก---"], ["all", "ดาวน์โหลดทั้งหมด"], ["cpd", "เฉพาะผู้ทำ (CPD)"], ["cpa", "เฉพาะผู้สอบ (CPA)"]] }
+        //     ]
+        // }
     ];
 
     var TYPE_MAP = {};
@@ -212,7 +212,7 @@
     function renderList() {
         var groups = [
             { label: "รายงาน (ไฟล์ Excel)", key: "report" },
-            { label: "เอกสารส่งทางอีเมล", key: "document" }
+            // { label: "เอกสารส่งทางอีเมล", key: "document" }
         ];
         var html = '';
         groups.forEach(function (g) {
