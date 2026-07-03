@@ -10,7 +10,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h2 class="mb-0">ผู้ดูแลระบบทั้งหมด</h2>
-                    <a href="admin_fromadd.php" class="btn btn-success">เพิ่มผู้ดูแลระบบใหม่</a>
+                    <a href="admin_fromadd.php" class="btn btn-primary">เพิ่มผู้ดูแลระบบใหม่</a>
                 </div>
 
                 <div class="card-body p-4">

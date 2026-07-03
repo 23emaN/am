@@ -88,7 +88,7 @@
                     <!-- รายการสินค้า (แสดงจากออเดอร์ — ยังไม่มีระบบแก้รายการ e-Tax) -->
                     <div class="card app-card border rounded-3 mt-4">
                         <div class="card-body p-3">
-                            <button type="button" class="btn btn-success mb-3" onclick="ComingSoon()">เพิ่มใหม่</button>
+                            <button type="button" class="btn btn-primary mb-3" onclick="ComingSoon()">เพิ่มใหม่</button>
                             <div class="table-responsive">
                                 <table class="table align-middle mb-0">
                                     <thead>

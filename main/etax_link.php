@@ -8,7 +8,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">ลิ้งค์ออกใบกำกับภาษี (E-Tax)</h4>
-                    <a href="etax_link_fromadd" class="btn btn-success d-inline-flex align-items-center gap-1">
+                    <a href="etax_link_fromadd" class="btn btn-primary d-inline-flex align-items-center gap-1">
                         <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span> สร้างลิ้งค์ใหม่
                     </a>
                 </div>

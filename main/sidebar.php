@@ -11,6 +11,8 @@
 <?php $history_pages = ['verify_history']; ?>
 <?php $verify_pages = ['verify_request']; ?>
 <?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
+<?php $setting_pages = ['website_setting']; ?>
+<?php $review_pages = ['reviews']; ?>
 <?php $banner_pages = ['banner', 'banner_fromadd', 'banner_edit']; ?>
 <?php $admin_pages = ['admin', 'admin_fromadd', 'admin_edit']; ?>
 <?php
@@ -170,6 +172,20 @@
                 <a href="coupon" class="menu-link <?php echo in_array($now_page, $coupon_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">sell</span>
                     <span class="title">คูปองส่วนลด</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $setting_pages) ? 'open' : '' ?>">
+                <a href="website_setting" class="menu-link <?php echo in_array($now_page, $setting_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">settings</span>
+                    <span class="title">ตั้งค่าเว็บไซต์</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $review_pages) ? 'open' : '' ?>">
+                <a href="reviews" class="menu-link <?php echo in_array($now_page, $review_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">reviews</span>
+                    <span class="title">รีวิวจากลูกค้า</span>
                 </a>
             </li>
 

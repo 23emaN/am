@@ -134,18 +134,10 @@ html, body { overflow-x: hidden; max-width: 100%; }
     transform: translateY(-50%);
 }
 
-/* ===== ตารางในระบบ (DataTables + style-two) ===== */
-/* หัวตารางไม่ตัดบรรทัด (เช่น "สถานะการยืนยัน")
-   ถ้าคอลัมน์เยอะเกินจอ ตัว .table-responsive จะ scroll แนวนอนเอง — สี/น้ำหนักใช้ของธีมเดิม */
 .default-table-area thead th {
     white-space: nowrap;
     vertical-align: middle;
-}
-
-/* ===== Dashboard (หน้าแรก) — ย้ายไป template/assets/css/ui.css แล้ว (แหล่งเดียว + ใช้ token/คุมคอนทราสต์) ===== */
-
-/* #8 DataTables: ไอคอนลูกศร sort (▲▼) ถูก render ด้วยฟอนต์ K2D ของธีม ทำให้ตัวอักษร
-   เพี้ยน (ดูเหมือน encoding error) -> บังคับใช้ฟอนต์ที่มี glyph สามเหลี่ยมปกติ */
+} 
 table.dataTable thead .dt-column-order::before,
 table.dataTable thead .dt-column-order::after,
 table.dataTable thead .sorting::before,
@@ -155,4 +147,31 @@ table.dataTable thead .sorting_asc::after,
 table.dataTable thead .sorting_desc::before,
 table.dataTable thead .sorting_desc::after {
     font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+}
+
+.app-tabs { flex-wrap: nowrap; }
+.app-tabs .nav-item { flex: 1 1 0; }
+.app-tabs .nav-link {
+    width: 100%; text-align: center;
+    font-size: 1.05rem; font-weight: 600;
+    padding: .85rem 1rem;
+}
+
+/* ===== ปุ่ม action ในตาราง (จัดการ/แก้ไข/ลบ/เปิดดู) — ไอคอน+ข้อความ เด่นและอ่านง่ายกว่า btn-sm =====
+   ใส่ class "table-action-btn" คู่กับ btn สีเดิม (btn-warning/btn-danger/btn-secondary ฯลฯ) */
+.table-action-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+    font-weight: 600; font-size: .9rem; padding: .45rem .85rem; white-space: nowrap;
+}
+.table-action-btn .material-symbols-outlined { font-size: 18px; line-height: 1; }
+/* ตัวอักษรปุ่ม action เป็นสีขาวเสมอ (รวม btn-warning ที่ปกติเป็นตัวอักษรเข้ม) */
+.table-action-btn,
+.table-action-btn:hover,
+.table-action-btn:focus,
+.table-action-btn:active { color: #fff; }
+
+.sidebar-area .logo .logo-text {
+    left: 56px !important;
+    top: 50% !important;
+    transform: translateY(-50%);
 }

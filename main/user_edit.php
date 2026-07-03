@@ -98,7 +98,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
 
-                    <ul class="nav nav-tabs mb-3" id="userTab" role="tablist">
+                    <ul class="nav nav-tabs app-tabs mb-3" id="userTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-order" type="button" role="tab">คำสั่งซื้อ</button>
                         </li>
@@ -116,6 +116,7 @@
                     <div class="tab-content">
                         <!-- แท็บ: คำสั่งซื้อ -->
                         <div class="tab-pane fade show active" id="tab-order" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle w-100 user-tab-table" id="TableOrder">
                                     <thead>
@@ -130,10 +131,12 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                            </div>
                         </div>
 
                         <!-- แท็บ: สิทธิ์เข้าคอร์สเรียน -->
                         <div class="tab-pane fade" id="tab-enroll" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle w-100 user-tab-table" id="TableEnroll">
                                     <thead>
@@ -145,10 +148,12 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                            </div>
                         </div>
 
                         <!-- แท็บ: ประวัติการสอบ/ใบรับรอง -->
                         <div class="tab-pane fade" id="tab-exam" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle w-100 user-tab-table" id="TableExam">
                                     <thead>
@@ -165,10 +170,12 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                            </div>
                         </div>
 
                         <!-- แท็บ: ประวัติการยืนยันตัวตน -->
                         <div class="tab-pane fade" id="tab-verify" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle w-100 user-tab-table" id="TableVerify">
                                     <thead>
@@ -181,6 +188,7 @@
                                     </thead>
                                     <tbody></tbody>
                                 </table>
+                            </div>
                             </div>
                         </div>
                     </div>

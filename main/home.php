@@ -8,6 +8,15 @@
 ?>
 <?php include "header.php"; ?>
 
+<style>
+    /* ไอคอน info บนหัวการ์ดสถิติ: จาง ๆ ไม่แย่งสายตา แต่ hover แล้วชัด */
+    .stat-info { color: var(--text-muted); cursor: help; line-height: 1; opacity: .7; transition: opacity .15s ease; }
+    .stat-info:hover, .stat-info:focus { opacity: 1; outline: none; }
+    .stat-info .material-symbols-outlined { font-size: 16px; vertical-align: middle; }
+    /* ข้อความบอกช่วงก่อนหน้าที่ใช้เทียบ */
+    .stat-compare { font-size: 11px; line-height: 1.3; }
+</style>
+
 <div class="container-fluid">
     <div class="main-content d-flex flex-column">
 
@@ -45,7 +54,12 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <p class="text-secondary fs-14 mb-2">สมาชิกใหม่</p>
+                                    <p class="text-secondary fs-14 mb-2 d-inline-flex align-items-center gap-1">สมาชิกใหม่
+                                        <span class="stat-info" tabindex="0" role="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                              title="นับจำนวนสมาชิกที่สมัครใหม่ (ตามวันที่สมัคร) ภายในช่วงที่เลือก ไม่รวมบัญชีที่ถูกลบ">
+                                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                                        </span>
+                                    </p>
                                     <h3 class="mb-0"><span id="StatNewMembers" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">คน</small></h3>
                                 </div>
                                 <div class="stat-icon stat-icon--brand">
@@ -53,6 +67,7 @@
                                 </div>
                             </div>
                             <span class="stat-trend mt-3" id="TrendMembers"></span>
+                            <span class="stat-compare text-secondary d-block mt-1" id="CompareMembers"></span>
                         </div>
                     </div>
                 </div>
@@ -61,7 +76,12 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <p class="text-secondary fs-14 mb-2">คำสั่งซื้อใหม่</p>
+                                    <p class="text-secondary fs-14 mb-2 d-inline-flex align-items-center gap-1">คำสั่งซื้อใหม่
+                                        <span class="stat-info" tabindex="0" role="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                              title="นับจำนวนคำสั่งซื้อทั้งหมดที่สร้างภายในช่วงที่เลือก (รวมทุกสถานะการชำระเงิน)">
+                                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                                        </span>
+                                    </p>
                                     <h3 class="mb-0"><span id="StatNewOrders" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">รายการ</small></h3>
                                 </div>
                                 <div class="stat-icon stat-icon--success">
@@ -69,6 +89,7 @@
                                 </div>
                             </div>
                             <span class="stat-trend mt-3" id="TrendOrders"></span>
+                            <span class="stat-compare text-secondary d-block mt-1" id="CompareOrders"></span>
                         </div>
                     </div>
                 </div>
@@ -77,7 +98,12 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <p class="text-secondary fs-14 mb-2">คำสั่งซื้อใหม่ (ยอดเงิน)</p>
+                                    <p class="text-secondary fs-14 mb-2 d-inline-flex align-items-center gap-1">คำสั่งซื้อใหม่ (ยอดเงิน)
+                                        <span class="stat-info" tabindex="0" role="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                              title="ผลรวมยอดเงินของคำสั่งซื้อที่ชำระเงินแล้ว ภายในช่วงที่เลือก">
+                                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                                        </span>
+                                    </p>
                                     <h3 class="mb-0"><span id="StatNewRevenue" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">฿</small></h3>
                                 </div>
                                 <div class="stat-icon stat-icon--warning">
@@ -85,6 +111,7 @@
                                 </div>
                             </div>
                             <span class="stat-trend mt-3" id="TrendRevenue"></span>
+                            <span class="stat-compare text-secondary d-block mt-1" id="CompareRevenue"></span>
                         </div>
                     </div>
                 </div>
@@ -93,7 +120,12 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <p class="text-secondary fs-14 mb-2">ยอดเงิน OTP คงเหลือ</p>
+                                    <p class="text-secondary fs-14 mb-2 d-inline-flex align-items-center gap-1">ยอดเงิน OTP คงเหลือ
+                                        <span class="stat-info" tabindex="0" role="button" data-bs-toggle="tooltip" data-bs-placement="top"
+                                              title="ยอดเงินคงเหลือสำหรับส่งรหัส OTP ยืนยันตัวตน · อยู่ระหว่างเชื่อมต่อ API ผู้ให้บริการ OTP (ยังไม่มีข้อมูลจริง)">
+                                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                                        </span>
+                                    </p>
                                     <h3 class="mb-0"><span id="StatOtpBalance" class="stat-value text-secondary">—</span> <small class="fs-14 fw-normal text-secondary">USD</small></h3>
                                 </div>
                                 <div class="stat-icon stat-icon--info">
@@ -215,6 +247,26 @@
         el.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">' + icon + '</span> ' + pctTxt + ' จากช่วงก่อน';
     }
 
+    // แสดงช่วงก่อนหน้าที่ใช้เป็นฐานเทียบแนวโน้ม (ให้ผู้ใช้รู้ว่า "จากช่วงก่อน" คือช่วงไหน)
+    function RenderCompare(period) {
+        var txt = "";
+        if (period && period.prev_from && period.prev_to) {
+            txt = 'เทียบกับช่วงก่อน ' + period.prev_from + ' – ' + period.prev_to;
+        }
+        ["CompareMembers", "CompareOrders", "CompareRevenue"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) { el.textContent = txt; }
+        });
+    }
+
+    // เปิดใช้งาน Bootstrap tooltip สำหรับไอคอน info บนการ์ดสถิติ
+    function InitStatTooltips() {
+        if (typeof bootstrap === "undefined" || !bootstrap.Tooltip) { return; }
+        document.querySelectorAll('.stat-info[data-bs-toggle="tooltip"]').forEach(function (el) {
+            if (!bootstrap.Tooltip.getInstance(el)) { new bootstrap.Tooltip(el); }
+        });
+    }
+
     // โหลดข้อมูลจริงตามช่วงวันที่ (อ่านจากข้อความช่วงวันที่ด้านบน)
     function LoadDashboard() {
         var nf = function (v) { return (typeof NumberFormat === "function") ? NumberFormat(v) : v; };
@@ -237,6 +289,7 @@
                 RenderTrend("TrendMembers", tr.members);
                 RenderTrend("TrendOrders", tr.orders);
                 RenderTrend("TrendRevenue", tr.revenue);
+                RenderCompare(d.period);
                 RenderSalesChart(d.days || [], d.sales || []);
             },
             error: function (j, e) { if (typeof ShowErrorAjax === "function") { ShowErrorAjax(j, e); } }
@@ -261,6 +314,7 @@
             $("#DashDateBtn").on("click", function () { fp.open(); });
         }
 
+        InitStatTooltips();
         LoadDashboard();
     });
 </script>
