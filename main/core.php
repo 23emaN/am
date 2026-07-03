@@ -161,6 +161,18 @@ $routes = [
         'update_banner'         => __DIR__ . '/core/listBanner/UpdateBanner.php',
         'delete_banner'         => __DIR__ . '/core/listBanner/DeleteBanner.php',
     ],
+
+    'website_setting'           => [
+        'get_setting'    => __DIR__ . '/core/websiteSetting/GetSetting.php',
+        'update_setting' => __DIR__ . '/core/websiteSetting/UpdateSetting.php',
+    ],
+
+    'list_review'                => [
+        'get_list_review' => __DIR__ . '/core/listReview/GetListReview.php',
+        'get_review'       => __DIR__ . '/core/listReview/GetReview.php',
+        'update_review'    => __DIR__ . '/core/listReview/UpdateReview.php',
+        'delete_review'    => __DIR__ . '/core/listReview/DeleteReview.php',
+    ],
 ];
 foreach ($routes as $state => $actions) {
     foreach ($actions as $action => $file) {
