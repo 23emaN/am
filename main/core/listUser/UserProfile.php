@@ -6,7 +6,6 @@
 
     $access_token = Auth::requireUserToken();
     $user_id = $access_token->user_id ?? null;
-
     $full_name = $access_token->fullname ?? '';
     $role_name = $access_token->access_level ?? '';
     $avatar = $access_token->profile_image ?? '';
@@ -48,3 +47,5 @@
         'menu_map'     => $menu_map,
     ]);
 ?>
+
+

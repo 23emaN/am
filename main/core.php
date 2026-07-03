@@ -11,28 +11,34 @@ $request_function = isset($_POST['request_function']) ? trim($_POST['request_fun
 $router = new Router();
 
 $routes = [
+    'dashboard'                => [
+        'get_dashboard' => __DIR__ . '/core/dashboard/GetDashboard.php',
+    ],
+
     'list_user'                => [
         'user_profile'   => __DIR__ . '/core/listUser/UserProfile.php',
         'get_list_user'  => __DIR__ . '/core/listUser/GetListUser.php',
         'get_user'       => __DIR__ . '/core/listUser/GetUser.php',
         'update_user'    => __DIR__ . '/core/listUser/UpdateUser.php',
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
+        'login_as_user'  => __DIR__ . '/core/listUser/LoginAsUser.php',
     ],
-
-    'list_enrollment'          => [
+  
+      'list_enrollment'          => [
         'get_list_enrollment' => __DIR__ . '/core/listEnrollment/GetListEnrollment.php',
         'add_enrollment'      => __DIR__ . '/core/listEnrollment/AddEnrollment.php',
         'get_enrollment'      => __DIR__ . '/core/listEnrollment/GetEnrollment.php',
         'update_enrollment'   => __DIR__ . '/core/listEnrollment/UpdateEnrollment.php',
         'export_report'       => __DIR__ . '/core/listEnrollment/EnrollmentReport.php',
     ],
-
+  
     'list_certificate'         => [
         'get_list_certificate' => __DIR__ . '/core/listCertificate/GetListCertificate.php',
         'get_certificate'      => __DIR__ . '/core/listCertificate/GetCertificate.php',
+        'approve_certificate'  => __DIR__ . '/core/listCertificate/ApproveCertificate.php',
+        'update_identity'      => __DIR__ . '/core/listCertificate/UpdateCertIdentity.php',
         'export_certificate'   => __DIR__ . '/core/listCertificate/ExportCertificate.php',
     ],
-
     'list_etax'                => [
         'get_list_etax'  => __DIR__ . '/core/listEtax/GetListEtax.php',
         'send_email'     => __DIR__ . '/core/listEtax/SendEtaxEmail.php',

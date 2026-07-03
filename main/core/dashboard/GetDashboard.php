@@ -103,7 +103,6 @@ try {
         $pct = ($diff / $prev) * 100;
         return ['pct' => round(abs($pct), 1), 'dir' => ($pct > 0 ? 'up' : ($pct < 0 ? 'down' : 'flat')), 'diff' => $diff];
     };
-
     Response::json(1, 'สำเร็จ', [
         'new_members' => $new_members,
         'new_orders'  => $new_orders,

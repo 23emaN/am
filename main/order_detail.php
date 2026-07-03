@@ -460,7 +460,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
-                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
+                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_order", request_function: "confirm_payment", order_id: ORDER_ID },
                 dataType: "json",
@@ -489,7 +489,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
-                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
+                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_order", request_function: "cancel_order", order_id: ORDER_ID },
                 dataType: "json",
