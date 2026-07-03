@@ -37,7 +37,10 @@ $stmt = $pdo_connect->prepare(
             c.course_number_exam,
             (SELECT a.attempt_score FROM tbl_exam_attempt a
               WHERE a.attempt_user_id = e.enroll_user_id AND a.attempt_course_id = e.enroll_course_id
-              ORDER BY a.attempt_id DESC LIMIT 1) AS score
+              ORDER BY a.attempt_id DESC LIMIT 1) AS score,
+            (SELECT a.create_at FROM tbl_exam_attempt a
+              WHERE a.attempt_user_id = e.enroll_user_id AND a.attempt_course_id = e.enroll_course_id
+              ORDER BY a.attempt_id DESC LIMIT 1) AS exam_completed_at
      FROM tbl_course_enrollment e
      LEFT JOIN tbl_user u   ON e.enroll_user_id = u.user_id
      LEFT JOIN tbl_course c ON e.enroll_course_id = c.course_id
@@ -52,8 +55,11 @@ if (!$row) {
 }
 
 // ---- เตรียมค่า ----
+// วันที่ในเอกสาร (เลขที่/วันที่หัวเอกสาร/วันที่อบรม/ไตรมาสรหัสหลักสูตร) อิงจาก
+// "วันที่สอบเสร็จ" (สร้าง attempt ล่าสุดที่ใช้ตัดสินผ่าน/ไม่ผ่าน) แทนวันที่สมัครเรียนหรือวันที่กดอนุมัติ
 $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
-$ts  = $row['create_at'] ? strtotime($row['create_at']) : time();
+$ts  = !empty($row['exam_completed_at']) ? strtotime($row['exam_completed_at'])
+     : ($row['create_at'] ? strtotime($row['create_at']) : time());
 $cert_no = date('ym', $ts) . str_pad((string) $row['enroll_id'], 4, '0', STR_PAD_LEFT);
 $fullname = trim(($row['user_firstname'] ?? '') . ' ' . ($row['user_lastname'] ?? ''));
 $acc = (string) ($row['user_citizen_id'] ?? ($row['user_cpd_no'] ?? ''));
