@@ -46,8 +46,8 @@ document.addEventListener("DOMContentLoaded", function() {
 // doGuard = true เฉพาะเมื่อเป็นข้อมูลจริงจาก server (กัน false-deny จาก cache เก่า)
 function ApplyProfile(data, doGuard) {
     if (!data) { return; }
-    $(".ShowUserFullname").html(data.full_name || "");
-    $(".ShowUserRole").html(data.role_name || "");
+    $(".ShowUserFullname").text(data.full_name || "");
+    $(".ShowUserRole").text(data.role_name || "");
     $(".ShowUserAvatar").attr("src", data.avatar || "../template/assets/images/administrator.jpg");
     FilterSidebarByAccess(data.access_menus);
     if (doGuard) { GuardPageByAccess(data.access_menus, data.menu_map); }
