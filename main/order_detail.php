@@ -113,12 +113,13 @@
             <!-- แท็บ: รายการ / ธุรกรรม -->
             <div class="card app-card bg-white border-0 rounded-3 mt-4 mb-4">
                 <div class="card-body p-4">
-                    <ul class="nav nav-tabs mb-3" role="tablist">
+                    <ul class="nav nav-tabs app-tabs mb-3" role="tablist">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-items" type="button">รายการในคำสั่งซื้อ</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-pay" type="button">ธุรกรรมชำระเงิน</button></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="tab-items" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle">
                                     <thead>
@@ -133,6 +134,7 @@
                                     <tbody id="OrdItems"></tbody>
                                 </table>
                             </div>
+                            </div>
                             <!-- สรุป VAT ชิดขวา -->
                             <div class="d-flex justify-content-end mt-2">
                                 <div class="od-summary">
@@ -143,6 +145,7 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-pay" role="tabpanel">
+                            <div class="default-table-area">
                             <div class="table-responsive">
                                 <table class="table align-middle">
                                     <thead>
@@ -156,6 +159,7 @@
                                     </thead>
                                     <tbody id="OrdPayTab"></tbody>
                                 </table>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -460,7 +464,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
-                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
+                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_order", request_function: "confirm_payment", order_id: ORDER_ID },
                 dataType: "json",
@@ -489,7 +493,7 @@
         }).then(function (result) {
             if (!result.isConfirmed) { return; }
             $.ajax({
-                beforeSend: function () { ShowLoadingOverlay(); }, complete: function () { HideLoadingOverlay(); },
+                beforeSend: function () { Swal.fire({ title: "กำลังดำเนินการ...", allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } }); },
                 type: "POST", url: "core.php",
                 data: { request_state: "list_order", request_function: "cancel_order", order_id: ORDER_ID },
                 dataType: "json",

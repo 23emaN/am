@@ -15,10 +15,11 @@
     <h4 class="mb-0 fw-bold">คำถามระหว่างรับชม</h4>
     <div class="d-flex gap-2">
         <button type="button" class="btn btn-info" onclick="OpenUploadQuestion()">อัพโหลดคำถาม</button>
-        <button type="button" class="btn btn-success" onclick="OpenAddQuestion()">เพิ่มคำถาม</button>
+        <button type="button" class="btn btn-primary" onclick="OpenAddQuestion()">เพิ่มคำถาม</button>
     </div>
 </div>
 
+<div class="default-table-area">
 <div class="table-responsive">
     <table class="table align-middle w-100">
         <thead>
@@ -27,7 +28,7 @@
                 <th scope="col">คำถาม</th>
                 <th scope="col" class="text-center" style="width: 120px;">ไฟล์/ภาพ</th>
                 <th scope="col" class="text-center" style="width: 140px;">คำตอบที่ถูกต้อง</th>
-                <th scope="col" class="text-center" style="width: 160px;">จัดการ</th>
+                <th scope="col" class="text-center" style="width: 180px;">จัดการ</th>
             </tr>
         </thead>
         <tbody>
@@ -51,8 +52,14 @@
                         </td>
                         <td class="text-center"><?php echo $correct > 0 ? 'ข้อ ' . $correct : '<span class="text-muted">-</span>'; ?></td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-warning" onclick="OpenEditQuestion(<?php echo $qid; ?>)">แก้ไข</button>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="DeleteQuestion(<?php echo $qid; ?>)">ลบ</button>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-warning table-action-btn" onclick="OpenEditQuestion(<?php echo $qid; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">edit</span>แก้ไข
+                                </button>
+                                <button type="button" class="btn btn-danger table-action-btn" onclick="DeleteQuestion(<?php echo $qid; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>ลบ
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -61,4 +68,5 @@
             <?php endif; ?>
         </tbody>
     </table>
+</div>
 </div>

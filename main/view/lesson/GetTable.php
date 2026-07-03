@@ -6,9 +6,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0 fw-bold">บทเรียน</h4>
-    <button type="button" class="btn btn-success" onclick="OpenAddLesson()">เพิ่มบทเรียนใหม่</button>
+    <button type="button" class="btn btn-primary" onclick="OpenAddLesson()">เพิ่มบทเรียนใหม่</button>
 </div>
 
+<div class="default-table-area">
 <div class="table-responsive">
     <table class="table align-middle w-100">
         <thead>
@@ -17,7 +18,7 @@
                 <th scope="col">ชื่อบทเรียน</th>
                 <th scope="col" class="text-center" style="width: 140px;">สถานะวิดีโอ</th>
                 <th scope="col" class="text-center" style="width: 140px;">สถานะคำถาม</th>
-                <th scope="col" class="text-center" style="width: 160px;">จัดการ</th>
+                <th scope="col" class="text-center" style="width: 180px;">จัดการ</th>
             </tr>
         </thead>
         <tbody>
@@ -47,8 +48,14 @@
                             <?php endif; ?>
                         </td>
                         <td class="text-center">
-                            <button type="button" class="btn btn-sm btn-warning" onclick="GotoLessonManage(<?php echo $lesson_id; ?>)">จัดการ</button>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="DeleteLesson(<?php echo $lesson_id; ?>)">ลบ</button>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-warning table-action-btn" onclick="GotoLessonManage(<?php echo $lesson_id; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>จัดการ
+                                </button>
+                                <button type="button" class="btn btn-danger table-action-btn" onclick="DeleteLesson(<?php echo $lesson_id; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>ลบ
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -57,4 +64,5 @@
             <?php endif; ?>
         </tbody>
     </table>
+</div>
 </div>

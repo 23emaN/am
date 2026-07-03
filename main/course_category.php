@@ -12,7 +12,7 @@
                     <h2 class="mb-0">หมวดหมู่ของคอร์สเรียน</h2>
 
                     <div class="d-flex gap-2">
-                        <button class="btn btn-success" type="button" onclick="GetModalAdd()">
+                        <button class="btn btn-primary" type="button" onclick="GetModalAdd()">
                             เพิ่มหมวดหมู่ใหม่
                         </button>
                     </div>

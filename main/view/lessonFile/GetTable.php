@@ -6,9 +6,10 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0 fw-bold">เอกสารประกอบการสอน</h4>
-    <button type="button" class="btn btn-success" onclick="OpenAddLessonFile()">เพิ่มเอกสารใหม่</button>
+    <button type="button" class="btn btn-primary" onclick="OpenAddLessonFile()">เพิ่มเอกสารใหม่</button>
 </div>
 
+<div class="default-table-area">
 <div class="table-responsive">
     <table class="table align-middle w-100">
         <thead>
@@ -36,13 +37,19 @@
                         <td class="text-secondary"><?php echo htmlspecialchars($row['lesson_name'] ?? '-'); ?></td>
                         <td><?php echo htmlspecialchars($type !== '' ? $type : '-'); ?></td>
                         <td class="text-center">
-                            <?php if ($path): ?>
-                                <a href="lesson_file_view.php?id=<?php echo $fid; ?>" class="btn btn-sm btn-secondary"
-                                   target="_blank" rel="noopener">เปิดดู</a>
-                            <?php else: ?>
-                                <span class="text-muted small">ไม่พบไฟล์</span>
-                            <?php endif; ?>
-                            <button type="button" class="btn btn-sm btn-danger" onclick="DeleteLessonFile(<?php echo $fid; ?>)">ลบ</button>
+                            <div class="d-flex gap-2 justify-content-center align-items-center">
+                                <?php if ($path): ?>
+                                    <a href="lesson_file_preview.php?id=<?php echo $fid; ?>" class="btn btn-secondary table-action-btn"
+                                       target="_blank" rel="noopener">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>เปิดดู
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted small">ไม่พบไฟล์</span>
+                                <?php endif; ?>
+                                <button type="button" class="btn btn-danger table-action-btn" onclick="DeleteLessonFile(<?php echo $fid; ?>)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>ลบ
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -51,4 +58,5 @@
             <?php endif; ?>
         </tbody>
     </table>
+</div>
 </div>

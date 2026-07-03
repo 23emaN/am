@@ -127,9 +127,10 @@ function course_codes(array $row, string $type): array {
 
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-primary icon-btn"
+                                    <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 px-3"
                                         onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข" aria-label="แก้ไขคอร์สเรียน">
                                         <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                        <span>แก้ไข</span>
                                     </button>
                                 </div>
                             </td>

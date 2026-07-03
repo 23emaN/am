@@ -7,6 +7,20 @@
 ?>
 <?php include "header.php"; ?>
 
+<style>
+    /* ===== ปุ่มลบคอร์ส: เน้นให้เด่น (แดงจริง + ไอคอน + เงา) เพราะเป็น action สำคัญ =====
+       (theme --bs-danger เป็นสีส้ม จึง override เป็นแดง var(--danger) ให้สื่อความหมาย "อันตราย") */
+    .BtnDeleteCourse.btn {
+        background: var(--danger); border-color: var(--danger); color: #fff;
+        font-weight: 600; padding: .55rem 1.15rem;
+    }
+    .BtnDeleteCourse.btn:hover, .BtnDeleteCourse.btn:focus {
+        background: #b91c1c; border-color: #b91c1c; color: #fff;
+    }
+    .BtnDeleteCourse .material-symbols-outlined { font-size: 20px; }
+    /* แท็บย้ายไปเป็นคลาสกลาง .app-tabs ใน custom.css แล้ว */
+</style>
+
 <div class="container-fluid">
     <div class="main-content d-flex flex-column">
 
@@ -16,11 +30,14 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-3">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">ดู/แก้ไขคอร์สเรียน</h2>
-                    <button type="button" class="btn btn-danger BtnDeleteCourse" onclick="DeleteCourse()">ลบคอร์สเรียน</button>
+                    <button type="button" class="btn btn-danger BtnDeleteCourse d-inline-flex align-items-center gap-2" onclick="DeleteCourse()">
+                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        ลบคอร์สเรียน
+                    </button>
                 </div>
 
                 <div class="card-body p-4 pt-0">
-                    <ul class="nav nav-tabs mb-3" id="courseTab" role="tablist">
+                    <ul class="nav nav-tabs app-tabs mb-3" id="courseTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-general" type="button" role="tab">ทั่วไป</button>
                         </li>
@@ -210,10 +227,6 @@
 <style>
     #editor_exam_text { height: 200px; background:#fff; }
     .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
-    td.dt-control { cursor: pointer; }
-    .exam-toggle { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; color:#fff; font-weight:bold; line-height:1; }
-    .exam-toggle.plus { background:#28a745; }
-    .exam-toggle.minus { background:#dc3545; }
 </style>
 
 <?php include "script.php"; ?>
@@ -505,62 +518,56 @@
         });
     }
     function StripTags(h) { var t = document.createElement('div'); t.innerHTML = h || ''; return (t.textContent || t.innerText || '').trim(); }
-    function ExamChildRow(d) {
-        var hasFile = (d.exam_image || d.exam_file) ? 'มี' : 'ไม่มีข้อมูล';
-        var correct = d.correct_text ? EscapeHTML(d.correct_text) : '-';
-        return '<table class="table table-borderless mb-0">' +
-            '<tr><td style="width:160px" class="fw-bold">คำถาม</td><td>' + EscapeHTML(StripTags(d.exam_text)) + '</td></tr>' +
-            '<tr><td class="fw-bold">ไฟล์/ภาพ</td><td>' + hasFile + '</td></tr>' +
-            '<tr><td class="fw-bold">คำตอบที่ถูกต้อง</td><td>' + correct + '</td></tr>' +
-            '<tr><td class="fw-bold">Action</td><td>' +
-                '<button type="button" class="btn btn-sm btn-warning" onclick="OpenEditExam(' + d.exam_id + ')">แก้ไข</button> ' +
-                '<button type="button" class="btn btn-sm btn-danger" onclick="DeleteExam(' + d.exam_id + ')">ลบ</button>' +
-            '</td></tr></table>';
-    }
+    // ตัดข้อความยาวให้พอดีตาราง (ดูเต็มได้ตอนกดแก้ไข)
+    function ExamTruncate(s, n) { s = s || ''; return s.length > n ? s.substring(0, n) + '…' : s; }
     function RenderExamTable(list_data) {
         list_data = list_data || [];
         var head = '<div class="d-flex justify-content-between align-items-center mb-3">' +
             '<h4 class="mb-0 fw-bold">ข้อสอบ</h4>' +
             '<div class="d-flex gap-2">' +
             '<button type="button" class="btn btn-info" onclick="OpenUploadExam()">อัพโหลดคำถาม</button>' +
-            '<button type="button" class="btn btn-success" onclick="OpenAddExam()">เพิ่มคำถาม</button>' +
+            '<button type="button" class="btn btn-primary" onclick="OpenAddExam()">เพิ่มคำถาม</button>' +
             '</div></div>';
 
         var rows = '';
-        list_data.forEach(function (d, i) {
-            var no = i + 1;
-            // แถวหลัก: ปุ่มวงกลม +/− + ลำดับ
-            rows += '<tr class="exam-main" data-exam-idx="' + i + '">' +
-                '<td class="exam-control text-center" style="cursor:pointer"><span class="exam-toggle plus">+</span></td>' +
-                '<td class="text-start">' + no + '</td>' +
-                '<td></td>' +
-                '</tr>';
-            // แถวรายละเอียด (ซ่อนไว้ก่อน) กางด้วยปุ่ม +/−
-            rows += '<tr class="exam-detail" data-exam-idx="' + i + '" style="display:none">' +
-                '<td></td><td colspan="2">' + ExamChildRow(d) + '</td>' +
-                '</tr>';
-        });
+        if (list_data.length === 0) {
+            rows = '<tr><td colspan="5" class="text-center text-muted py-4">ยังไม่มีข้อสอบ</td></tr>';
+        } else {
+            list_data.forEach(function (d, i) {
+                var qtext   = EscapeHTML(ExamTruncate(StripTags(d.exam_text), 80));
+                var fileCell = (d.exam_image || d.exam_file)
+                    ? '<span class="badge bg-success">มี</span>'
+                    : '<span class="text-muted">ไม่มีข้อมูล</span>';
+                var correctCell = (d.correct_index && d.correct_index > 0)
+                    ? 'ข้อ ' + d.correct_index
+                    : '<span class="text-muted">-</span>';
+                rows += '<tr>' +
+                    '<td class="text-center">' + (i + 1) + '</td>' +
+                    '<td>' + qtext + '</td>' +
+                    '<td class="text-center">' + fileCell + '</td>' +
+                    '<td class="text-center">' + correctCell + '</td>' +
+                    '<td class="text-center"><div class="d-flex gap-2 justify-content-center">' +
+                        '<button type="button" class="btn btn-warning table-action-btn" onclick="OpenEditExam(' + d.exam_id + ')">' +
+                            '<span class="material-symbols-outlined" aria-hidden="true">edit</span>แก้ไข</button>' +
+                        '<button type="button" class="btn btn-danger table-action-btn" onclick="DeleteExam(' + d.exam_id + ')">' +
+                            '<span class="material-symbols-outlined" aria-hidden="true">delete</span>ลบ</button>' +
+                    '</div></td>' +
+                    '</tr>';
+            });
+        }
 
         $("#GetExamTab").html(head +
+            '<div class="default-table-area"><div class="table-responsive">' +
             '<table id="ExamTable" class="table align-middle w-100" style="width:100%"><thead><tr>' +
-            '<th style="width:50px"></th><th style="width:100px">ลำดับ</th><th></th>' +
-            '</tr></thead><tbody>' + rows + '</tbody></table>');
+            '<th scope="col" class="text-center" style="width:80px">ลำดับ</th>' +
+            '<th scope="col">คำถาม</th>' +
+            '<th scope="col" class="text-center" style="width:120px">ไฟล์/ภาพ</th>' +
+            '<th scope="col" class="text-center" style="width:140px">คำตอบที่ถูกต้อง</th>' +
+            '<th scope="col" class="text-center" style="width:180px">จัดการ</th>' +
+            '</tr></thead><tbody>' + rows + '</tbody></table>' +
+            '</div></div>');
     }
 
-    // กดวงกลม +/− เพื่อกาง/ยุบรายละเอียดของแต่ละข้อ (event delegation, ไม่ใช้ DataTables)
-    $('#GetExamTab').off('click', 'td.exam-control').on('click', 'td.exam-control', function () {
-        var $mainTr = $(this).closest('tr.exam-main');
-        var idx = $mainTr.data('exam-idx');
-        var $detail = $mainTr.siblings('tr.exam-detail[data-exam-idx="' + idx + '"]');
-        var $glyph = $(this).find('.exam-toggle');
-        if ($detail.is(':visible')) {
-            $detail.hide();
-            $glyph.removeClass('minus').addClass('plus').text('+');
-        } else {
-            $detail.show();
-            $glyph.removeClass('plus').addClass('minus').text('−');
-        }
-    });
     function EnsureExamQuill() {
         if (!quillExam && typeof Quill !== 'undefined') {
             quillExam = new Quill('#editor_exam_text', {

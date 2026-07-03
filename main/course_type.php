@@ -13,7 +13,7 @@
 
                     <div class="d-flex gap-2">
                         <a href="course.php" class="btn btn-outline-secondary">กลับไปคอร์สเรียน</a>
-                        <button class="btn btn-success" type="button" onclick="GetModalAdd()">เพิ่มประเภทใหม่</button>
+                        <button class="btn btn-primary" type="button" onclick="GetModalAdd()">เพิ่มประเภทใหม่</button>
                     </div>
                 </div>
 

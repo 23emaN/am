@@ -12,6 +12,15 @@
 <style>
     #editor_question_text { height: 200px; background:#fff; }
     .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    /* ช่องกรอกพื้นหลังขาว (ธีมตั้ง .form-control เป็นเทา #F6F7F9) */
+    #formLesson .form-control,
+    #formLesson .form-select,
+    #formLesson .form-control:focus,
+    #formLesson .form-select:focus { background-color: #fff !important; }
+    /* เส้นคั่นแนวตั้งระหว่าง 2 คอลัมน์ (เฉพาะจอใหญ่) */
+    @media (min-width: 992px) {
+        #formLesson .lesson-col-right { border-left: 1px solid var(--border); }
+    }
 </style>
 
 <div class="container-fluid">
@@ -24,7 +33,7 @@
                 <div class="card-body p-4">
                     <h2 class="mb-3">จัดการบทเรียน</h2>
 
-                    <ul class="nav nav-tabs mb-3" role="tablist">
+                    <ul class="nav nav-tabs app-tabs mb-3" role="tablist">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-l-general" type="button">ทั่วไป</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-l-video" type="button">วีดีโอ</button></li>
                         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-l-question" type="button">คำถามระหว่างรับชม</button></li>
@@ -34,36 +43,50 @@
                         <!-- ===== ทั่วไป ===== -->
                         <div class="tab-pane fade show active" id="tab-l-general" role="tabpanel">
                             <form id="formLesson">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium">ลำดับ/บทเรียนที่ <span class="text-danger">*</span></label>
-                                        <input type="number" min="0" class="form-control" name="lesson_order">
+                                <div class="row g-4">
+                                    <!-- ===== ซ้าย: ข้อมูลบทเรียน ===== -->
+                                    <div class="col-lg-6">
+                                        <h6 class="fw-bold text-secondary text-uppercase mb-3" style="letter-spacing:.02em;">ข้อมูลบทเรียน</h6>
+                                        <div class="row g-3">
+                                            <div class="col-4">
+                                                <label class="form-label fw-medium">ลำดับ/บทเรียนที่ <span class="text-danger">*</span></label>
+                                                <input type="number" min="0" class="form-control" name="lesson_order">
+                                            </div>
+                                            <div class="col-8">
+                                                <label class="form-label fw-medium">ชื่อบทเรียน <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="lesson_name">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-medium">รายละเอียดโดยย่อ</label>
+                                                <textarea class="form-control" name="lesson_overview" rows="5"></textarea>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium">ชื่อบทเรียน <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" name="lesson_name">
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-medium">คำถามระหว่างรับชม <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="lesson_question">
-                                            <option value="0">ปิดใช้งานคำถาม</option>
-                                            <option value="1">เปิดใช้งานคำถาม</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium">จำนวนคำถามระหว่างรับชม</label>
-                                        <input type="number" min="0" class="form-control" name="lesson_question_limit">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium">ระยะเวลาทำคำถามระหว่างรับชม (วินาที)</label>
-                                        <input type="number" min="0" class="form-control" name="lesson_question_time">
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-medium">รายละเอียดโดยย่อ</label>
-                                        <textarea class="form-control" name="lesson_overview" rows="3"></textarea>
+
+                                    <!-- ===== ขวา: การตั้งค่าคำถามระหว่างรับชม ===== -->
+                                    <div class="col-lg-6 lesson-col-right">
+                                        <h6 class="fw-bold text-secondary text-uppercase mb-3" style="letter-spacing:.02em;">การตั้งค่าคำถามระหว่างรับชม</h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="form-label fw-medium">สถานะคำถาม <span class="text-danger">*</span></label>
+                                                <select class="form-select" name="lesson_question">
+                                                    <option value="0">ปิดใช้งานคำถาม</option>
+                                                    <option value="1">เปิดใช้งานคำถาม</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label fw-medium">จำนวนคำถามระหว่างรับชม</label>
+                                                <input type="number" min="0" class="form-control" name="lesson_question_limit">
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label fw-medium">ระยะเวลาทำคำถาม (วินาที)</label>
+                                                <input type="number" min="0" class="form-control" name="lesson_question_time">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn btn-primary w-100 mt-3 BtnUpdateLesson" onclick="SubmitUpdateLesson()">แก้ไขข้อมูล</button>
+
+                                <button type="button" class="btn btn-primary w-100 mt-4 BtnUpdateLesson" onclick="SubmitUpdateLesson()">แก้ไขข้อมูล</button>
                             </form>
                         </div>
 
