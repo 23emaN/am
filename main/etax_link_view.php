@@ -21,23 +21,23 @@
 
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <a href="etax_link" class="btn btn-light d-inline-flex align-items-center gap-1">
-                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> กลับ
+                    <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ
                 </a>
                 <div class="d-flex flex-wrap gap-2" id="ViewButtons"></div>
             </div>
 
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
                     <h4 class="mb-1">ใบกำกับภาษี <span id="EtxNo">-</span></h4>
                     <div class="text-secondary mb-4">วันที่ในเอกสาร <span id="EtxDate">-</span> · <span id="EtxStatus"></span> <span id="EtxLinkStatus"></span></div>
 
                     <!-- ลิ้งค์สำหรับลูกค้า -->
                     <div class="mb-4">
-                        <label class="form-label fw-medium">ลิ้งค์สำหรับลูกค้า (เปิดโหลด PDF โดยไม่ต้องเข้าสู่ระบบ)</label>
+                        <label for="PublicLink" class="form-label fw-medium">ลิ้งค์สำหรับลูกค้า (เปิดโหลด PDF โดยไม่ต้องเข้าสู่ระบบ)</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="PublicLink" readonly>
                             <button type="button" class="btn btn-secondary d-inline-flex align-items-center gap-1" onclick="CopyPublicLink()">
-                                <span class="material-symbols-outlined" style="font-size:18px;">content_copy</span> คัดลอก
+                                <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">content_copy</span> คัดลอก
                             </button>
                         </div>
                     </div>

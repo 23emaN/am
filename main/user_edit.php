@@ -20,7 +20,7 @@
             -->
 
             <!-- การ์ดที่ 1: รายละเอียด + ฟอร์มแก้ไข -->
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
@@ -95,7 +95,7 @@
             </div>
 
             <!-- การ์ดที่ 2: แท็บข้อมูลที่เกี่ยวข้อง -->
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
 
                     <ul class="nav nav-tabs mb-3" id="userTab" role="tablist">
@@ -198,7 +198,7 @@
 <!-- Modal: ตรวจสอบเอกสารยืนยันตัวตน -->
 <div class="modal fade" id="VerifyModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content app-card">
             <div class="modal-header">
                 <h5 class="modal-title">ยืนยันตัวตนผู้ใช้</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -212,24 +212,24 @@
                         <input type="text" class="form-control bg-light" value="ยืนยันด้วยบัตรประชาชน" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">หมายเลขเอกสาร</label>
+                        <label class="form-label" for="verify_citizen_id">หมายเลขเอกสาร</label>
                         <input type="text" class="form-control bg-light" id="verify_citizen_id" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">วันหมดอายุของเอกสาร</label>
+                        <label class="form-label" for="verify_expiry">วันหมดอายุของเอกสาร</label>
                         <input type="text" class="form-control bg-light" id="verify_expiry" readonly>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">รูปเอกสาร</label>
                         <div>
-                            <img id="verify_id_image" src="" alt="รูปเอกสาร" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <img id="verify_id_image" src="" alt="รูปเอกสาร" class="img-fluid w-100" style="object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border);">
                             <div id="verify_id_image_empty" class="text-muted small d-none">ไม่มีรูปเอกสาร</div>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">รูปหน้ายืนยัน</label>
                         <div>
-                            <img id="verify_photo" src="" alt="รูปหน้ายืนยัน" class="img-fluid rounded border w-100" style="object-fit: contain;">
+                            <img id="verify_photo" src="" alt="รูปหน้ายืนยัน" class="img-fluid w-100" style="object-fit: contain; border-radius: var(--radius-md); border: 1px solid var(--border);">
                             <div id="verify_photo_empty" class="text-muted small d-none">ไม่มีรูปหน้ายืนยัน</div>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
 
                     <!-- หมายเหตุ: บังคับกรอกเมื่อเลือก "ไม่อนุมัติ" (เหตุผลการปฏิเสธ) -->
                     <div class="mb-2 d-none" id="remark_wrap">
-                        <label class="form-label">หมายเหตุ (เหตุผลที่ไม่อนุมัติ) <span class="text-danger">*</span></label>
+                        <label class="form-label" for="verify_remark">หมายเหตุ (เหตุผลที่ไม่อนุมัติ) <span class="text-danger">*</span></label>
                         <textarea class="form-control" name="remark" id="verify_remark" rows="2" placeholder="ระบุเหตุผลการปฏิเสธ"></textarea>
                     </div>
                 </form>

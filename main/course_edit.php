@@ -13,7 +13,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-3">
+            <div class="card app-card bg-white border-0 rounded-3 mb-3">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">ดู/แก้ไขคอร์สเรียน</h2>
                     <button type="button" class="btn btn-danger BtnDeleteCourse" onclick="DeleteCourse()">ลบคอร์สเรียน</button>
@@ -118,7 +118,7 @@
             <div class="modal-body">
                 <form id="formLessonFile" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label class="form-label fw-medium">บทเรียน <span class="text-danger">*</span></label>
+                        <label class="form-label fw-medium" for="lf_lesson_id">บทเรียน <span class="text-danger">*</span></label>
                         <select class="form-select" name="lesson_id" id="lf_lesson_id">
                             <option value="">กรุณาเลือกบทเรียน</option>
                         </select>
@@ -170,7 +170,7 @@
                     </div>
                     <div id="examChoiceList"></div>
                     <div class="mb-2">
-                        <label class="form-label fw-medium">คำตอบที่ถูกต้อง <span class="text-danger">*</span></label>
+                        <label class="form-label fw-medium" for="examCorrectSelect">คำตอบที่ถูกต้อง <span class="text-danger">*</span></label>
                         <select class="form-select" id="examCorrectSelect"></select>
                     </div>
                 </form>

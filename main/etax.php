@@ -7,7 +7,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">ใบกำกับภาษี (E-Tax)</h4>
                 </div>
@@ -15,7 +15,7 @@
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-6">
-                            <label class="form-label fw-medium">ค้นหา</label>
+                            <label for="f_search" class="form-label fw-medium">ค้นหา</label>
                             <input type="text" class="form-control" id="f_search" placeholder="เลขที่เอกสาร / ชื่อลูกค้า / เลขประจำตัวผู้เสียภาษี">
                         </div>
                         <div class="col-md-2">

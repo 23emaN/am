@@ -22,7 +22,7 @@ $to   = min($page * $per_page, $total);
                         <th scope="col">ตัวอย่าง</th>
                         <th scope="col">ลิงก์ปลายทาง</th>
                         <th scope="col" class="text-center">สถานะ</th>
-                        <th scope="col" class="text-center" style="width: 130px;">ACTION</th>
+                        <th scope="col" class="text-center" style="width: 110px;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,7 +38,7 @@ $to   = min($page * $per_page, $total);
                                 <?php if ($img_path): ?>
                                     <img src="<?php echo $img_path; ?>"
                                          alt="banner"
-                                         style="max-height: 100px; max-width: 300px; object-fit: cover; border-radius: 6px;"
+                                         style="max-height: 100px; max-width: 300px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border);"
                                          onerror="this.style.display='none'">
                                 <?php else: ?>
                                     <span class="text-muted small">ไม่มีรูป</span>
@@ -61,10 +61,12 @@ $to   = min($page * $per_page, $total);
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-info text-white w-100"
-                                    onclick="GetEditBanner('<?php echo $row['banner_id']; ?>');">
-                                    แก้ไข
-                                </button>
+                                <div class="d-flex justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-info text-white"
+                                        onclick="GetEditBanner('<?php echo $row['banner_id']; ?>');">
+                                        แก้ไข
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -75,9 +77,9 @@ $to   = min($page * $per_page, $total);
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

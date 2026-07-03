@@ -37,7 +37,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         $doc_status  = (string) ($row['doc_status'] ?? '1');
                         $link_status = (string) ($row['link_status'] ?? '1');
                         $link_on     = ($link_status === '1');
-                        $sq          = 'btn btn-sm d-inline-flex align-items-center justify-content-center p-0';
+                        $sq          = 'btn btn-sm icon-btn';
                     ?>
                         <tr>
                             <td class="text-center"><?= $id ?></td>
@@ -61,16 +61,16 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
-                                    <a href="etax_link_view.php?id=<?= $id ?>" class="<?= $sq ?> btn-info text-white" style="width:34px;height:34px;" title="ดูข้อมูล">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">visibility</span></a>
-                                    <button type="button" class="<?= $sq ?> btn-secondary" style="width:34px;height:34px;" onclick="CopyLink('<?= $esc($token) ?>')" title="คัดลอกลิ้งค์">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">link</span></button>
-                                    <button type="button" class="<?= $sq ?> btn-success" style="width:34px;height:34px;" onclick="DownloadEtaxLink(<?= $id ?>)" title="ดาวน์โหลด PDF">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">download</span></button>
-                                    <button type="button" class="<?= $sq . ($link_on ? ' btn-warning' : ' btn-outline-secondary') ?>" style="width:34px;height:34px;" onclick="ToggleLink(<?= $id ?>)" title="<?= $link_on ? 'ปิดใช้งานลิ้งค์' : 'เปิดใช้งานลิ้งค์' ?>">
-                                        <span class="material-symbols-outlined" style="font-size:18px;"><?= $link_on ? 'link_off' : 'link' ?></span></button>
-                                    <button type="button" class="<?= $sq ?> btn-danger" style="width:34px;height:34px;" onclick="DeleteLink(<?= $id ?>)" title="ลบ">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">delete</span></button>
+                                    <a href="etax_link_view.php?id=<?= $id ?>" class="<?= $sq ?> btn-info text-white" title="ดูข้อมูล" aria-label="ดูข้อมูลใบกำกับภาษี">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span></a>
+                                    <button type="button" class="<?= $sq ?> btn-secondary" onclick="CopyLink('<?= $esc($token) ?>')" title="คัดลอกลิ้งค์" aria-label="คัดลอกลิ้งค์">
+                                        <span class="material-symbols-outlined" aria-hidden="true">link</span></button>
+                                    <button type="button" class="<?= $sq ?> btn-success" onclick="DownloadEtaxLink(<?= $id ?>)" title="ดาวน์โหลด PDF" aria-label="ดาวน์โหลด PDF">
+                                        <span class="material-symbols-outlined" aria-hidden="true">download</span></button>
+                                    <button type="button" class="<?= $sq . ($link_on ? ' btn-warning' : ' btn-outline-secondary') ?>" onclick="ToggleLink(<?= $id ?>)" title="<?= $link_on ? 'ปิดใช้งานลิ้งค์' : 'เปิดใช้งานลิ้งค์' ?>" aria-label="<?= $link_on ? 'ปิดใช้งานลิ้งค์' : 'เปิดใช้งานลิ้งค์' ?>">
+                                        <span class="material-symbols-outlined" aria-hidden="true"><?= $link_on ? 'link_off' : 'link' ?></span></button>
+                                    <button type="button" class="<?= $sq ?> btn-danger" onclick="DeleteLink(<?= $id ?>)" title="ลบ" aria-label="ลบลิ้งค์">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span></button>
                                 </div>
                             </td>
                         </tr>
@@ -82,9 +82,9 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

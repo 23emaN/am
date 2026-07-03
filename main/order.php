@@ -7,12 +7,12 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คำสั่งซื้อทั้งหมด</h4>
                     <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1"
                         data-bs-toggle="modal" data-bs-target="#modalDownload">
-                        <span class="material-symbols-outlined" style="font-size:18px;">download</span> ดาวน์โหลดรายงานคำสั่งซื้อ
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">download</span> ดาวน์โหลดรายงานคำสั่งซื้อ
                     </button>
                 </div>
 
@@ -20,15 +20,15 @@
                     <!-- ===== ฟิลเตอร์ค้นหา ===== -->
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">หมายเลขคำสั่งซื้อ</label>
+                            <label for="f_order" class="form-label fw-medium">หมายเลขคำสั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_order" placeholder="เช่น VAT2606114">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">ลูกค้า</label>
+                            <label for="f_customer" class="form-label fw-medium">ลูกค้า</label>
                             <input type="text" class="form-control" id="f_customer" placeholder="ชื่อลูกค้า">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">สถานะ</label>
+                            <label for="f_status" class="form-label fw-medium">สถานะ</label>
                             <select class="form-select" id="f_status">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">สำเร็จแล้ว</option>
@@ -37,7 +37,7 @@
                             </select>
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">สถานะการชำระเงิน</label>
+                            <label for="f_payment" class="form-label fw-medium">สถานะการชำระเงิน</label>
                             <select class="form-select" id="f_payment">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">ชำระแล้ว</option>
@@ -46,7 +46,7 @@
                             </select>
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">วันที่สั่งซื้อ</label>
+                            <label for="f_date" class="form-label fw-medium">วันที่สั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_date" placeholder="วัน/เดือน/ปี" autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg-auto">
@@ -74,7 +74,7 @@
             </div>
             <div class="modal-body p-4">
                 <div class="mb-3">
-                    <label class="form-label fw-medium">เลือกช่วงวันที่</label>
+                    <label for="dl_range" class="form-label fw-medium">เลือกช่วงวันที่</label>
                     <input type="text" class="form-control" id="dl_range" placeholder="เลือกช่วงวันที่ (จาก - ถึง)" autocomplete="off" readonly>
                     <div class="form-text">เลือกได้ทั้งช่วง — คลิกวันเริ่มต้นแล้วคลิกวันสิ้นสุด (เว้นว่าง = ทั้งหมด)</div>
                 </div>

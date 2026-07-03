@@ -26,20 +26,19 @@
                             </p>
                         </div>
                         <div class="position-relative">
-                            <button type="button" class="btn d-inline-flex align-items-center gap-1" id="DashDateBtn"
-                                style="background:#ffffff;color:#605DFF;border:0;font-weight:500;box-shadow:0 2px 6px rgba(16,24,40,.12);">
-                                <span class="material-symbols-outlined" style="font-size: 18px;">calendar_month</span>
+                            <button type="button" class="btn welcome-date-btn d-inline-flex align-items-center gap-1" id="DashDateBtn">
+                                <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
                                 เลือกวันที่
                             </button>
                             <!-- input ซ่อนไว้สำหรับ flatpickr range (ปุ่มด้านบนเป็นตัวเปิด) -->
-                            <input type="text" id="DashDateRange" class="position-absolute end-0 top-100"
+                            <input type="text" id="DashDateRange" class="position-absolute end-0 top-100" aria-label="เลือกช่วงวันที่ของข้อมูลแดชบอร์ด"
                                 style="width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0;">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- การ์ดสถิติ (ข้อมูล mock — รอต่อ API จริงภายหลัง) -->
+            <!-- การ์ดสถิติ (ตัวเลข + แนวโน้มเทียบช่วงก่อนหน้า โหลดจาก API จริง) -->
             <div class="row g-4 mb-4">
                 <div class="col-xl-3 col-md-6">
                     <div class="card stat-card bg-white border-0 rounded-3 h-100">
@@ -47,13 +46,13 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-secondary fs-14 mb-2">สมาชิกใหม่</p>
-                                    <h3 class="mb-0"><span id="StatNewMembers">93</span> <small class="fs-14 fw-normal text-secondary">คน</small></h3>
+                                    <h3 class="mb-0"><span id="StatNewMembers" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">คน</small></h3>
                                 </div>
-                                <div class="stat-icon" style="background:#eef0ff; color:#605DFF;">
-                                    <span class="material-symbols-outlined">group</span>
+                                <div class="stat-icon stat-icon--brand">
+                                    <span class="material-symbols-outlined" aria-hidden="true">group</span>
                                 </div>
                             </div>
-                            <span class="stat-trend up mt-3"><span class="material-symbols-outlined" style="font-size:16px;">trending_up</span> +12% จากเดือนก่อน</span>
+                            <span class="stat-trend mt-3" id="TrendMembers"></span>
                         </div>
                     </div>
                 </div>
@@ -63,13 +62,13 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-secondary fs-14 mb-2">คำสั่งซื้อใหม่</p>
-                                    <h3 class="mb-0"><span id="StatNewOrders">105</span> <small class="fs-14 fw-normal text-secondary">รายการ</small></h3>
+                                    <h3 class="mb-0"><span id="StatNewOrders" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">รายการ</small></h3>
                                 </div>
-                                <div class="stat-icon" style="background:#e8f8ef; color:#16a34a;">
-                                    <span class="material-symbols-outlined">shopping_cart</span>
+                                <div class="stat-icon stat-icon--success">
+                                    <span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span>
                                 </div>
                             </div>
-                            <span class="stat-trend up mt-3"><span class="material-symbols-outlined" style="font-size:16px;">trending_up</span> +8% จากเดือนก่อน</span>
+                            <span class="stat-trend mt-3" id="TrendOrders"></span>
                         </div>
                     </div>
                 </div>
@@ -79,13 +78,13 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-secondary fs-14 mb-2">คำสั่งซื้อใหม่ (ยอดเงิน)</p>
-                                    <h3 class="mb-0"><span id="StatNewRevenue">45,901</span> <small class="fs-14 fw-normal text-secondary">฿</small></h3>
+                                    <h3 class="mb-0"><span id="StatNewRevenue" class="stat-value">–</span> <small class="fs-14 fw-normal text-secondary">฿</small></h3>
                                 </div>
-                                <div class="stat-icon" style="background:#fff4e5; color:#f59e0b;">
-                                    <span class="material-symbols-outlined">payments</span>
+                                <div class="stat-icon stat-icon--warning">
+                                    <span class="material-symbols-outlined" aria-hidden="true">payments</span>
                                 </div>
                             </div>
-                            <span class="stat-trend up mt-3"><span class="material-symbols-outlined" style="font-size:16px;">trending_up</span> +5% จากเดือนก่อน</span>
+                            <span class="stat-trend mt-3" id="TrendRevenue"></span>
                         </div>
                     </div>
                 </div>
@@ -95,13 +94,13 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <p class="text-secondary fs-14 mb-2">ยอดเงิน OTP คงเหลือ</p>
-                                    <h3 class="mb-0"><span id="StatOtpBalance">—</span> <small class="fs-14 fw-normal text-secondary">USD</small></h3>
+                                    <h3 class="mb-0"><span id="StatOtpBalance" class="stat-value text-secondary">—</span> <small class="fs-14 fw-normal text-secondary">USD</small></h3>
                                 </div>
-                                <div class="stat-icon" style="background:#e6f6fb; color:#0ea5e9;">
-                                    <span class="material-symbols-outlined">sms</span>
+                                <div class="stat-icon stat-icon--info">
+                                    <span class="material-symbols-outlined" aria-hidden="true">sms</span>
                                 </div>
                             </div>
-                            <span class="stat-trend mt-3 text-secondary"><span class="material-symbols-outlined" style="font-size:16px;">info</span> รอเชื่อม API ผู้ให้บริการ OTP</span>
+                            <span class="empty-state mt-3" style="font-size:12px;"><span class="material-symbols-outlined" style="font-size:16px;" aria-hidden="true">info</span> รอเชื่อม API ผู้ให้บริการ OTP</span>
                         </div>
                     </div>
                 </div>
@@ -179,18 +178,41 @@
             xaxis: {
                 categories: days,
                 tickPlacement: "on",
-                labels: { rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: "12px", colors: "#94a3b8" } },
+                labels: { rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: "12px", colors: "#64748b" } },
                 axisBorder: { show: false },
                 axisTicks: { show: false }
             },
             yaxis: {
                 min: 0,
                 tickAmount: 4,
-                labels: { style: { colors: "#94a3b8" }, formatter: function (v) { return (typeof NumberFormat === "function") ? NumberFormat(Math.round(v)) : Math.round(v); } }
+                labels: { style: { colors: "#64748b" }, formatter: function (v) { return (typeof NumberFormat === "function") ? NumberFormat(Math.round(v)) : Math.round(v); } }
             },
             tooltip: { y: { formatter: function (v) { return ((typeof NumberFormat === "function") ? NumberFormat(v) : v) + " ฿"; } } }
         });
         salesChart.render();
+    }
+
+    // แสดงป้ายแนวโน้มเทียบช่วงก่อนหน้า (ข้อมูลจริงจาก API)
+    function RenderTrend(elId, t) {
+        var el = document.getElementById(elId);
+        if (!el) { return; }
+        if (!t || t.dir === "flat") {
+            el.className = "stat-trend mt-3 text-secondary";
+            el.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">trending_flat</span> เท่ากับช่วงก่อน';
+            return;
+        }
+        var up = t.dir === "up";
+        el.className = "stat-trend mt-3 " + (up ? "up" : "down");
+        var icon = up ? "trending_up" : "trending_down";
+        var nf = function (v) { return (typeof NumberFormat === "function") ? NumberFormat(v) : v; };
+        var pctTxt;
+        if (t.pct === null || typeof t.pct === "undefined") {
+            // ช่วงก่อนหน้าไม่มีฐานเทียบ (=0) -> โชว์จำนวนที่เพิ่ม/ลดจริงแทน %
+            pctTxt = (up ? "+" : "-") + nf(Math.round(Math.abs(t.diff || 0)));
+        } else {
+            pctTxt = (up ? "+" : "-") + t.pct + "%";
+        }
+        el.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">' + icon + '</span> ' + pctTxt + ' จากช่วงก่อน';
     }
 
     // โหลดข้อมูลจริงตามช่วงวันที่ (อ่านจากข้อความช่วงวันที่ด้านบน)
@@ -211,6 +233,10 @@
                 $("#StatNewMembers").text(nf(d.new_members));
                 $("#StatNewOrders").text(nf(d.new_orders));
                 $("#StatNewRevenue").text(nf(Math.round(d.revenue)));
+                var tr = d.trend || {};
+                RenderTrend("TrendMembers", tr.members);
+                RenderTrend("TrendOrders", tr.orders);
+                RenderTrend("TrendRevenue", tr.revenue);
                 RenderSalesChart(d.days || [], d.sales || []);
             },
             error: function (j, e) { if (typeof ShowErrorAjax === "function") { ShowErrorAjax(j, e); } }

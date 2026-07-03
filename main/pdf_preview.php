@@ -26,7 +26,7 @@
         html, body { margin: 0; height: 100%; font-family: "K2D", Tahoma, sans-serif; background: #525659; }
         #pvFrame { width: 100%; height: 100%; border: 0; display: block; }
         .pv-msg { color: #fff; text-align: center; padding-top: 80px; font-size: 16px; }
-        .pv-spin { width: 34px; height: 34px; border: 4px solid #888; border-top-color: #fff; border-radius: 50%; margin: 0 auto 16px; animation: pvspin 0.8s linear infinite; }
+        .pv-spin { width: 34px; height: 34px; border: 4px solid #888; border-top-color: #8b89ff; border-radius: 50%; margin: 0 auto 16px; animation: pvspin 0.8s linear infinite; }
         @keyframes pvspin { to { transform: rotate(360deg); } }
     </style>
 </head>

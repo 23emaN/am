@@ -5,7 +5,7 @@
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คำสั่งซื้อรอยืนยัน</h4>
                 </div>
@@ -14,15 +14,15 @@
                     <!-- ===== FILTER ROW ===== -->
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">หมายเลขคำสั่งซื้อ</label>
+                            <label class="form-label fw-medium" for="f_order">หมายเลขคำสั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_order" placeholder="เช่น ORD-..." autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">ลูกค้า</label>
+                            <label class="form-label fw-medium" for="f_customer">ลูกค้า</label>
                             <input type="text" class="form-control" id="f_customer" placeholder="ชื่อลูกค้า" autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label class="form-label fw-medium">วันที่สั่งซื้อ</label>
+                            <label class="form-label fw-medium" for="f_date">วันที่สั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_date" placeholder="วัน/เดือน/ปี" autocomplete="off">
                         </div>
                         <div class="col-md-6 col-lg-auto">

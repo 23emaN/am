@@ -27,7 +27,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">ใบรับรองผลการสอบ</h4>
                 </div>
@@ -35,7 +35,7 @@
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-3">
-                            <label class="form-label fw-medium">คอร์สเรียน</label>
+                            <label for="f_course" class="form-label fw-medium">คอร์สเรียน</label>
                             <select class="form-select tom-course" id="f_course">
                                 <option value="">ทั้งหมด</option>
                                 <?php foreach ($course_options as $c): ?>
@@ -44,7 +44,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-medium">ผู้เรียน</label>
+                            <label for="f_member" class="form-label fw-medium">ผู้เรียน</label>
                             <select class="form-select tom-member" id="f_member">
                                 <option value="">ทั้งหมด</option>
                                 <?php foreach ($member_options as $m): ?>
@@ -53,7 +53,7 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-medium">สถานะการสอบ</label>
+                            <label for="f_status" class="form-label fw-medium">สถานะการสอบ</label>
                             <select class="form-select" id="f_status">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">ผ่าน</option>
@@ -61,7 +61,7 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-medium">การอนุมัติ</label>
+                            <label for="f_approve" class="form-label fw-medium">การอนุมัติ</label>
                             <select class="form-select" id="f_approve">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">อนุมัติ</option>

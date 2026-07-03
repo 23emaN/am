@@ -20,7 +20,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
                     <h4 class="mb-4">ดูข้อมูลใบกำกับภาษี (E-TAX)</h4>
 

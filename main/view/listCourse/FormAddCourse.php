@@ -44,7 +44,7 @@
     .code-builder .cb-seg-quarter { flex:0 0 auto; width:34px; min-width:34px; text-align:center; padding:2px 1px; background:#e9ecef !important; }
 </style>
 
-<div class="card bg-white border-0 rounded-3 mb-4">
+<div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-0">
         <h2 class="mb-0"><?php echo $mode === 'edit' ? 'ข้อมูลทั่วไปของคอร์สเรียน' : 'เพิ่มคอร์สเรียนใหม่'; ?></h2>
     </div>

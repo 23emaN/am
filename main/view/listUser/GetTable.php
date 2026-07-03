@@ -42,10 +42,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                             <td class="text-center"><?php echo $n++; ?></td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <span class="flex-shrink-0 d-inline-flex align-items-center justify-content-center rounded-circle text-primary fw-medium"
-                                          style="width:38px;height:38px;background:#eef0ff;">
-                                        <?php echo $esc($initial); ?>
-                                    </span>
+                                    <span class="avatar-initial" aria-hidden="true"><?php echo $esc($initial); ?></span>
                                     <span class="ms-2 fw-medium"><?php echo $esc($full_name !== '' ? $full_name : '-'); ?></span>
                                 </div>
                             </td>
@@ -60,15 +57,13 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                             </td>
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center p-0"
-                                        style="width:34px;height:34px;"
-                                        onclick="GetEditUser('<?php echo $esc($row['user_id']); ?>');" title="ดู/แก้ไข">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                                    <button type="button" class="btn btn-sm btn-primary icon-btn"
+                                        onclick="GetEditUser('<?php echo $esc($row['user_id']); ?>');" title="ดู/แก้ไข" aria-label="ดู/แก้ไขผู้ใช้">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-info text-white d-inline-flex align-items-center justify-content-center p-0"
-                                        style="width:34px;height:34px;"
-                                        onclick="LoginAsUser('<?php echo $esc($row['user_id']); ?>');" title="ล็อกอินเข้าเว็บไซต์">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">login</span>
+                                    <button type="button" class="btn btn-sm btn-info text-white icon-btn"
+                                        onclick="LoginAsUser('<?php echo $esc($row['user_id']); ?>');" title="ล็อกอินเข้าเว็บไซต์" aria-label="ล็อกอินเข้าเว็บไซต์แทนผู้ใช้">
+                                        <span class="material-symbols-outlined" aria-hidden="true">login</span>
                                     </button>
                                 </div>
                             </td>
@@ -81,9 +76,9 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

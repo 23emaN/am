@@ -17,13 +17,13 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 <?php if (!empty($list)): ?>
     <div class="default-table-area">
         <div class="table-responsive">
-            <table class="table align-middle w-100" id="PageTable">
+            <table class="table align-middle w-100" id="PageTable" style="table-layout: fixed;">
                 <thead>
                     <tr>
-                        <th scope="col" class="text-center" style="width: 80px;">#</th>
-                        <th scope="col" class="text-start">ชื่อประเภท</th>
-                        <th scope="col" class="text-end" style="width: 180px;">จำนวนคอร์สเรียน</th>
-                        <th scope="col" class="text-center" style="width: 120px;"></th>
+                        <th scope="col" class="text-center" style="width: 8%;">#</th>
+                        <th scope="col" class="text-start" style="width: 52%;">ชื่อประเภท</th>
+                        <th scope="col" class="text-center" style="width: 18%;">จำนวนคอร์สเรียน</th>
+                        <th scope="col" class="text-center" style="width: 22%;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,16 +31,18 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         <tr>
                             <td class="text-center"><?= $i++ ?></td>
                             <td class="text-secondary"><?= $esc($row["type_name"] ?? "") ?></td>
-                            <td class="text-end text-secondary"><?= $esc($row["course_count"] ?? 0) ?></td>
+                            <td class="text-secondary text-center"><?= $esc($row["course_count"] ?? 0) ?></td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-warning w-100 mb-1"
-                                    onclick="GetEditType('<?= $esc($row['type_id']) ?>');">
-                                    แก้ไข
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger w-100 mb-1"
-                                    onclick="GetDeleteType('<?= $esc($row['type_id']) ?>');">
-                                    ลบ
-                                </button>
+                                <div class="d-flex gap-2 justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                        onclick="GetEditType('<?= $esc($row['type_id']) ?>');">
+                                        แก้ไข
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="GetDeleteType('<?= $esc($row['type_id']) ?>');">
+                                        ลบ
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -51,9 +53,9 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

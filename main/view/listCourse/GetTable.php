@@ -61,7 +61,7 @@ function course_codes(array $row, string $type): array {
                                          style="width:64px;height:48px;object-fit:cover;border-radius:8px;">
                                 <?php else: ?>
                                     <span class="d-inline-flex align-items-center justify-content-center text-muted"
-                                          style="width:64px;height:48px;border-radius:8px;background:#f1f3f6;">
+                                          style="width:64px;height:48px;border-radius:8px;background:var(--bg);" aria-hidden="true">
                                         <i class="ri-image-line fs-18"></i>
                                     </span>
                                 <?php endif; ?>
@@ -127,10 +127,9 @@ function course_codes(array $row, string $type): array {
 
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center justify-content-center p-0"
-                                        style="width:34px;height:34px;"
-                                        onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">edit</span>
+                                    <button type="button" class="btn btn-sm btn-primary icon-btn"
+                                        onclick="GetEditCourse('<?php echo $row['course_id']; ?>');" title="แก้ไข" aria-label="แก้ไขคอร์สเรียน">
+                                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
                                     </button>
                                 </div>
                             </td>
@@ -143,9 +142,9 @@ function course_codes(array $row, string $type): array {
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>
