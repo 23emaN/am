@@ -154,7 +154,7 @@ try {
         $pdo_connect->rollBack();
     }
     error_log('ConfirmPayment Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

@@ -68,7 +68,7 @@ try {
     }
 } catch (Throwable $e) {
     error_log('SaveProgress Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

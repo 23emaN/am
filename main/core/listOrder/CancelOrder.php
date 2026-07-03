@@ -58,7 +58,7 @@ try {
     Response::json(1, 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว', ['order_id' => $order_id]);
 } catch (\Throwable $e) {
     error_log('CancelOrder Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

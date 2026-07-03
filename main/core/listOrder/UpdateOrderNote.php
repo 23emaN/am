@@ -30,7 +30,7 @@ try {
     Response::json(1, 'บันทึกหมายเหตุสำเร็จ', null);
 } catch (Throwable $e) {
     error_log('UpdateOrderNote Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

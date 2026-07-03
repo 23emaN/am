@@ -85,7 +85,7 @@ try {
     Response::json(1, 'อัปโหลดวิดีโอขึ้น Vimeo สำเร็จ', ['lesson_video' => $embed, 'video_id' => $video_id]);
 } catch (Exception $e) {
     error_log('Vimeo Upload Error: ' . $e->getMessage());
-    Response::json(0, 'อัปโหลดขึ้น Vimeo ไม่สำเร็จ: ' . $e->getMessage(), null);
+    Response::json(0, 'อัปโหลดขึ้น Vimeo ไม่สำเร็จ', null);
 } finally {
     $pdo_connect = null;
 }

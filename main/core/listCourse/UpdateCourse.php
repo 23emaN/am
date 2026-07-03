@@ -152,7 +152,7 @@ try {
     Response::json(1, 'บันทึกการแก้ไขสำเร็จ', ['course_id' => $course_id]);
 } catch (Exception $e) {
     error_log('Update Course Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

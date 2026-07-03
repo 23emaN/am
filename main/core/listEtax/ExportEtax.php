@@ -53,5 +53,5 @@ try {
     exit;
 } catch (\Throwable $e) {
     error_log('ExportEtax Error: ' . $e->getMessage());
-    Response::json(0, 'สร้าง PDF ไม่สำเร็จ: ' . $e->getMessage(), null);
+    Response::json(0, 'สร้าง PDF ไม่สำเร็จ', null);
 }

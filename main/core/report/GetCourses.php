@@ -33,7 +33,7 @@ try {
     Response::json(1, 'Success', ['courses' => $data]);
 } catch (\Throwable $e) {
     error_log('Report GetCourses Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo = null;
 }
