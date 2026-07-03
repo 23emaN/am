@@ -74,12 +74,46 @@ try {
         $guard++;
     }
 
+    // ---- แนวโน้มเทียบช่วงก่อนหน้า (ความยาวเท่ากัน ก่อน [from,to] ทันที) ----
+    $len_days  = (int) floor((strtotime($to) - strtotime($from)) / 86400) + 1;
+    $prev_to   = date('Y-m-d', strtotime($from . ' -1 day'));
+    $prev_from = date('Y-m-d', strtotime($from . ' -' . $len_days . ' day'));
+
+    $st = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_user WHERE delete_at IS NULL AND DATE(create_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $prev_from, ':t' => $prev_to]);
+    $prev_members = (int) $st->fetchColumn();
+    $st->closeCursor();
+
+    $st = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_orders WHERE DATE(created_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $prev_from, ':t' => $prev_to]);
+    $prev_orders = (int) $st->fetchColumn();
+    $st->closeCursor();
+
+    $st = $pdo_connect->prepare("SELECT COALESCE(SUM(total_price),0) FROM tbl_orders WHERE payment_status = '1' AND DATE(created_at) BETWEEN :f AND :t");
+    $st->execute([':f' => $prev_from, ':t' => $prev_to]);
+    $prev_revenue = (float) $st->fetchColumn();
+    $st->closeCursor();
+
+    // % เปลี่ยนแปลง + ทิศทาง + diff (จำนวนที่เพิ่ม/ลดจริง)
+    // กันหารศูนย์: ไม่มีฐานเทียบ (prev<=0) -> pct=null แต่ยังส่ง diff ให้แสดงจำนวนจริงแทน %
+    $trend = function ($cur, $prev) {
+        $cur = (float) $cur; $prev = (float) $prev;
+        $diff = $cur - $prev;
+        if ($prev <= 0) { return ['pct' => null, 'dir' => ($cur > 0 ? 'up' : 'flat'), 'diff' => $diff]; }
+        $pct = ($diff / $prev) * 100;
+        return ['pct' => round(abs($pct), 1), 'dir' => ($pct > 0 ? 'up' : ($pct < 0 ? 'down' : 'flat')), 'diff' => $diff];
+    };
     Response::json(1, 'สำเร็จ', [
         'new_members' => $new_members,
         'new_orders'  => $new_orders,
         'revenue'     => $revenue,
         'days'        => $days,
         'sales'       => $sales,
+        'trend'       => [
+            'members' => $trend($new_members, $prev_members),
+            'orders'  => $trend($new_orders,  $prev_orders),
+            'revenue' => $trend($revenue,     $prev_revenue),
+        ],
     ]);
 
 } catch (\Throwable $e) {

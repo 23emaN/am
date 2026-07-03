@@ -5,22 +5,22 @@
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">ลิ้งค์ออกใบกำกับภาษี (E-Tax)</h4>
                     <a href="etax_link_fromadd" class="btn btn-success d-inline-flex align-items-center gap-1">
-                        <span class="material-symbols-outlined" style="font-size:18px;">add</span> สร้างลิ้งค์ใหม่
+                        <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span> สร้างลิ้งค์ใหม่
                     </a>
                 </div>
 
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-4">
-                            <label class="form-label fw-medium">ค้นหา</label>
+                            <label class="form-label fw-medium" for="f_search">ค้นหา</label>
                             <input type="text" class="form-control" id="f_search" placeholder="เลขใบกำกับ / ชื่อลูกค้า">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-medium">สถานะเอกสาร</label>
+                            <label class="form-label fw-medium" for="f_doc_status">สถานะเอกสาร</label>
                             <select class="form-select" id="f_doc_status">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">ออกใบกำกับภาษีแล้ว</option>
@@ -28,7 +28,7 @@
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-medium">สถานะลิงค์</label>
+                            <label class="form-label fw-medium" for="f_link_status">สถานะลิงค์</label>
                             <select class="form-select" id="f_link_status">
                                 <option value="">ทั้งหมด</option>
                                 <option value="1">ใช้งานได้</option>

@@ -12,7 +12,7 @@
     <div class="main-content d-flex flex-column">
         <?php include "navbar.php"; ?>
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white p-4">
                     <h4 class="mb-0">สร้างลิ้งค์ออกใบกำกับภาษี (E-TAX)</h4>
                 </div>
@@ -21,30 +21,30 @@
                         <!-- ข้อมูลลูกค้า -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">ชื่อลูกค้า / บริษัท <span class="text-danger">*</span></label>
+                                <label for="customer_name" class="form-label fw-medium">ชื่อลูกค้า / บริษัท <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="customer_name" placeholder="กรอกชื่อลูกค้า">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">วันที่ในเอกสาร <span class="text-danger">*</span></label>
+                                <label for="doc_date" class="form-label fw-medium">วันที่ในเอกสาร <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="doc_date" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-medium">ประเภท</label>
+                                <label for="customer_type" class="form-label fw-medium">ประเภท</label>
                                 <select class="form-select" id="customer_type">
                                     <option value="1">บุคคลธรรมดา</option>
                                     <option value="2">นิติบุคคล</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-medium">เลขประจำตัวผู้เสียภาษี <span class="text-danger">*</span></label>
+                                <label for="customer_tax_id" class="form-label fw-medium">เลขประจำตัวผู้เสียภาษี <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="customer_tax_id" maxlength="13" placeholder="13 หลัก">
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-medium">อีเมล</label>
+                                <label for="customer_email" class="form-label fw-medium">อีเมล</label>
                                 <input type="email" class="form-control" id="customer_email" placeholder="(ถ้ามี)">
                             </div>
                             <div class="col-12">
-                                <label class="form-label fw-medium">ที่อยู่</label>
+                                <label for="customer_address" class="form-label fw-medium">ที่อยู่</label>
                                 <textarea class="form-control" id="customer_address" rows="2" placeholder="ที่อยู่สำหรับออกใบกำกับภาษี"></textarea>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h6 class="mb-0">รายการสินค้า</h6>
                             <button type="button" class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" onclick="AddItemRow()">
-                                <span class="material-symbols-outlined" style="font-size:18px;">add</span> เพิ่มใหม่
+                                <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span> เพิ่มใหม่
                             </button>
                         </div>
                         <div class="table-responsive mb-3">

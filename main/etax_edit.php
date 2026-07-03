@@ -14,7 +14,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
                     <h4 class="mb-4">แก้ไขใบกำกับภาษีอิเล็กทรอนิกส์ (E-TAX INVOICE)</h4>
 
@@ -32,61 +32,61 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">ประเภทลูกค้า <span class="text-danger">*</span></label>
+                                <label for="etx_type" class="form-label fw-medium">ประเภทลูกค้า <span class="text-danger">*</span></label>
                                 <select class="form-select" id="etx_type">
                                     <option value="1">บุคคลธรรมดา</option>
                                     <option value="2">นิติบุคคล</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">ชื่อ – นามสกุลลูกค้า <span class="text-danger">*</span></label>
+                                <label for="etx_name" class="form-label fw-medium">ชื่อ – นามสกุลลูกค้า <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_name">
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">หมายเลขผู้เสียภาษี 13 หลัก <span class="text-danger">*</span></label>
+                                <label for="etx_tax_id" class="form-label fw-medium">หมายเลขผู้เสียภาษี 13 หลัก <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_tax_id" maxlength="13">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">สาขาที่</label>
+                                <label for="etx_branch" class="form-label fw-medium">สาขาที่</label>
                                 <input type="text" class="form-control" id="etx_branch" placeholder="เช่น สำนักงานใหญ่">
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label fw-medium">ที่อยู่ <span class="text-danger">*</span></label>
+                                <label for="etx_detail" class="form-label fw-medium">ที่อยู่ <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="etx_detail" rows="2"></textarea>
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">แขวง/ตำบล <span class="text-danger">*</span></label>
+                                <label for="etx_subdistrict" class="form-label fw-medium">แขวง/ตำบล <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_subdistrict">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">เขต/อำเภอ <span class="text-danger">*</span></label>
+                                <label for="etx_district" class="form-label fw-medium">เขต/อำเภอ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_district">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">จังหวัด <span class="text-danger">*</span></label>
+                                <label for="etx_province" class="form-label fw-medium">จังหวัด <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_province">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
+                                <label for="etx_zipcode" class="form-label fw-medium">รหัสไปรษณีย์ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_zipcode" maxlength="5">
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">อีเมล <span class="text-secondary fs-12">(อีเมลผู้ใช้ แก้ที่หน้าผู้ใช้)</span></label>
+                                <label for="etx_email" class="form-label fw-medium">อีเมล <span class="text-secondary fs-12">(อีเมลผู้ใช้ แก้ที่หน้าผู้ใช้)</span></label>
                                 <input type="text" class="form-control" id="etx_email" readonly disabled>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
+                                <label for="etx_phone" class="form-label fw-medium">เบอร์โทรศัพท์ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="etx_phone">
                             </div>
                         </div>
                     </form>
 
                     <!-- รายการสินค้า (แสดงจากออเดอร์ — ยังไม่มีระบบแก้รายการ e-Tax) -->
-                    <div class="card border rounded-3 mt-4">
+                    <div class="card app-card border rounded-3 mt-4">
                         <div class="card-body p-3">
                             <button type="button" class="btn btn-success mb-3" onclick="ComingSoon()">เพิ่มใหม่</button>
                             <div class="table-responsive">

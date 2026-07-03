@@ -35,7 +35,7 @@ function coupon_date($d): string {
                         <th scope="col">เริ่ม</th>
                         <th scope="col">สิ้นสุด</th>
                         <th scope="col" class="text-center">สถานะ</th>
-                        <th scope="col" class="text-center" style="width: 160px;">ACTION</th>
+                        <th scope="col" class="text-center" style="width: 140px;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,10 +73,12 @@ function coupon_date($d): string {
                                 <?php endif; ?>
                             </td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm btn-info text-white w-100"
-                                    onclick="GetEditCoupon('<?php echo $row['coupon_id']; ?>');">
-                                    ดูรายละเอียด/แก้ไข
-                                </button>
+                                <div class="d-flex justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-info text-white"
+                                        onclick="GetEditCoupon('<?php echo $row['coupon_id']; ?>');">
+                                        รายละเอียด
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -87,9 +89,9 @@ function coupon_date($d): string {
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

@@ -59,6 +59,8 @@
 
         <link rel="stylesheet" href="../template/assets/css/web.css">
 
+        <link rel="stylesheet" href="../template/assets/css/ui.css?ver=<?php echo @filemtime(dirname(__DIR__) . '/template/assets/css/ui.css') ?: time(); ?>">
+
     </head>
 
 

@@ -20,7 +20,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-3">
+            <div class="card app-card bg-white border-0 rounded-3 mb-3">
                 <div class="card-body p-4">
                     <h2 class="mb-3">จัดการบทเรียน</h2>
 
@@ -79,7 +79,7 @@
                             <!-- ปุ่มไปหน้าทดสอบบทเรียน (เครื่องเล่นจริง + คำถามคั่น) -->
                             <a href="lesson_preview.php?course_id=<?php echo $course_id; ?>&lesson_id=<?php echo $lesson_id; ?>"
                                class="btn btn-outline-success w-100 mt-2 d-inline-flex align-items-center justify-content-center gap-1">
-                                <span class="material-symbols-outlined" style="font-size:18px;">play_circle</span>
+                                <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">play_circle</span>
                                 ทดสอบเล่นบทเรียน (Preview)
                             </a>
 
@@ -130,7 +130,7 @@
                     </div>
                     <div id="choiceList"></div>
                     <div class="mb-2">
-                        <label class="form-label fw-medium">คำตอบที่ถูกต้อง <span class="text-danger">*</span></label>
+                        <label for="correctSelect" class="form-label fw-medium">คำตอบที่ถูกต้อง <span class="text-danger">*</span></label>
                         <select class="form-select" id="correctSelect"></select>
                     </div>
                 </form>

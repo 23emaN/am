@@ -49,15 +49,15 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
-                                    <a href="etax_view.php?id=<?= $order_id ?>" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-info text-white" style="width:34px;height:34px;" title="ดูข้อมูล">
-                                        <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                                    <a href="etax_view.php?id=<?= $order_id ?>" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-info text-white icon-btn" title="ดูข้อมูล" aria-label="ดูข้อมูลใบกำกับภาษี">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
                                     </a>
                                     <?php if ($status === '1'): ?>
-                                        <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-success" style="width:34px;height:34px;" onclick="DownloadEtax(<?= $order_id ?>)" title="ดาวน์โหลด PDF">
-                                            <span class="material-symbols-outlined" style="font-size:18px;">download</span>
+                                        <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-success icon-btn" onclick="DownloadEtax(<?= $order_id ?>)" title="ดาวน์โหลด PDF" aria-label="ดาวน์โหลด PDF ใบกำกับภาษี">
+                                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
                                         </button>
-                                        <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-warning" style="width:34px;height:34px;" onclick="SendEmail(<?= $order_id ?>)" title="ส่งอีเมล">
-                                            <span class="material-symbols-outlined" style="font-size:18px;">mail</span>
+                                        <button type="button" class="btn btn-sm d-inline-flex align-items-center justify-content-center p-0 btn-warning icon-btn" onclick="SendEmail(<?= $order_id ?>)" title="ส่งอีเมล" aria-label="ส่งอีเมลใบกำกับภาษี">
+                                            <span class="material-symbols-outlined" aria-hidden="true">mail</span>
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -71,9 +71,9 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 
     <?php include dirname(__DIR__) . '/_pagination.php'; ?>
 <?php else: ?>
-    <div class="text-center py-5 text-muted">
-        <span class="material-symbols-outlined" style="font-size:48px;opacity:.4;">inbox</span>
-        <div class="mt-2 fw-semibold">ไม่พบข้อมูล</div>
-        <div style="font-size:13px;">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
+    <div class="list-empty">
+        <div class="list-empty-icon"><span class="material-symbols-outlined" aria-hidden="true">inbox</span></div>
+        <div class="list-empty-title">ไม่พบข้อมูล</div>
+        <div class="list-empty-hint">ลองปรับเงื่อนไขการค้นหาใหม่อีกครั้ง</div>
     </div>
 <?php endif; ?>

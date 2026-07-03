@@ -7,7 +7,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คอร์สเรียน</h4>
 
@@ -18,10 +18,10 @@
                         </a>
                         */ ?>
                         <a href="course_category.php" class="btn btn-outline-primary d-inline-flex align-items-center gap-1">
-                            <span class="material-symbols-outlined" style="font-size:18px;">folder</span> จัดการหมวดหมู่
+                            <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">folder</span> จัดการหมวดหมู่
                         </a>
                         <a href="course_fromadd.php" class="btn btn-primary d-inline-flex align-items-center gap-1">
-                            <span class="material-symbols-outlined" style="font-size:18px;">add</span> เพิ่มคอร์สเรียน
+                            <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">add</span> เพิ่มคอร์สเรียน
                         </a>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-6 col-lg-4">
-                            <label class="form-label fw-medium">ค้นหา</label>
+                            <label for="f_search" class="form-label fw-medium">ค้นหา</label>
                             <input type="text" class="form-control" id="f_search" placeholder="ชื่อคอร์ส / ประเภท / หมวดหมู่ / รหัสวิชา">
                         </div>
                         <div class="col-md-3 col-lg-2">

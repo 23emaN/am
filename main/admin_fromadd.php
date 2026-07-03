@@ -13,7 +13,7 @@
         <?php include "navbar.php"; ?>
 
         <div class="px-2">
-            <div class="card bg-white border-0 rounded-3 mb-4">
+            <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white p-4">
                     <h2 class="mb-0">เพิ่มผู้ดูแลระบบใหม่</h2>
                 </div>
@@ -22,21 +22,31 @@
                     <form id="FormAddAdmin" autocomplete="off">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="admin_name" value="">
+                                <label for="admin_name" class="form-label">ชื่อ-นามสกุล <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="admin_name" name="admin_name" value="">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">อีเมล <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="user_email" value="">
+                                <label for="user_email" class="form-label">อีเมล <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="user_email" name="user_email" value="">
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">รหัสผ่าน <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="user_password" value="" autocomplete="new-password">
+                                <label for="user_password" class="form-label">รหัสผ่าน <span class="text-danger">*</span></label>
+                                <div class="login-field">
+                                    <input type="password" class="form-control" id="user_password" name="user_password" value="" autocomplete="new-password">
+                                    <button type="button" class="login-eye" aria-label="แสดงหรือซ่อนรหัสผ่าน" aria-pressed="false" onclick="(function(b){var i=document.getElementById('user_password');var show=i.type==='password';i.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));var g=b.querySelector('.material-symbols-outlined');if(g){g.textContent=show?'visibility_off':'visibility';}})(this)">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">ยืนยันรหัสผ่าน <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="user_password_confirm" value="" autocomplete="new-password">
+                                <label for="user_password_confirm" class="form-label">ยืนยันรหัสผ่าน <span class="text-danger">*</span></label>
+                                <div class="login-field">
+                                    <input type="password" class="form-control" id="user_password_confirm" name="user_password_confirm" value="" autocomplete="new-password">
+                                    <button type="button" class="login-eye" aria-label="แสดงหรือซ่อนรหัสผ่าน" aria-pressed="false" onclick="(function(b){var i=document.getElementById('user_password_confirm');var show=i.type==='password';i.type=show?'text':'password';b.setAttribute('aria-pressed',String(show));var g=b.querySelector('.material-symbols-outlined');if(g){g.textContent=show?'visibility_off':'visibility';}})(this)">
+                                        <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- สิทธิ์การใช้งาน: โหลดจาก tbl_slidebar (ค่าเริ่มต้นติ๊กทุกเมนูยกเว้น "ผู้ดูแลระบบ") -->
@@ -46,7 +56,7 @@
                             </div>
 
                             <div class="col-12 mt-3">
-                                <button type="submit" class="btn btn-primary w-100">ยืนยันการเพิ่มผู้ดูแลระบบ</button>
+                                <button type="submit" class="btn btn-primary w-100 py-2">ยืนยันการเพิ่มผู้ดูแลระบบ</button>
                             </div>
                         </div>
                     </form>
