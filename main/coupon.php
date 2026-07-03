@@ -10,7 +10,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h2 class="mb-0">คูปองส่วนลด</h2>
-                    <a href="coupon_fromadd.php" class="btn btn-success">สร้างคูปองส่วนลดใหม่</a>
+                    <a href="coupon_fromadd.php" class="btn btn-primary">สร้างคูปองส่วนลดใหม่</a>
                 </div>
 
                 <div class="card-body p-4">

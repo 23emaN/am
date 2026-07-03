@@ -30,7 +30,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h4 class="mb-0">คอร์สเรียนคงเหลือในระบบ</h4>
-                    <button type="button" class="btn btn-success" onclick="OpenAdd()">เพิ่มสิทธิ์การเข้าถึงคอร์สเรียน</button>
+                    <button type="button" class="btn btn-primary" onclick="OpenAdd()">เพิ่มสิทธิ์การเข้าถึงคอร์สเรียน</button>
                 </div>
 
                 <div class="card-body p-4">

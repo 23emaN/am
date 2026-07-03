@@ -103,6 +103,7 @@ try {
         $pct = ($diff / $prev) * 100;
         return ['pct' => round(abs($pct), 1), 'dir' => ($pct > 0 ? 'up' : ($pct < 0 ? 'down' : 'flat')), 'diff' => $diff];
     };
+
     Response::json(1, 'สำเร็จ', [
         'new_members' => $new_members,
         'new_orders'  => $new_orders,
@@ -113,6 +114,14 @@ try {
             'members' => $trend($new_members, $prev_members),
             'orders'  => $trend($new_orders,  $prev_orders),
             'revenue' => $trend($revenue,     $prev_revenue),
+        ],
+        // ช่วงที่เลือก + ช่วงก่อนหน้าที่ใช้เป็นฐานเทียบแนวโน้ม (ความยาวเท่ากัน ก่อน [from,to] ทันที)
+        'period'      => [
+            'from'      => date('d/m/Y', strtotime($from)),
+            'to'        => date('d/m/Y', strtotime($to)),
+            'prev_from' => date('d/m/Y', strtotime($prev_from)),
+            'prev_to'   => date('d/m/Y', strtotime($prev_to)),
+            'len_days'  => $len_days,
         ],
     ]);
 

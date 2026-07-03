@@ -10,7 +10,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h2 class="mb-0">แบนเนอร์</h2>
-                    <a href="banner_fromadd.php" class="btn btn-success">สร้างแบนเนอร์ใหม่</a>
+                    <a href="banner_fromadd.php" class="btn btn-primary">สร้างแบนเนอร์ใหม่</a>
                 </div>
 
                 <div class="card-body p-4">

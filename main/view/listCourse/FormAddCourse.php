@@ -44,19 +44,23 @@
     .code-builder .cb-seg-quarter { flex:0 0 auto; width:34px; min-width:34px; text-align:center; padding:2px 1px; background:#e9ecef !important; }
 </style>
 
+<?php if ($mode === 'edit'): ?>
+<!-- โหมดแก้ไข: ไม่หุ้มการ์ด เพราะอยู่ในแท็บของการ์ดหลักอยู่แล้ว (กันการ์ดซ้อนการ์ด) -->
+<div class="course-form-plain">
+    <h2 class="mb-4">ข้อมูลทั่วไปของคอร์สเรียน</h2>
+<?php else: ?>
 <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-0">
-        <h2 class="mb-0"><?php echo $mode === 'edit' ? 'ข้อมูลทั่วไปของคอร์สเรียน' : 'เพิ่มคอร์สเรียนใหม่'; ?></h2>
+        <h2 class="mb-0">เพิ่มคอร์สเรียนใหม่</h2>
     </div>
-    <?php if ($mode !== 'edit'): ?>
     <div class="px-4 mb-3">
         <div class="alert alert-success mb-0" role="alert">
             คุณสามารถเพิ่มข้อมูลบทเรียนและข้อสอบได้หลังจากเพิ่มคอร์สเรียน
         </div>
     </div>
-    <?php endif; ?>
 
     <div class="card-body p-4">
+<?php endif; ?>
         <form id="formAddCourse" enctype="multipart/form-data">
             <?php if ($mode === 'edit'): ?>
                 <input type="hidden" name="course_id" value="<?php echo $cv('course_id'); ?>">
@@ -270,8 +274,12 @@
                 </button>
             </div>
         </form>
+<?php if ($mode === 'edit'): ?>
+</div>
+<?php else: ?>
     </div>
 </div>
+<?php endif; ?>
 
 <script>
     // ข้อมูลโหมดแก้ไข (โหมดเพิ่ม = null → prefill ทั้งหมดถูกข้าม ทำงานเหมือนเดิม)
