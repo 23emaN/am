@@ -71,7 +71,7 @@ try {
     ]);
 } catch (Exception $e) {
     error_log('Vimeo CreateUpload Error: ' . $e->getMessage());
-    Response::json(0, 'สร้างงานอัปโหลดไม่สำเร็จ: ' . $e->getMessage(), null);
+    Response::json(0, 'สร้างงานอัปโหลดไม่สำเร็จ', null);
 } finally {
     $pdo_connect = null;
 }

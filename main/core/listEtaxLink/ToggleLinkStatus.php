@@ -39,7 +39,7 @@ try {
     Response::json(1, $new === '1' ? 'เปิดใช้งานลิ้งค์แล้ว' : 'ปิดใช้งานลิ้งค์แล้ว', ['link_status' => $new]);
 } catch (\Throwable $e) {
     error_log('ToggleLinkStatus Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo = null;
 }

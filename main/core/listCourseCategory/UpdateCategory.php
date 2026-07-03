@@ -45,7 +45,7 @@
             Response::json(1, "แก้ไขข้อมูลสำเร็จ", null);
         } catch (Exception $e) {
             error_log("Update Category Error: " . $e->getMessage());
-            Response::json(0, $e->getMessage(), null);
+            Response::json(0, 'เกิดข้อผิดพลาด', null);
         } finally {
             $pdo_connect = null;
         }

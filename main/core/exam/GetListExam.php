@@ -33,15 +33,34 @@ $stmt->execute([':cid' => $course_id]);
 $exams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt->closeCursor();
 
-foreach ($exams as &$e) {
+// ดึงตัวเลือกของทุกข้อสอบในครั้งเดียว แล้วจัดกลุ่มตาม exam_id (กัน N+1)
+$choicesByExamId = [];
+$exam_ids = array_column($exams, 'exam_id');
+if ($exam_ids) {
+    $placeholders = [];
+    $params = [];
+    foreach ($exam_ids as $i => $eid) {
+        $ph = ':id' . $i;
+        $placeholders[] = $ph;
+        $params[$ph] = $eid;
+    }
     $cs = $pdo_connect->prepare(
-        "SELECT exam_choice_text, exam_choice_correct FROM tbl_exam_choice
-         WHERE exam_id = :eid AND delete_at IS NULL
-         ORDER BY exam_choice_id ASC"
+        "SELECT exam_id, exam_choice_text, exam_choice_correct FROM tbl_exam_choice
+         WHERE exam_id IN (" . implode(',', $placeholders) . ") AND delete_at IS NULL
+         ORDER BY exam_id ASC, exam_choice_id ASC"
     );
-    $cs->execute([':eid' => $e['exam_id']]);
-    $choices = $cs->fetchAll(PDO::FETCH_ASSOC);
+    $cs->execute($params);
+    foreach ($cs->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $choicesByExamId[$row['exam_id']][] = [
+            'exam_choice_text'    => $row['exam_choice_text'],
+            'exam_choice_correct' => $row['exam_choice_correct'],
+        ];
+    }
     $cs->closeCursor();
+}
+
+foreach ($exams as &$e) {
+    $choices = $choicesByExamId[$e['exam_id']] ?? [];
 
     $correct = 0;
     $correct_text = '';

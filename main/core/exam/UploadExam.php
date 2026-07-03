@@ -78,7 +78,7 @@ try {
 } catch (Exception $e) {
     if ($pdo_connect->inTransaction()) { $pdo_connect->rollBack(); }
     error_log('Upload Exam Error: ' . $e->getMessage());
-    Response::json(0, 'อ่านไฟล์ Excel ไม่สำเร็จ: ' . $e->getMessage(), null);
+    Response::json(0, 'อ่านไฟล์ Excel ไม่สำเร็จ', null);
 } finally {
     $pdo_connect = null;
 }
