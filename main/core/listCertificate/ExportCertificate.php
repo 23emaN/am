@@ -92,8 +92,11 @@ $id_img_html = $id_img_uri !== ''
     ? '<img src="' . $id_img_uri . '" style="width:175px;border:1px solid #bbb;">'
     : '';
 
-// รหัสหลักสูตร: ตัดวงเล็บปี/ไตรมาสออกตอนแสดงผล (ให้เหมือนหน้าคอร์ส)
-$code_disp = $code !== '' ? str_replace(['[', ']'], '', $code) : '-';
+// รหัสหลักสูตร: ไตรมาส (placeholder วงเล็บชุดสุดท้าย เช่น [01]) อิงจากวันที่ออก (train_date)
+//   ม.ค.-มี.ค.=01, เม.ย.-มิ.ย.=02, ก.ค.-ก.ย.=03, ต.ค.-ธ.ค.=04 ; ส่วนปี [69] คงค่าเดิม
+$quarter = str_pad((string) (int) ceil((int) date('n', $ts) / 3), 2, '0', STR_PAD_LEFT);
+$code_q  = $code !== '' ? preg_replace('/\[\d{1,2}\](?=[^\[]*$)/', $quarter, $code, 1) : '';
+$code_disp = $code_q !== '' ? str_replace(['[', ']'], '', $code_q) : '-';
 
 // โลโก้ AM GROUP (ไฟล์อยู่ในโปรเจกต์เรา; เผื่อไว้ fallback ไป cpdth ถ้าไม่เจอ)
 $logo_uri = Pdf::fileToDataUri(dirname(__DIR__, 3) . '/assets/images/am-group-logo.png');
