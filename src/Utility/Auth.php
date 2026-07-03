@@ -56,7 +56,7 @@ class Auth
         $jwt = self::bearerToken();
 
         if ($jwt === '') {
-
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', "[" . date('Y-m-d H:i:s') . "] No JWT token found in headers.\n", FILE_APPEND);
             Response::json(0, 'Unauthorized', null);
 
         }
@@ -74,7 +74,7 @@ class Auth
         $secretKey = $_ENV['JWT_SECRET'] ?? '';
 
         if ($secretKey === '') {
-
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', "[" . date('Y-m-d H:i:s') . "] JWT_SECRET not found in env.\n", FILE_APPEND);
             Response::json(0, 'Secret key not found', null);
 
         }
@@ -84,13 +84,13 @@ class Auth
             $token = JWT::decode($jwt, new Key($secretKey, 'HS256'));
 
         } catch (Throwable $exception) {
-
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', "[" . date('Y-m-d H:i:s') . "] JWT decode failed: " . $exception->getMessage() . " Token: " . $jwt . "\n", FILE_APPEND);
             Response::json(0, 'Invalid token', null);
 
         }
 
         if (($token->exp ?? 0) < time()) {
-
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', "[" . date('Y-m-d H:i:s') . "] Token expired. Exp: " . ($token->exp ?? 0) . " vs Now: " . time() . "\n", FILE_APPEND);
             Response::json(0, 'Token expired', null);
 
         }
@@ -105,7 +105,7 @@ class Auth
     {
 
         if (empty($token->jti)) {
-
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', "[" . date('Y-m-d H:i:s') . "] Token jti is empty.\n", FILE_APPEND);
             Response::json(0, 'Invalid token', null);
 
         }
@@ -133,6 +133,22 @@ class Auth
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (! $row) {
+            // Let's run diagnostic queries to find why it failed
+            $diag_sql = "SELECT lt.token_code, lt.user_id, lt.end_datetime, lt.expire_datetime, NOW() as db_now, u.user_status
+                         FROM tbl_login_token lt
+                         LEFT JOIN tbl_user u ON lt.user_id = u.user_id
+                         WHERE lt.token_code = :token_code";
+            $diag_stmt = $db->prepare($diag_sql);
+            $diag_stmt->execute([':token_code' => $token->jti ?? '']);
+            $diag_row = $diag_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $log_msg = "[" . date('Y-m-d H:i:s') . "] ensureActiveUser failed. Token JTI: " . ($token->jti ?? 'empty') . "\n";
+            if ($diag_row) {
+                $log_msg .= "Diagnostic Row: " . json_encode($diag_row) . "\n";
+            } else {
+                $log_msg .= "No token found in tbl_login_token matching JTI.\n";
+            }
+            file_put_contents(dirname(__DIR__, 2) . '/debug_auth.log', $log_msg, FILE_APPEND);
 
             Response::json(0, 'User revoked', null);
 
@@ -157,3 +173,4 @@ class Auth
     }
 
 }
+
