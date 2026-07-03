@@ -50,7 +50,7 @@
             Response::json(1, "ลบข้อมูลสำเร็จ", null);
         } catch (Exception $e) {
             error_log("Delete Category Error: " . $e->getMessage());
-            Response::json(0, $e->getMessage(), null);
+            Response::json(0, 'เกิดข้อผิดพลาด', null);
         } finally {
             $pdo_connect = null;
         }

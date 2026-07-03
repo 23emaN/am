@@ -74,7 +74,7 @@ try {
     Response::json(1, 'บันทึกที่อยู่สำเร็จ', null);
 } catch (Throwable $e) {
     error_log('UpdateOrderAddress Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

@@ -48,7 +48,7 @@ try {
     ]);
 } catch (Exception $e) {
     error_log('GetVideoStatus Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

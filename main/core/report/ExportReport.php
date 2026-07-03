@@ -108,5 +108,5 @@ try {
     exit;
 } catch (\Throwable $e) {
     error_log('ExportReport(' . $report_type . ') Error: ' . $e->getMessage());
-    Response::json(0, 'สร้างรายงานไม่สำเร็จ: ' . $e->getMessage(), null);
+    Response::json(0, 'สร้างรายงานไม่สำเร็จ', null);
 }

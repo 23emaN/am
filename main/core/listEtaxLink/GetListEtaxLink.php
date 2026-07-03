@@ -87,7 +87,7 @@ try {
     Response::json(1, 'สำเร็จ', ['list' => $list, 'total' => $total, 'page' => $page, 'per_page' => $per_page]);
 } catch (\Throwable $e) {
     error_log('GetListEtaxLink Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo = null;
 }

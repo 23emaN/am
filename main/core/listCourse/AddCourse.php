@@ -137,7 +137,7 @@ try {
     Response::json(1, 'บันทึกคอร์สเรียนสำเร็จ', ['course_id' => $course_id]);
 } catch (Exception $e) {
     error_log('Add Course Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }

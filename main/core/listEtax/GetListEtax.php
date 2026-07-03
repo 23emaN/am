@@ -96,5 +96,5 @@ try {
 
 } catch (\Throwable $e) {
     error_log('GetListEtax Error: ' . $e->getMessage());
-    Response::json(0, 'เกิดข้อผิดพลาด: ' . $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 }

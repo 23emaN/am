@@ -34,16 +34,32 @@ $stmt->execute([':lid' => $lesson_id]);
 $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt->closeCursor();
 
+// ดึงตัวเลือกของทุกคำถามในครั้งเดียว แล้วจัดกลุ่มตาม question_id (กัน N+1)
+$choicesByQuestionId = [];
+$question_ids = array_column($questions, 'question_id');
+if ($question_ids) {
+    $placeholders = [];
+    $params = [];
+    foreach ($question_ids as $i => $qid) {
+        $ph = ':id' . $i;
+        $placeholders[] = $ph;
+        $params[$ph] = $qid;
+    }
+    $cs = $pdo_connect->prepare(
+        "SELECT question_id, question_choice_correct FROM tbl_question_choice
+         WHERE question_id IN (" . implode(',', $placeholders) . ") AND delete_at IS NULL
+         ORDER BY question_id ASC, question_choice_id ASC"
+    );
+    $cs->execute($params);
+    foreach ($cs->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $choicesByQuestionId[$row['question_id']][] = $row['question_choice_correct'];
+    }
+    $cs->closeCursor();
+}
+
 // หาลำดับ (1-based) ของตัวเลือกที่เป็นคำตอบถูกของแต่ละคำถาม
 foreach ($questions as &$q) {
-    $cs = $pdo_connect->prepare(
-        "SELECT question_choice_correct FROM tbl_question_choice
-         WHERE question_id = :qid AND delete_at IS NULL
-         ORDER BY question_choice_id ASC"
-    );
-    $cs->execute([':qid' => $q['question_id']]);
-    $choices = $cs->fetchAll(PDO::FETCH_COLUMN);
-    $cs->closeCursor();
+    $choices = $choicesByQuestionId[$q['question_id']] ?? [];
 
     $correct = 0;
     foreach ($choices as $i => $c) {

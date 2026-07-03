@@ -304,5 +304,5 @@ try {
     exit;
 } catch (\Throwable $e) {
     error_log('ExportCertificate Error: ' . $e->getMessage());
-    Response::json(0, 'สร้าง PDF ไม่สำเร็จ', null);
+    Response::json(0, 'สร้าง PDF ไม่สำเร็จ: ' . $e->getMessage(), null);
 }

@@ -284,7 +284,7 @@
 <script>
     // ข้อมูลโหมดแก้ไข (โหมดเพิ่ม = null → prefill ทั้งหมดถูกข้าม ทำงานเหมือนเดิม)
     var FORM_MODE = '<?php echo $mode; ?>';
-    var COURSE = <?php echo $course ? json_encode($course, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
+    var COURSE = <?php echo $course ? json_encode($course, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) : 'null'; ?>;
 
     // เริ่มต้น dropdown + rich text editor (รันหลังฟอร์มถูกแทรกเข้า DOM)
     (function () {

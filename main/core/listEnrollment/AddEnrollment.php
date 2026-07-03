@@ -85,7 +85,7 @@ try {
     Response::json(1, 'เพิ่มสิทธิ์สำเร็จ' . ($mail_sent ? ' และส่งอีเมลแจ้งสมาชิกแล้ว' : ' (ส่งอีเมลไม่สำเร็จ/ไม่มีอีเมล)'), null);
 } catch (Throwable $e) {
     error_log('AddEnrollment Error: ' . $e->getMessage());
-    Response::json(0, $e->getMessage(), null);
+    Response::json(0, 'เกิดข้อผิดพลาด', null);
 } finally {
     $pdo_connect = null;
 }
