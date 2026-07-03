@@ -2,7 +2,12 @@
 
 require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
+use App\Utility\Auth;
 use App\Database\Connection;
+
+// fragment นี้ถูกยิงตรง (ไม่ผ่าน main/core.php router) จึงต้องเช็ค token เองที่นี่
+// กันดึงข้อมูลรีวิว (ชื่อ/อีเมลผู้รีวิว) โดยไม่ผ่านการยืนยันตัวตน
+Auth::requireUserToken();
 
 $raw = file_get_contents("php://input");
 $data = json_decode($raw, true);
