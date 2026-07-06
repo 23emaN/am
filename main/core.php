@@ -173,6 +173,12 @@ $routes = [
         'update_review'    => __DIR__ . '/core/listReview/UpdateReview.php',
         'delete_review'    => __DIR__ . '/core/listReview/DeleteReview.php',
     ],
+
+    'chat'                       => [
+        'get_rooms'    => __DIR__ . '/core/chat/GetRooms.php',
+        'get_messages' => __DIR__ . '/core/chat/GetMessages.php',
+        'send_message' => __DIR__ . '/core/chat/SendMessage.php',
+    ],
 ];
 foreach ($routes as $state => $actions) {
     foreach ($actions as $action => $file) {

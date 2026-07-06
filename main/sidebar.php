@@ -10,6 +10,7 @@
 <?php $user_pages = ['user', 'user_edit']; ?>
 <?php $history_pages = ['verify_history']; ?>
 <?php $verify_pages = ['verify_request']; ?>
+<?php $chat_pages = ['chat']; ?>
 <?php $coupon_pages = ['coupon', 'coupon_fromadd', 'coupon_edit']; ?>
 <?php $setting_pages = ['website_setting']; ?>
 <?php $review_pages = ['reviews']; ?>
@@ -44,6 +45,21 @@
         }
     } catch (\Throwable $e) {
         $pending_transfer_orders = 0;
+    }
+
+    // จำนวนข้อความจากผู้เรียนที่ยังไม่อ่าน (sender_type='1' AND is_read='0') สำหรับ badge ข้างเมนู
+    $chat_unread_msgs = 0;
+    try {
+        if (!empty($pdo_sidebar)) {
+            $stmt_chat = $pdo_sidebar->query(
+                "SELECT COUNT(*) FROM tbl_chat_messages
+                 WHERE delete_at IS NULL AND sender_type = '1' AND is_read = '0'"
+            );
+            $chat_unread_msgs = (int) $stmt_chat->fetchColumn();
+            $stmt_chat->closeCursor();
+        }
+    } catch (\Throwable $e) {
+        $chat_unread_msgs = 0;
     }
 ?>
 
@@ -91,6 +107,14 @@
                 <a href="order" class="menu-link <?php echo in_array($now_page, $order_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">receipt_long</span>
                     <span class="title">คำสั่งซื้อคอร์สเรียน</span>
+                </a>
+            </li>
+
+            <li class="menu-item <?php echo in_array($now_page, $chat_pages) ? 'open' : '' ?>">
+                <a href="chat" class="menu-link <?php echo in_array($now_page, $chat_pages) ? 'active' : '' ?>">
+                    <span class="material-symbols-outlined menu-icon">forum</span>
+                    <span class="title">ตอบคำถามผู้เรียน</span>
+                    <span class="badge rounded-pill bg-danger ms-auto" id="sidebarChatBadge" style="<?php echo $chat_unread_msgs > 0 ? '' : 'display:none;'; ?>"><?php echo $chat_unread_msgs > 99 ? '99+' : $chat_unread_msgs; ?></span>
                 </a>
             </li>
 
