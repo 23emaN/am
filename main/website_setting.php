@@ -14,6 +14,24 @@
     #editor_about_us, #editor_contact_us { height: 160px; background: #fff; }
     .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
     .setting-section-title { letter-spacing: .02em; }
+    /* ===== อัปโหลดรูป (ลากวาง/คลิก) + ปุ่ม X ลบ ===== */
+    .img-dropzone {
+        border: 2px dashed #c7cbe0; border-radius: 12px; background: #fbfbff;
+        padding: 28px 20px; text-align: center; cursor: pointer; min-height: 160px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+        transition: border-color .15s, background .15s;
+    }
+    .img-dropzone:hover, .img-dropzone.dragover { border-color: var(--brand-500); background: var(--brand-soft); }
+    .img-dz-icon { font-size: 44px; color: var(--brand-500); }
+    .img-preview-wrap { position: relative; display: inline-block; max-width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #f7f8fb; }
+    .img-preview-wrap img { max-width: 100%; max-height: 320px; display: block; }
+    .img-remove-x {
+        position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; padding: 0; border: 0;
+        border-radius: 50%; background: rgba(0,0,0,.6); color: #fff; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; transition: background .15s;
+    }
+    .img-remove-x:hover { background: #dc3545; }
+    .img-remove-x .material-symbols-outlined { font-size: 20px; }
 </style>
 
 <div class="container-fluid">
@@ -98,19 +116,25 @@
                                 <input type="text" class="form-control" name="youtube_id" placeholder="เช่น b1E-mcxdtm4">
                                 <div class="form-text">ส่วนหลัง <code>watch?v=</code> ของลิงก์ Youtube</div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium" for="image_file_input">รูปภาพหน้าแรก <small class="text-muted">(jpg, png, webp, gif · ไม่เกิน 5MB)</small></label>
-                                <input type="file" class="form-control" name="image_file" id="image_file_input" accept="image/*">
-                            </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">ข้อความแถวที่ 1</label>
                                 <div id="editor_text_1"></div>
                             </div>
                             <div class="col-12">
-                                <label class="form-label text-muted small">รูปภาพปัจจุบัน</label>
-                                <div id="ImgPreviewWrap" class="border rounded-3 p-3 bg-light text-center" style="min-height:140px; display:flex; align-items:center; justify-content:center;">
-                                    <span class="text-muted" id="ImgPreviewEmpty">กำลังโหลด...</span>
-                                    <img id="ImgPreview" src="" alt="preview" style="max-width:100%; max-height:280px; display:none; border-radius:8px; border:1px solid var(--border);">
+                                <label class="form-label fw-medium">รูปภาพหน้าแรก <small class="text-muted">(jpg, png, webp, gif · ไม่เกิน 5MB)</small></label>
+                                <input type="file" id="image_file_input" name="image_file" accept="image/*" hidden>
+                                <input type="hidden" name="remove_image" id="remove_image" value="0">
+                                <!-- ยังไม่มีรูป: โซนคลิก/ลากวางเพื่อใส่รูป -->
+                                <div id="imgDrop" class="img-dropzone">
+                                    <span class="material-symbols-outlined img-dz-icon" aria-hidden="true">add_photo_alternate</span>
+                                    <div class="fw-medium">คลิกเพื่อเลือกรูป หรือ ลากไฟล์มาวางที่นี่</div>
+                                </div>
+                                <!-- มีรูปแล้ว: แสดงรูป + ปุ่ม X ลบ (มุมขวาบน) -->
+                                <div id="imgBox" class="img-preview-wrap d-none">
+                                    <img id="ImgPreview" src="" alt="รูปภาพหน้าแรก">
+                                    <button type="button" class="img-remove-x" onclick="RemoveImage()" title="ลบรูป" aria-label="ลบรูป">
+                                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="col-12">
@@ -172,7 +196,7 @@
     $(document).ready(function () {
         InitQuills();
         LoadSetting();
-        $('#image_file_input').on('change', PreviewNewImage);
+        InitImgDrop();
     });
 
     function InitQuills() {
@@ -226,13 +250,16 @@
         if (quillText1) { quillText1.root.innerHTML = s ? (s.text_1 || "") : ""; }
         if (quillText2) { quillText2.root.innerHTML = s ? (s.text_2 || "") : ""; }
 
-        // รูปภาพปัจจุบัน
+        // รูปภาพปัจจุบัน -> มีรูป: แสดงรูป+ปุ่มลบ, ไม่มี: โซนลากวาง
+        $('#remove_image').val('0');
+        var _imgInput = document.getElementById('image_file_input'); if (_imgInput) { _imgInput.value = ''; }
         if (s && s.image_path) {
-            $("#ImgPreviewEmpty").hide();
-            $("#ImgPreview").attr("src", "../" + s.image_path).show();
+            $('#ImgPreview').attr('src', '../' + s.image_path);
+            $('#imgDrop').addClass('d-none');
+            $('#imgBox').removeClass('d-none');
         } else {
-            $("#ImgPreview").hide();
-            $("#ImgPreviewEmpty").text("ยังไม่มีรูปภาพ").show();
+            $('#imgBox').addClass('d-none');
+            $('#imgDrop').removeClass('d-none');
         }
 
         // โซเชียล & ติดต่อ
@@ -243,23 +270,56 @@
         if (quillContact) { quillContact.root.innerHTML = s ? (s.contact_us || "") : ""; }
     }
 
-    // พรีวิวรูปใหม่ก่อนอัปโหลด
-    function PreviewNewImage() {
-        var file = this.files[0];
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function (e) { $('#ImgPreviewEmpty').hide(); $('#ImgPreview').attr('src', e.target.result).show(); };
-            reader.readAsDataURL(file);
-        }
+    // ===== อัปโหลดรูป (ลากวาง/คลิก) + พรีวิว + ลบ =====
+    function InitImgDrop() {
+        var zone = document.getElementById('imgDrop');
+        var input = document.getElementById('image_file_input');
+        if (!zone || !input) { return; }
+        zone.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function () { if (input.files && input.files.length) { ShowPickedImg(input.files[0]); } });
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            zone.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); zone.classList.add('dragover'); });
+        });
+        ['dragleave', 'dragend'].forEach(function (ev) {
+            zone.addEventListener(ev, function (e) { e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover'); });
+        });
+        zone.addEventListener('drop', function (e) {
+            e.preventDefault(); e.stopPropagation(); zone.classList.remove('dragover');
+            var files = e.dataTransfer && e.dataTransfer.files;
+            if (!files || !files.length) { return; }
+            if (!/^image\//.test(files[0].type)) {
+                Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาวางไฟล์รูปภาพเท่านั้น</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
+                return;
+            }
+            input.files = files;
+            ShowPickedImg(files[0]);
+        });
+    }
+    // เลือกรูปใหม่ -> พรีวิวทันที (ยกเลิกสถานะ "ลบรูป")
+    function ShowPickedImg(file) {
+        var reader = new FileReader();
+        reader.onload = function (e) { ShowImg(e.target.result); };
+        reader.readAsDataURL(file);
+        $('#remove_image').val('0');
+    }
+    // แสดงรูป (ซ่อนโซนลากวาง)
+    function ShowImg(src) {
+        $('#ImgPreview').attr('src', src);
+        $('#imgDrop').addClass('d-none');
+        $('#imgBox').removeClass('d-none');
+    }
+    // กด X ลบรูป -> กลับไปโซนลากวาง + สั่ง backend ลบรูปเดิม (ถ้ามี)
+    function RemoveImage() {
+        var input = document.getElementById('image_file_input');
+        if (input) { input.value = ''; }
+        $('#ImgPreview').attr('src', '');
+        $('#imgBox').addClass('d-none');
+        $('#imgDrop').removeClass('d-none');
+        $('#remove_image').val('1');
     }
 
     $(document).on('submit', '#FormSetting', function (e) {
         e.preventDefault();
-
-        if (($('[name="department_code"]').val() || '').trim() === '') {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกรหัสหน่วยงาน</span>', icon: "error", confirmButtonText: "ตกลง" });
-            return;
-        }
 
         var fd = new FormData(this);
         // Quill -> ฟิลด์
