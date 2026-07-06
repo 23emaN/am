@@ -123,7 +123,7 @@
 
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
-                                    <label for="lpQuestionLimit" class="form-label fw-medium lp-meta">จำนวนคำถาม</label>
+                                    <label for="lpQuestionLimit" class="form-label fw-medium lp-meta">จำนวนครั้งที่จะเด้ง (คำถาม/OTP)</label>
                                     <input type="number" min="0" class="form-control form-control-sm" id="lpQuestionLimit" value="2">
                                 </div>
                                 <div class="col-6">
@@ -310,14 +310,13 @@
         });
     }
 
-    // สุ่มตำแหน่งคำถามในช่วง 10%-90% ของวิดีโอ
+    // สร้างตารางเด้ง: จำนวนจุดทั้งหมดตามที่ตั้งค่า แต่ละจุดสุ่มเป็นคำถามหรือ OTP (เหมือนหน้าจริง)
     function BuildSchedule() {
         schedule = [];
         if (!$("#lpEnableQuestion").is(":checked")) { return; }
-        var limit = parseInt($("#lpQuestionLimit").val(), 10) || 0;
-        // โหมดจริงใช้คำถามจริง (ว่าง = ไม่มีคำถาม), sandbox ใช้คำถามตัวอย่าง
+        var n = parseInt($("#lpQuestionLimit").val(), 10) || 0;
+        // โหมดจริงใช้คำถามจริง (ว่าง = ไม่มีคำถาม -> เป็น OTP หมด), sandbox ใช้คำถามตัวอย่าง
         var pool = REAL_MODE ? (window.LP_QUESTIONS || []) : MOCK_QUESTIONS;
-        var n = Math.min(limit, pool.length);
         if (n <= 0 || duration <= 0) { return; }
 
         var lo = duration * 0.1, hi = duration * 0.9;
@@ -334,7 +333,9 @@
             var tmp = idxs[j]; idxs[j] = idxs[k]; idxs[k] = tmp;
         }
         for (var q = 0; q < n; q++) {
-            schedule.push({ time: times[q], asked: false, question: pool[idxs[q]] });
+            var hasQ = (pool.length > 0 && idxs[q] !== undefined);
+            var isOtp = !hasQ || (Math.random() < 0.5);   // มีคำถาม -> สุ่ม 50% คำถาม/OTP, ไม่มี -> OTP
+            schedule.push({ time: times[q], asked: false, type: isOtp ? 'otp' : 'question', question: hasQ ? pool[idxs[q]] : null });
         }
     }
 
@@ -345,10 +346,23 @@
         pausedForQuestion = true;
         LPlayer.pause();
 
-        var qIndex = schedule.indexOf(item) + 1;
-        $("#lpQNo").text("คำถามที่ " + qIndex + " / " + schedule.length);
-        $("#lpQText").html(item.question.text);
+        var idx = schedule.indexOf(item) + 1;
         $("#lpQHint").hide().text("");
+
+        // จุดยืนยัน OTP (จำลองในหน้าทดสอบ — ของจริงเด้งกรอก OTP ฝั่งนักเรียน)
+        if (item.type === 'otp') {
+            $("#lpQNo").text("ยืนยันตัวตน (OTP) " + idx + " / " + schedule.length);
+            $("#lpQText").html('<span class="material-symbols-outlined align-middle" style="font-size:20px;">verified_user</span> จุดยืนยันตัวตนด้วย OTP (โหมดทดสอบ — จำลอง)<div class="small text-white-50 mt-1">ของจริงระบบจะส่ง OTP ให้นักเรียนกรอกก่อนดูต่อ</div>');
+            $("#lpChoices").html('');
+            $("#lpSubmitBtn").text("ยืนยัน (จำลอง) & ดูต่อ");
+            $("#lpOverlay").addClass("show");
+            StartTimer();
+            return;
+        }
+
+        $("#lpQNo").text("คำถามที่ " + idx + " / " + schedule.length);
+        $("#lpQText").html(item.question.text);
+        $("#lpSubmitBtn").text("ตอบ & ดูต่อ");
 
         var html = "";
         item.question.choices.forEach(function (c, i) {
@@ -390,6 +404,16 @@
     }
 
     function LpSubmitAnswer() {
+        // จุด OTP (จำลอง): ยืนยันแล้วดูต่อได้เลย ไม่นับเป็นคำถาม
+        if (currentQ && currentQ.type === 'otp') {
+            if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+            $("#lpOverlay").removeClass("show");
+            pausedForQuestion = false;
+            currentQ = null;
+            SaveProgress(true);
+            LPlayer.play();
+            return;
+        }
         if (selectedChoice === null) {
             if ($("#lpMustAnswer").is(":checked")) {
                 $("#lpQHint").show().text("กรุณาเลือกคำตอบก่อน");

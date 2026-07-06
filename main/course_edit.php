@@ -75,55 +75,6 @@
     </div>
 </div>
 
-<!-- ===== Modal: เพิ่มบทเรียนใหม่ ===== -->
-<div class="modal fade" id="modalAddLesson" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">เพิ่มบทเรียนใหม่</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="formAddLesson">
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">บทเรียนที่ <span class="text-danger">*</span></label>
-                        <input type="number" min="0" class="form-control" name="lesson_order" placeholder="0">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">ชื่อบทเรียน <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="lesson_name" placeholder="กรอกชื่อบทเรียน">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">คำถามระหว่างรับชม <span class="text-danger">*</span></label>
-                        <select class="form-select" name="lesson_question">
-                            <option value="0">ปิดใช้งานคำถาม</option>
-                            <option value="1">เปิดใช้งานคำถาม</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">จำนวนคำถามระหว่างรับชม</label>
-                        <input type="number" min="0" class="form-control" name="lesson_question_limit" placeholder="0">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-medium">ระยะเวลาทำคำถามระหว่างรับชม (วินาที)</label>
-                        <input type="number" min="0" class="form-control" name="lesson_question_time" placeholder="0">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label fw-medium">รายละเอียดโดยย่อ</label>
-                        <textarea class="form-control" name="lesson_overview" rows="3"></textarea>
-                    </div>
-                    <div class="alert alert-success small mb-0">
-                        เมื่อเพิ่มบทเรียนแล้วจะถูกบันทึกทันที จึงสามารถเพิ่มข้อสอบ / วิดีโอ และเนื้อหาอื่น ๆ ของบทเรียนได้
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary w-100 BtnAddLesson" onclick="SubmitAddLesson()">เพิ่มบทเรียน</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- ===== Modal: เพิ่มเอกสารประกอบ ===== -->
 <div class="modal fade" id="modalLessonFile" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -259,6 +210,13 @@
         $('button[data-bs-target="#tab-doc"]').on('shown.bs.tab', function () {
             if (!docLoaded && typeof LoadDocTab === 'function') { docLoaded = true; LoadDocTab(); }
         });
+
+        // เปิดแท็บตาม hash (เช่น กลับมาจากหน้าจัดการบทเรียน -> #tab-lesson)
+        var hash = window.location.hash;
+        if (hash) {
+            var trigger = document.querySelector('button[data-bs-target="' + hash + '"]');
+            if (trigger) { new bootstrap.Tab(trigger).show(); }
+        }
     });
 
     // ===== แท็บทั่วไป: ดึงข้อมูลคอร์ส + ตัวเลือก แล้ว render ฟอร์ม (dual-mode = edit) =====
@@ -361,34 +319,8 @@
         });
     }
     function OpenAddLesson() {
-        $('#formAddLesson')[0].reset();
-        new bootstrap.Modal(document.getElementById('modalAddLesson')).show();
-    }
-    function SubmitAddLesson() {
-        const name = $('#formAddLesson [name="lesson_name"]').val().trim();
-        if (name === "") {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกชื่อบทเรียน</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
-            return;
-        }
-        const data = $('#formAddLesson').serializeArray();
-        data.push({ name: "request_state", value: "lesson" });
-        data.push({ name: "request_function", value: "add_lesson" });
-        data.push({ name: "course_id", value: COURSE_ID });
-        $.ajax({
-            beforeSend: function () { ShowLoadingButton('.BtnAddLesson'); },
-            type: "POST", url: "core.php", data: $.param(data), dataType: "json",
-            success: function (response) {
-                if (response.result == 1) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalAddLesson')).hide();
-                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500 });
-                    LoadLessonTab();
-                } else {
-                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, timer: 2500 });
-                }
-            },
-            complete: function () { HideLoadingButton('.BtnAddLesson'); },
-            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-        });
+        // เดิมเปิด modal — เปลี่ยนเป็นเด้งไปหน้าเพิ่มบทเรียน (หน้าเต็ม หน้าตาเดียวกับจัดการบทเรียน)
+        window.location.href = "lesson_manage.php?course_id=" + COURSE_ID;
     }
     function DeleteLesson(lesson_id) {
         Swal.fire({ title: "ยืนยันการลบ", html: '<span class="fw-bold text-danger">ต้องการลบบทเรียนนี้ใช่หรือไม่?</span>', icon: "warning", showCancelButton: true, confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก", confirmButtonColor: "#dc3545" })
