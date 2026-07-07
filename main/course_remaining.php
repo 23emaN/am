@@ -35,7 +35,7 @@
 
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end mb-4">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="form-label fw-medium" for="f_course">คอร์สเรียน</label>
                             <select class="form-select tom-course" id="f_course">
                                 <option value="">ทั้งหมด</option>
@@ -44,13 +44,21 @@
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="form-label fw-medium" for="f_member">สมาชิก</label>
                             <select class="form-select tom-member" id="f_member">
                                 <option value="">ทั้งหมด</option>
                                 <?php foreach ($member_options as $m): ?>
                                     <option value="<?php echo (int) $m['user_id']; ?>"><?php echo htmlspecialchars($member_label($m)); ?></option>
                                 <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-medium" for="f_status">สถานะ</label>
+                            <select class="form-select" id="f_status">
+                                <option value="">ทั้งหมด</option>
+                                <option value="1">ใช้งาน</option>
+                                <option value="0">ยกเลิก</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-flex gap-2">
@@ -113,9 +121,10 @@
             <div class="modal-header"><h5 class="modal-title">แก้ไขสิทธิ์การเข้าถึงคอร์ส</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body p-4">
                 <input type="hidden" id="edit_id">
+                <input type="hidden" id="edit_orig_status">
                 <div class="mb-3">
                     <label class="form-label fw-medium" for="edit_status">สถานะ</label>
-                    <select class="form-select" id="edit_status">
+                    <select class="form-select" id="edit_status" onchange="ToggleEditExpiry()">
                         <option value="1">ให้สิทธิ์การใช้งาน</option>
                         <option value="0">ยกเลิกสิทธิ์การใช้งาน</option>
                     </select>
@@ -124,7 +133,9 @@
                     <label class="form-label fw-medium" for="edit_expiry">วันที่หมดอายุ (หากปล่อยว่างจะเป็นไม่มีกำหนด)</label>
                     <input type="text" class="form-control" id="edit_expiry" placeholder="วัน/เดือน/ปี" autocomplete="off">
                 </div>
-                <div class="alert alert-danger small mb-0">หากยกเลิกสิทธิ์การเข้าถึงคอร์สแล้วจะไม่สามารถยกเลิกได้ภายหลัง กรุณาตรวจสอบข้อมูลก่อนดำเนินการ</div>
+                <div class="alert alert-warning small mb-0" id="edit_cancel_note" style="display:none;">
+                    ยกเลิกสิทธิ์แล้วผู้เรียนจะเข้าคอร์สไม่ได้ แต่กลับมาเปิดใช้งานใหม่ได้ภายหลัง
+                </div>
             </div>
             <div class="modal-footer p-3"><button type="button" class="btn btn-primary w-100 BtnEdit" onclick="SubmitEdit()">บันทึก</button></div>
         </div>
@@ -168,6 +179,7 @@
                 request_function: "get_list_enrollment",
                 f_course: $("#f_course").val(),
                 f_member: $("#f_member").val(),
+                f_status: $("#f_status").val(),
                 page: page
             },
             dataType: "json",
@@ -238,12 +250,35 @@
             success: function (r) {
                 if (r.result != 1) { Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + r.msg + '</span>', icon: "error" }); return; }
                 $("#edit_id").val(r.data.enroll_id);
-                $("#edit_status").val("1");
+                $("#edit_status").val(r.data.status || "1");
+                $("#edit_orig_status").val(r.data.status || "1");
                 $("#edit_expiry").val(r.data.expiry || "");
+                ToggleEditExpiry();
                 new bootstrap.Modal(document.getElementById("modalEdit")).show();
             },
             error: function (j, e) { ShowErrorAjax(j, e); }
         });
+    }
+    // ปรับการแสดงช่องวันหมดอายุ/โน้ตตามสถานะที่เลือก
+    function ToggleEditExpiry() {
+        var sel = $("#edit_status").val();
+        var orig = $("#edit_orig_status").val();
+        var reactivating = (sel === "1" && orig === "0");   // ยกเลิก -> ใช้งาน
+        // ช่องวันหมดอายุ: แสดงเมื่อสถานะ = ใช้งาน (ทั้งแก้ไขปกติ + เปิดใหม่ — ว่าง=ไม่มีกำหนด)
+        $("#edit_expiry_wrap").toggle(sel === "1");
+        $("#edit_reactivate_note").toggle(reactivating);
+        $("#edit_cancel_note").toggle(sel === "0");
+        // เปิดใหม่จากที่ยกเลิก -> ตั้ง default วันหมดอายุ = วันนี้ + 90 วัน (แก้ไข/ล้างได้)
+        if (reactivating) { SetEditExpiry(Plus90Days()); }
+    }
+    function Plus90Days() {
+        var d = new Date(); d.setDate(d.getDate() + 90);
+        return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
+    }
+    function SetEditExpiry(val) {
+        var el = document.getElementById("edit_expiry");
+        if (el && el._flatpickr) { el._flatpickr.setDate(val, false, "d/m/Y"); }
+        else { $("#edit_expiry").val(val); }
     }
     function SubmitEdit() {
         $.ajax({

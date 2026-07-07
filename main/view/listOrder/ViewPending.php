@@ -13,6 +13,16 @@ $from = $total > 0 ? ($page - 1) * $per_page + 1 : 0;
 $to   = min($page * $per_page, $total);
 
 $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
+
+// วันที่แสดง 2 บรรทัด: บรรทัดบน = วันที่, บรรทัดล่าง = เวลา (เล็ก/จาง)
+$date2 = function ($v) use ($esc): string {
+    $v = trim((string) $v);
+    if ($v === '') { return '<span class="text-muted">-</span>'; }
+    $p = preg_split('/\s+/', $v, 2);
+    $out = $esc($p[0]);
+    if (isset($p[1]) && $p[1] !== '') { $out .= '<br><span class="text-secondary small">' . $esc($p[1]) . '</span>'; }
+    return $out;
+};
 ?>
 <?php if (!empty($list)): ?>
     <div class="default-table-area">
@@ -36,7 +46,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         $course_html = $courses !== ''
                             ? implode('<br>', array_map($esc, explode("\n", $courses)))
                             : '<span class="text-muted">-</span>';
-                        $created = ($row['created'] ?? '') !== '' ? $esc($row['created']) : '-';
+                        $created = $date2($row['created'] ?? '');
                     ?>
                         <tr>
                             <td class="text-center"><?= $i++ ?></td>

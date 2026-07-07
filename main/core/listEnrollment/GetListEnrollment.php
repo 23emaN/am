@@ -24,6 +24,7 @@ $offset   = ($page - 1) * $per_page;
 
 $f_course = trim((string) ($_POST['f_course'] ?? ''));   // enroll_course_id
 $f_member = trim((string) ($_POST['f_member'] ?? ''));   // enroll_user_id หรือ ชื่อสมาชิก
+$f_status = trim((string) ($_POST['f_status'] ?? ''));   // '' = ทั้งหมด, '1' = ใช้งาน, '0' = ยกเลิก
 
 $joins = "FROM tbl_course_enrollment e
           LEFT JOIN tbl_user u   ON e.enroll_user_id = u.user_id
@@ -44,6 +45,10 @@ if ($f_member !== '') {
         $params[':f_member'] = '%' . $f_member . '%';
     }
 }
+if ($f_status === '0' || $f_status === '1') {
+    $where[] = "e.enroll_access = :f_status";
+    $params[':f_status'] = $f_status;
+}
 $where_sql = 'WHERE ' . implode(' AND ', $where);
 
 try {
@@ -55,7 +60,7 @@ try {
 
     // ข้อมูลหน้าปัจจุบัน (เรียงคงที่ ใหม่สุดก่อน)
     $sql = "SELECT e.enroll_id, e.enroll_payment_status, e.enroll_date, e.enroll_expiry_date,
-                   e.enroll_is_completed, e.create_at,
+                   e.enroll_is_completed, e.enroll_access, e.create_at,
                    u.user_firstname, u.user_lastname, u.user_phone,
                    c.course_name, c.course_price, c.course_promotion
             $joins
@@ -98,6 +103,7 @@ try {
             'remain_days'  => $remain_days,
             'price'        => number_format($price, 2),
             'is_completed' => (string) ($r['enroll_is_completed'] ?? '0'),
+            'status'       => (string) ($r['enroll_access'] ?? '1'),   // 1=ใช้งาน, 0=ยกเลิก
             'expiry_raw'   => $exp ? date('d/m/Y', strtotime($exp)) : '',
         ];
     }

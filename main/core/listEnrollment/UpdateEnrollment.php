@@ -1,6 +1,8 @@
 <?php
-// แก้ไขสิทธิ์การเข้าถึงคอร์ส: เปลี่ยนวันหมดอายุ หรือ ยกเลิกสิทธิ์ (soft delete)
-// status: '1' = ให้สิทธิ์การใช้งาน (อัปเดตวันหมดอายุ), '0' = ยกเลิกสิทธิ์ (ลบ - ยกเลิกไม่ได้ภายหลัง)
+// แก้ไขสิทธิ์การเข้าถึงคอร์ส (ใช้ enroll_access เป็นสถานะ ไม่ลบทิ้ง -> แก้ไข/เปิดใหม่ได้)
+// status: '1' = ให้สิทธิ์ใช้งาน (enroll_access=1) + ตั้งวันหมดอายุตามที่กรอก (ว่าง=ไม่มีกำหนด)
+//         '0' = ยกเลิกสิทธิ์ (enroll_access=0)
+// หมายเหตุ: ตอนเปิดใช้งานจากที่ยกเลิก ฝั่งหน้าเว็บจะ default ช่องวันหมดอายุเป็น 90 วันนับจากวันนี้ (แก้ไข/ล้างได้)
 
 use App\Utility\Auth;
 use App\Utility\Response;
@@ -34,13 +36,13 @@ $chk->closeCursor();
 
 try {
     if ($status === '0') {
-        // ยกเลิกสิทธิ์ -> soft delete
-        $stmt = $pdo_connect->prepare("UPDATE tbl_course_enrollment SET delete_at = NOW() WHERE enroll_id = :id AND delete_at IS NULL");
+        // ยกเลิกสิทธิ์ -> enroll_access = 0 (คงรายการไว้ แก้ไข/เปิดใหม่ได้ภายหลัง)
+        $stmt = $pdo_connect->prepare("UPDATE tbl_course_enrollment SET enroll_access = '0' WHERE enroll_id = :id AND delete_at IS NULL");
         $stmt->execute([':id' => $enroll_id]);
         $stmt->closeCursor();
         Response::json(1, 'ยกเลิกสิทธิ์การเข้าถึงคอร์สแล้ว', null);
     } else {
-        // อัปเดตวันหมดอายุ (ว่าง = ไม่มีกำหนด)
+        // ให้สิทธิ์ใช้งาน -> ตั้ง enroll_access=1 + วันหมดอายุตามที่กรอก (ว่าง = ไม่มีกำหนด)
         $exp = null;
         if ($expiry !== '') {
             if (preg_match('#^(\d{2})/(\d{2})/(\d{4})$#', $expiry, $m)) {
@@ -49,7 +51,7 @@ try {
                 $exp = $expiry;
             }
         }
-        $stmt = $pdo_connect->prepare("UPDATE tbl_course_enrollment SET enroll_expiry_date = :exp WHERE enroll_id = :id AND delete_at IS NULL");
+        $stmt = $pdo_connect->prepare("UPDATE tbl_course_enrollment SET enroll_access = '1', enroll_expiry_date = :exp WHERE enroll_id = :id AND delete_at IS NULL");
         $stmt->execute([':exp' => $exp, ':id' => $enroll_id]);
         $stmt->closeCursor();
         Response::json(1, 'บันทึกการแก้ไขสำเร็จ', null);

@@ -53,7 +53,8 @@ try {
                     u.user_citizen_id,
                     u.user_cpd_no,
                     u.user_cpa_no,
-                    u.user_status
+                    u.user_status,
+                    u.identity_verified
                 FROM tbl_user u
                 $where_sql
                 ORDER BY u.user_id DESC
@@ -79,6 +80,7 @@ try {
             "user_cpd_no"     => $row["user_cpd_no"] ?? null,
             "user_cpa_no"     => $row["user_cpa_no"] ?? null,
             "user_status"     => $row["user_status"] ?? null,
+            "identity_verified" => (string) ($row["identity_verified"] ?? '0'),  // 0=ยังไม่ยืนยัน 1=รอตรวจสอบ 2=ยืนยันแล้ว
         ];
     }
 

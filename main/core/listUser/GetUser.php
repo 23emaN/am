@@ -26,7 +26,7 @@ if (!$pdo_connect) {
 // ข้อมูลผู้ใช้ (เฉพาะที่ยังไม่ถูกลบ)
 $stmt = $pdo_connect->prepare(
     "SELECT user_id, user_prefix, user_firstname, user_lastname, user_email,
-            user_phone, user_citizen_id, user_cpd_no, user_cpa_no, user_status
+            user_phone, user_citizen_id, user_cpd_no, user_cpa_no, user_status, identity_verified
      FROM tbl_user WHERE user_id = :id AND delete_at IS NULL LIMIT 1"
 );
 $stmt->execute([':id' => $target_id]);
@@ -84,8 +84,33 @@ foreach ($exam_rows as $r) {
     ];
 }
 
+// แท็บ "ประวัติการยืนยันตัวตน" — tbl_identity_verification_log (action_type: 1=อนุมัติ, 2=ยกเลิก)
+$stmt_verify = $pdo_connect->prepare(
+    "SELECT l.action_type, l.remark, l.created_at,
+            a.user_firstname AS admin_firstname, a.user_lastname AS admin_lastname
+     FROM tbl_identity_verification_log l
+     LEFT JOIN tbl_user a ON l.create_user_id = a.user_id
+     WHERE l.user_id = :id
+     ORDER BY l.log_id DESC"
+);
+$stmt_verify->execute([':id' => $target_id]);
+$verify_rows = $stmt_verify->fetchAll(PDO::FETCH_ASSOC);
+$stmt_verify->closeCursor();
+
+$verify_history = [];
+foreach ($verify_rows as $r) {
+    $admin = trim(($r['admin_firstname'] ?? '') . ' ' . ($r['admin_lastname'] ?? ''));
+    $verify_history[] = [
+        'action_type' => (string) ($r['action_type'] ?? '0'),
+        'remark'      => $r['remark'] ?? '',
+        'admin_name'  => $admin !== '' ? $admin : 'ระบบ',
+        'created_at'  => $r['created_at'] ?? '',
+    ];
+}
+
 Response::json(1, 'Success', [
-    'user'        => $user,
-    'enrollments' => $enrollments,
-    'exams'       => $exams,
+    'user'           => $user,
+    'enrollments'    => $enrollments,
+    'exams'          => $exams,
+    'verify_history' => $verify_history,
 ]);

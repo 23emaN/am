@@ -179,6 +179,10 @@ $routes = [
         'get_messages' => __DIR__ . '/core/chat/GetMessages.php',
         'send_message' => __DIR__ . '/core/chat/SendMessage.php',
     ],
+
+    'sidebar'                    => [
+        'get_badges'   => __DIR__ . '/core/sidebarBadge/GetBadges.php',
+    ],
 ];
 foreach ($routes as $state => $actions) {
     foreach ($actions as $action => $file) {
