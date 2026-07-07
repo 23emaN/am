@@ -31,6 +31,8 @@
     }
 
     function reallyShow() {
+        // หน้าที่ตั้ง flag นี้ (เช่น หน้าแชท ที่ poll ถี่) -> ไม่โชว์ spinner กลางจอ
+        if (window.CPDTH_SUPPRESS_SPINNER) { return; }
         // ถ้าหน้าไหนเปิด SweetAlert (เช่น loader ของตัวเอง) ค้างอยู่แล้ว -> ไม่ต้องซ้อน spinner
         if (window.Swal && typeof Swal.isVisible === "function" && Swal.isVisible()) { return; }
         if (hideTimer !== null) { clearTimeout(hideTimer); hideTimer = null; }

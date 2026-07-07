@@ -98,14 +98,18 @@ function FilterSidebarByAccess(allowed) {
     if (!allowed || !allowed.length) { return; }
     $(".sidebar-area .menu-item").each(function () {
         var title = $(this).find(".title").first().text().trim();
-        if (title && allowed.indexOf(title) === -1) {
-            $(this).hide();
-        }
+        if (!title) { return; }
+        // idempotent: ซ่อนเมนูที่ไม่มีสิทธิ์ + "คืน" เมนูที่มีสิทธิ์
+        // (กันเมนูใหม่โดนซ่อนค้าง เพราะรอบแรกใช้ cache สิทธิ์เก่าที่ยังไม่มีเมนูนั้น)
+        if (allowed.indexOf(title) === -1) { $(this).hide(); }
+        else { $(this).show(); }
     });
-    // ซ่อนหัวข้อหมวดที่ไม่เหลือเมนูที่มองเห็น
+    // ซ่อน/คืนหัวข้อหมวดตามว่ายังเหลือเมนูที่มองเห็นใต้หมวดนั้นหรือไม่
     $(".sidebar-area .menu-title").each(function () {
         if ($(this).nextUntil(".menu-title", ".menu-item:visible").length === 0) {
             $(this).hide();
+        } else {
+            $(this).show();
         }
     });
 }
