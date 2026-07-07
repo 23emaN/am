@@ -30,12 +30,13 @@ $params = [];
 if ($search !== '') {
     // ใช้ placeholder แยกชื่อกันแต่ละจุด (PDO::ATTR_EMULATE_PREPARES=false ของโปรเจกต์นี้
     // ไม่รองรับ named placeholder ซ้ำหลายจุดในคิวรีเดียว -> SQLSTATE[HY093])
-    $where[] = "(r.comment LIKE :search1 OR u.user_firstname LIKE :search2 OR u.user_lastname LIKE :search3 OR u.user_email LIKE :search4)";
+    $where[] = "(r.comment LIKE :search1 OR u.user_firstname LIKE :search2 OR u.user_lastname LIKE :search3 OR u.user_email LIKE :search4 OR r.reviewer_name LIKE :search5)";
     $like = '%' . $search . '%';
     $params[':search1'] = $like;
     $params[':search2'] = $like;
     $params[':search3'] = $like;
     $params[':search4'] = $like;
+    $params[':search5'] = $like;
 }
 if ($status === '0' || $status === '1') {
     $where[] = "r.is_approved = :status";
@@ -48,7 +49,7 @@ try {
     $stmt_stats = $pdo_connect->query(
         "SELECT r.rating, COUNT(*) AS c
          FROM tbl_reviews r
-         JOIN tbl_user u ON u.user_id = r.user_id
+         LEFT JOIN tbl_user u ON u.user_id = r.user_id
          WHERE u.delete_at IS NULL
          GROUP BY r.rating"
     );
@@ -82,16 +83,16 @@ try {
     ];
 
     // จำนวนทั้งหมดหลังกรอง
-    $stmt_cnt = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_reviews r JOIN tbl_user u ON u.user_id = r.user_id $where_sql");
+    $stmt_cnt = $pdo_connect->prepare("SELECT COUNT(*) FROM tbl_reviews r LEFT JOIN tbl_user u ON u.user_id = r.user_id $where_sql");
     $stmt_cnt->execute($params);
     $total = (int) $stmt_cnt->fetchColumn();
     $stmt_cnt->closeCursor();
 
     // ข้อมูลหน้าปัจจุบัน
-    $sql = "SELECT r.review_id, r.user_id, r.rating, r.comment, r.created_at, r.is_approved,
+    $sql = "SELECT r.review_id, r.user_id, r.reviewer_name, r.rating, r.comment, r.created_at, r.is_approved,
                    u.user_firstname, u.user_lastname, u.user_email
             FROM tbl_reviews r
-            JOIN tbl_user u ON u.user_id = r.user_id
+            LEFT JOIN tbl_user u ON u.user_id = r.user_id
             $where_sql
             ORDER BY r.created_at DESC, r.review_id DESC
             LIMIT :offset, :per_page";
@@ -108,7 +109,7 @@ try {
         $full_name = trim(($row['user_firstname'] ?? '') . ' ' . ($row['user_lastname'] ?? ''));
         $list[] = [
             'review_id'   => $row['review_id'],
-            'reviewer'    => $full_name !== '' ? $full_name : '-',
+            'reviewer'    => $full_name !== '' ? $full_name : (trim((string) ($row['reviewer_name'] ?? '')) !== '' ? $row['reviewer_name'] : '-'),
             'user_email'  => $row['user_email'],
             'rating'      => $row['rating'],
             'comment'     => $row['comment'],

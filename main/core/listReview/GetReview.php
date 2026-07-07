@@ -24,10 +24,10 @@ if (!$pdo_connect) {
 }
 
 $stmt = $pdo_connect->prepare(
-    "SELECT r.review_id, r.user_id, r.rating, r.comment, r.created_at, r.is_approved,
+    "SELECT r.review_id, r.user_id, r.reviewer_name, r.rating, r.comment, r.created_at, r.is_approved,
             u.user_firstname, u.user_lastname, u.user_email
      FROM tbl_reviews r
-     JOIN tbl_user u ON u.user_id = r.user_id
+     LEFT JOIN tbl_user u ON u.user_id = r.user_id
      WHERE r.review_id = :id
      LIMIT 1"
 );
