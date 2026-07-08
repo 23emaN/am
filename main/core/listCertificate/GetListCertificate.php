@@ -54,9 +54,10 @@ if ($f_member !== '' && ctype_digit($f_member)) { $where[] = "e.enroll_user_id =
 if ($f_status === '1' || $f_status === '0')     { $where[] = "COALESCE($pass_expr, '0') = :f_status"; $params[':f_status'] = $f_status; }
 if ($f_approve === '1' || $f_approve === '0')   { $where[] = "e.enroll_is_completed = :f_approve"; $params[':f_approve'] = $f_approve; }
 if ($search !== '') {
-    $where[] = "(CONCAT_WS(' ', u.user_firstname, u.user_lastname) LIKE :search
-                 OR c.course_name LIKE :search
-                 OR u.user_citizen_id LIKE :search)";
+    $where[] = "(CONCAT_WS(' ',
+                     u.user_firstname, u.user_lastname,
+                     c.course_name, u.user_citizen_id
+                 ) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

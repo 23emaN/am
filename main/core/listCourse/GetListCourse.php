@@ -31,13 +31,11 @@ $joins = "FROM tbl_course c
 $where  = ["c.delete_at IS NULL"];
 $params = [];
 if ($search !== '') {
-    $where[] = "(c.course_name LIKE :search
-                 OR t.type_name LIKE :search
-                 OR g.group_name LIKE :search
-                 OR c.course_code_cpd_1 LIKE :search OR c.course_code_cpd_2 LIKE :search
-                 OR c.course_code_cpd_3 LIKE :search OR c.course_code_cpd_4 LIKE :search
-                 OR c.course_code_cpa_1 LIKE :search OR c.course_code_cpa_2 LIKE :search
-                 OR c.course_code_cpa_3 LIKE :search OR c.course_code_cpa_4 LIKE :search)";
+    $where[] = "(CONCAT_WS(' ',
+                     c.course_name, t.type_name, g.group_name,
+                     c.course_code_cpd_1, c.course_code_cpd_2, c.course_code_cpd_3, c.course_code_cpd_4,
+                     c.course_code_cpa_1, c.course_code_cpa_2, c.course_code_cpa_3, c.course_code_cpa_4
+                 ) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

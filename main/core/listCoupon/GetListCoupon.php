@@ -30,7 +30,7 @@ $search = trim((string) ($_POST['search'] ?? ''));   // ค้นหาจาก
 $where  = ["delete_at IS NULL"];
 $params = [];
 if ($search !== '') {
-    $where[] = "(coupon_code LIKE :search OR coupon_detail LIKE :search)";
+    $where[] = "(CONCAT_WS(' ', coupon_code, coupon_detail) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

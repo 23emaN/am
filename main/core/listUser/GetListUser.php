@@ -27,11 +27,10 @@ $search = trim((string) ($_POST['search'] ?? ''));
 $where  = ["u.delete_at IS NULL"];
 $params = [];
 if ($search !== '') {
-    $where[] = "(CONCAT_WS(' ', u.user_firstname, u.user_lastname) LIKE :search
-                 OR u.user_email LIKE :search
-                 OR u.user_citizen_id LIKE :search
-                 OR u.user_cpd_no LIKE :search
-                 OR u.user_cpa_no LIKE :search)";
+    $where[] = "(CONCAT_WS(' ',
+                     u.user_firstname, u.user_lastname,
+                     u.user_email, u.user_citizen_id, u.user_cpd_no, u.user_cpa_no
+                 ) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

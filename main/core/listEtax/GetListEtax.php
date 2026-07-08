@@ -42,10 +42,12 @@ $where  = ["o.payment_status = '1'"];
 $params = [];
 if ($search !== '') {
     // ชื่อ = addr_name หรือ ชื่อ-นามสกุลผู้ใช้ ; เลขผู้เสียภาษี = addr_tax_id ; เลขที่เอกสาร = order_id
-    $where[] = "(COALESCE(a.addr_name, '') LIKE :search
-                 OR CONCAT_WS(' ', u.user_firstname, u.user_lastname) LIKE :search
-                 OR COALESCE(a.addr_tax_id, '') LIKE :search
-                 OR CAST(o.order_id AS CHAR) LIKE :search)";
+    // NOTE: tbl_user (utf8mb4_unicode_ci) + tbl_user_address (utf8mb4_general_ci) mix collations;
+    // force one collation on the concatenated haystack or MySQL throws 1267 "Illegal mix of collations".
+    $where[] = "(CONCAT_WS(' ',
+                     a.addr_name, u.user_firstname, u.user_lastname,
+                     a.addr_tax_id, o.order_id
+                 ) COLLATE utf8mb4_unicode_ci LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);
