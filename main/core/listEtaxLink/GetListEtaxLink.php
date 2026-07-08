@@ -31,7 +31,7 @@ $params = [];
 if ($f_doc_status === '1' || $f_doc_status === '2')  { $where[] = "l.doc_status = :f_doc_status"; $params[':f_doc_status'] = $f_doc_status; }
 if ($f_link_status === '1' || $f_link_status === '0') { $where[] = "l.link_status = :f_link_status"; $params[':f_link_status'] = $f_link_status; }
 if ($search !== '') {
-    $where[] = "(l.etax_no LIKE :search OR l.customer_name LIKE :search)";
+    $where[] = "(CONCAT_WS(' ', l.etax_no, l.customer_name) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

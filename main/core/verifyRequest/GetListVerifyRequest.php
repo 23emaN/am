@@ -28,8 +28,7 @@ $search = trim((string) ($_POST['search'] ?? '')); // ชื่อ / เลข�
 $where  = ["u.delete_at IS NULL", "u.identity_verified = '1'"];
 $params = [];
 if ($search !== '') {
-    $where[] = "(CONCAT_WS(' ', u.user_firstname, u.user_lastname) LIKE :search
-                 OR u.user_citizen_id LIKE :search)";
+    $where[] = "(CONCAT_WS(' ', u.user_firstname, u.user_lastname, u.user_citizen_id) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);

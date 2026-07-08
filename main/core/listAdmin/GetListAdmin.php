@@ -31,8 +31,7 @@ $search = trim((string) ($_POST['search'] ?? '')); // ชื่อ-นามส�
 $where  = ["delete_at IS NULL", "admin_status = '1'"];
 $params = [];
 if ($search !== '') {
-    $where[] = "(CONCAT_WS(' ', user_firstname, user_lastname) LIKE :search
-                 OR user_email LIKE :search)";
+    $where[] = "(CONCAT_WS(' ', user_firstname, user_lastname, user_email) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);
