@@ -11,8 +11,7 @@
 <?php include "header.php"; ?>
 
 <style>
-    #editor_question_text { height: 200px; background:#fff; }
-    .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    .tox-tinymce { border-color: #ced4da !important; border-radius: 8px; }
     /* ช่องกรอกพื้นหลังขาว (ธีมตั้ง .form-control เป็นเทา #F6F7F9) */
     #formLesson .form-control,
     #formLesson .form-select,
@@ -179,7 +178,7 @@
                     <input type="hidden" name="question_text" id="q_text">
                     <div class="mb-3">
                         <label class="form-label fw-medium">คำถาม <span class="text-danger">*</span></label>
-                        <div id="editor_question_text"></div>
+                        <textarea id="editor_question_text"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-medium">ภาพ</label>
@@ -243,7 +242,7 @@
     var COURSE_ID = <?php echo $course_id; ?>;
     var LESSON_ID = <?php echo $lesson_id; ?>;
     var IS_ADD    = <?php echo $is_add ? 'true' : 'false'; ?>;
-    var quillQuestion = null;
+    // question editor = TinyMCE (init ตอน ready — ดู InitQuestionEditor / SetQuestionHTML / GetQuestionHTML)
     var questionTabLoaded = false;
     var _pickedVideoURL = null;   // object URL ของไฟล์ที่เพิ่งเลือก (ไว้ revoke)
     var questionBuffer = [];      // โหมดเพิ่ม: พักคำถามไว้ก่อน แล้วบันทึกทีเดียวตอนกด "เพิ่มบทเรียน"
@@ -256,6 +255,11 @@
             return;
         }
         InitVideoDropZone();
+        InitQuestionEditor();
+        // TinyMCE dialogs (แทรกลิงก์) render นอก modal — กัน Bootstrap modal แย่ง focus จนพิมพ์ไม่ได้
+        document.addEventListener('focusin', function (e) {
+            if (e.target.closest && e.target.closest('.tox-tinymce-aux, .tox-dialog')) { e.stopImmediatePropagation(); }
+        });
         $('button[data-bs-target="#tab-l-question"]').on('shown.bs.tab', function () {
             if (!questionTabLoaded) { questionTabLoaded = true; LoadQuestionTab(); }
         });
@@ -556,13 +560,26 @@
         })();
     }
 
-    function EnsureQuill() {
-        if (!quillQuestion && typeof Quill !== 'undefined') {
-            quillQuestion = new Quill('#editor_question_text', {
-                theme: 'snow',
-                modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link'], ['clean']] }
-            });
-        }
+    function InitQuestionEditor() {
+        if (typeof tinymce === 'undefined' || tinymce.get('editor_question_text')) { return; }
+        tinymce.init({
+            selector: '#editor_question_text',
+            height: 200,
+            menubar: false,
+            elementpath: false,
+            plugins: 'lists link',
+            toolbar: 'bold italic underline | bullist numlist | link | removeformat',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        });
+    }
+    function SetQuestionHTML(html) {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get('editor_question_text') : null;
+        if (ed) { ed.setContent(html || ''); }
+    }
+    function GetQuestionHTML() {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get('editor_question_text') : null;
+        if (!ed) { return ''; }
+        return ed.getContent({ format: 'text' }).trim() === '' ? '' : ed.getContent();
     }
     function AddChoiceRow(text) {
         var idx = $('#choiceList .choice-row').length + 1;
@@ -599,8 +616,7 @@
         $('#modalQuestionTitle').text('สร้างคำถามใหม่');
         $('#formQuestion')[0].reset();
         $('#q_id').val('');
-        EnsureQuill();
-        if (quillQuestion) { quillQuestion.setText(''); }
+        SetQuestionHTML('');
         $('#choiceList').empty();
         AddChoiceRow(''); AddChoiceRow('');
         RefreshCorrectOptions();
@@ -615,8 +631,7 @@
             $('#modalQuestionTitle').text('แก้ไขคำถาม');
             $('#formQuestion')[0].reset();
             $('#q_id').val('');
-            EnsureQuill();
-            if (quillQuestion) { quillQuestion.root.innerHTML = q.text || ''; }
+            SetQuestionHTML(q.text || '');
             $('#choiceList').empty();
             (q.choices || []).forEach(function (c) { AddChoiceRow(c || ''); });
             RefreshCorrectOptions();
@@ -633,8 +648,7 @@
                 $('#modalQuestionTitle').text('แก้ไขคำถาม');
                 $('#formQuestion')[0].reset();
                 $('#q_id').val(qid);
-                EnsureQuill();
-                if (quillQuestion) { quillQuestion.root.innerHTML = response.data.question.question_text || ''; }
+                SetQuestionHTML(response.data.question.question_text || '');
                 $('#choiceList').empty();
                 var correctIdx = 0;
                 response.data.choices.forEach(function (c, i) {
@@ -649,11 +663,7 @@
         });
     }
     function SubmitQuestion() {
-        if (quillQuestion) {
-            var html = quillQuestion.root.innerHTML;
-            if (quillQuestion.getText().trim() === '') { html = ''; }
-            $('#q_text').val(html);
-        }
+        $('#q_text').val(GetQuestionHTML());
         if ($('#q_text').val().trim() === '') {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกคำถาม</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
             return;

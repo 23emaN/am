@@ -184,7 +184,6 @@
 </div>
 
 <?php include "script.php"; ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
 
 </body>
 
@@ -209,6 +208,7 @@
 
         var commonConfig = {
             menubar: false,
+            elementpath: false,
             plugins: 'lists wordcount',
             toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',

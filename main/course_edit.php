@@ -122,7 +122,7 @@
                     <input type="hidden" name="exam_text" id="e_text">
                     <div class="mb-3">
                         <label class="form-label fw-medium">คำถาม <span class="text-danger">*</span></label>
-                        <div id="editor_exam_text"></div>
+                        <textarea id="editor_exam_text"></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-medium">ภาพ</label>
@@ -176,8 +176,7 @@
 </div>
 
 <style>
-    #editor_exam_text { height: 200px; background:#fff; }
-    .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    .tox-tinymce { border-color: #ced4da !important; border-radius: 8px; }
 </style>
 
 <?php include "script.php"; ?>
@@ -188,7 +187,7 @@
 
 <script>
     var COURSE_ID = <?php echo $course_id; ?>;
-    var quillExam = null;
+    // exam editor = TinyMCE (init ตอน ready — ดู InitExamEditor / SetExamHTML / GetExamHTML)
 
     $(document).ready(function () {
         if (!COURSE_ID) {
@@ -197,6 +196,11 @@
             return;
         }
         LoadGeneralTab();
+        InitExamEditor();
+        // TinyMCE dialogs (แทรกลิงก์) render นอก modal — กัน Bootstrap modal แย่ง focus จนพิมพ์ไม่ได้
+        document.addEventListener('focusin', function (e) {
+            if (e.target.closest && e.target.closest('.tox-tinymce-aux, .tox-dialog')) { e.stopImmediatePropagation(); }
+        });
 
         // โหลดแท็บแบบ lazy ครั้งแรกที่เปิด
         var lessonLoaded = false, examLoaded = false;
@@ -500,13 +504,26 @@
             '</div></div>');
     }
 
-    function EnsureExamQuill() {
-        if (!quillExam && typeof Quill !== 'undefined') {
-            quillExam = new Quill('#editor_exam_text', {
-                theme: 'snow',
-                modules: { toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link'], ['clean']] }
-            });
-        }
+    function InitExamEditor() {
+        if (typeof tinymce === 'undefined' || tinymce.get('editor_exam_text')) { return; }
+        tinymce.init({
+            selector: '#editor_exam_text',
+            height: 200,
+            menubar: false,
+            elementpath: false,
+            plugins: 'lists link',
+            toolbar: 'bold italic underline | bullist numlist | link | removeformat',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+        });
+    }
+    function SetExamHTML(html) {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get('editor_exam_text') : null;
+        if (ed) { ed.setContent(html || ''); }
+    }
+    function GetExamHTML() {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get('editor_exam_text') : null;
+        if (!ed) { return ''; }
+        return ed.getContent({ format: 'text' }).trim() === '' ? '' : ed.getContent();
     }
     function AddExamChoiceRow(text) {
         var row = $('<div class="input-group mb-2 exam-choice-row">' +
@@ -541,8 +558,7 @@
         $('#modalExamTitle').text('สร้างคำถามใหม่');
         $('#formExam')[0].reset();
         $('#e_id').val('');
-        EnsureExamQuill();
-        if (quillExam) { quillExam.setText(''); }
+        SetExamHTML('');
         $('#examChoiceList').empty();
         AddExamChoiceRow(''); AddExamChoiceRow('');
         new bootstrap.Modal(document.getElementById('modalExam')).show();
@@ -557,8 +573,7 @@
                 $('#modalExamTitle').text('แก้ไขคำถาม');
                 $('#formExam')[0].reset();
                 $('#e_id').val(eid);
-                EnsureExamQuill();
-                if (quillExam) { quillExam.root.innerHTML = response.data.exam.exam_text || ''; }
+                SetExamHTML(response.data.exam.exam_text || '');
                 $('#examChoiceList').empty();
                 var correctIdx = 0;
                 response.data.choices.forEach(function (c, i) {
@@ -572,11 +587,7 @@
         });
     }
     function SubmitExam() {
-        if (quillExam) {
-            var html = quillExam.root.innerHTML;
-            if (quillExam.getText().trim() === '') { html = ''; }
-            $('#e_text').val(html);
-        }
+        $('#e_text').val(GetExamHTML());
         if ($('#e_text').val().trim() === '') {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกคำถาม</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
             return;

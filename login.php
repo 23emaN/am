@@ -14,7 +14,6 @@
         <link rel="stylesheet" href="template/assets/css/apexcharts.css">
         <link rel="stylesheet" href="template/assets/css/prism.css">
         <link rel="stylesheet" href="template/assets/css/rangeslider.css">
-        <link rel="stylesheet" href="template/assets/css/quill.snow.css">
         <link rel="stylesheet" href="template/assets/css/google-icon.css">
         <link rel="stylesheet" href="template/assets/css/remixicon.css">
         <link rel="stylesheet" href="template/assets/css/swiper-bundle.min.css">
@@ -95,7 +94,6 @@
         <script src="template/assets/js/sidebar-menu.js"></script>
         <script src="template/assets/js/dragdrop.js"></script>
         <script src="template/assets/js/rangeslider.min.js"></script>
-        <script src="template/assets/js/quill.min.js"></script>
         <script src="template/assets/js/data-table.js"></script>
         <script src="template/assets/js/prism.js"></script>
         <script src="template/assets/js/clipboard.min.js"></script>

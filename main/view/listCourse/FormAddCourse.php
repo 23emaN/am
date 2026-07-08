@@ -31,9 +31,8 @@
     }
     .select2-container--default .select2-selection--single .select2-selection__placeholder { color: #6c757d !important; }
     .select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px !important; }
-    /* Quill ต้องมี height ชัดเจน เพราะ .ql-container ใช้ height:100% */
-    #editor_course_detail { height: 280px; background:#fff; }
-    .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    /* TinyMCE border ให้เข้ากับ .form-control */
+    .tox-tinymce { border-color: #ced4da !important; border-radius: 8px; }
     /* ช่อง disabled ให้เป็นสีเทา (override .form-control สีขาวด้านบน) */
     .form-control:disabled, .form-select:disabled, .form-control[readonly] { background-color: #e9ecef !important; }
     /* ตัวสร้างรหัสหลักสูตร — แสดงแนวนอนบรรทัดเดียว เลื่อนในช่องได้ถ้ายาวเกิน */
@@ -127,7 +126,7 @@
 
             <div class="mb-3">
                 <label class="form-label fw-medium">รายละเอียดแบบเต็ม <span class="text-danger">*</span></label>
-                <div id="editor_course_detail"></div>
+                <textarea id="editor_course_detail"></textarea>
                 <input type="hidden" name="course_detail" id="course_detail">
             </div>
 
@@ -312,19 +311,23 @@
             var f = this.files && this.files[0];
             if (f) { var r = new FileReader(); r.onload = function (e) { showCoverPreview(e.target.result); }; r.readAsDataURL(f); }
         });
-        if (typeof Quill !== 'undefined') {
-            window.quillCourseDetail = new Quill('#editor_course_detail', {
-                theme: 'snow',
+        if (typeof tinymce !== 'undefined') {
+            if (tinymce.get('editor_course_detail')) { tinymce.get('editor_course_detail').remove(); }
+            tinymce.init({
+                selector: '#editor_course_detail',
+                height: 280,
+                menubar: false,
+                elementpath: false,
+                plugins: 'lists link',
+                toolbar: 'blocks | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | removeformat',
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 placeholder: 'กรอกรายละเอียดคอร์สเรียน...',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['link'],
-                        ['clean']
-                    ]
+                setup: function (editor) {
+                    editor.on('init', function () {
+                        if (typeof COURSE !== 'undefined' && COURSE && COURSE.course_detail) {
+                            editor.setContent(COURSE.course_detail);
+                        }
+                    });
                 }
             });
         }
@@ -517,20 +520,18 @@
                 var dn = 'course_approval_date_' + qd;
                 if (COURSE[dn]) { $('[name="' + dn + '"]').val(COURSE[dn]); }
             }
-            // Quill rich text
-            if (window.quillCourseDetail && COURSE.course_detail) {
-                window.quillCourseDetail.root.innerHTML = COURSE.course_detail;
-            }
+            // รายละเอียดคอร์ส (TinyMCE) — เซ็ตค่าตอน editor init เสร็จแล้ว (ดู setup ด้านบน)
             // พรีวิวรูปหน้าปกเดิม
             if (COURSE.course_cover_image) { showCoverPreview('../' + COURSE.course_cover_image); }
         }
     })();
 
     function SaveCourse() {
-        // ดึงเนื้อหาจาก Quill ใส่ hidden input
-        if (window.quillCourseDetail) {
-            let html = window.quillCourseDetail.root.innerHTML;
-            if (window.quillCourseDetail.getText().trim() === '') { html = ''; }
+        // ดึงเนื้อหาจาก TinyMCE ใส่ hidden input
+        var edCourseDetail = (typeof tinymce !== 'undefined') ? tinymce.get('editor_course_detail') : null;
+        if (edCourseDetail) {
+            let html = edCourseDetail.getContent();
+            if (edCourseDetail.getContent({ format: 'text' }).trim() === '') { html = ''; }
             $('#course_detail').val(html);
         }
 
