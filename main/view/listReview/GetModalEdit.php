@@ -18,10 +18,10 @@ try {
     $pdo = (new Connection())->getPdo();
     if ($pdo && $review_id > 0) {
         $stmt = $pdo->prepare(
-            "SELECT r.review_id, r.rating, r.comment, r.is_approved, r.created_at,
+            "SELECT r.review_id, r.reviewer_name, r.rating, r.comment, r.is_approved, r.created_at,
                     u.user_firstname, u.user_lastname, u.user_email
              FROM tbl_reviews r
-             JOIN tbl_user u ON u.user_id = r.user_id
+             LEFT JOIN tbl_user u ON u.user_id = r.user_id
              WHERE r.review_id = :id
              LIMIT 1"
         );
@@ -34,7 +34,7 @@ try {
 }
 
 $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
-$reviewer_name = $review ? trim(($review['user_firstname'] ?? '') . ' ' . ($review['user_lastname'] ?? '')) : '';
+$reviewer_name = $review ? (trim(($review['user_firstname'] ?? '') . ' ' . ($review['user_lastname'] ?? '')) ?: (string) ($review['reviewer_name'] ?? '')) : '';
 $rating = $review ? (int) $review['rating'] : 0;
 $is_approved = $review ? (string) $review['is_approved'] : '1';
 ?>

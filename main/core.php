@@ -169,6 +169,7 @@ $routes = [
 
     'list_review'                => [
         'get_list_review' => __DIR__ . '/core/listReview/GetListReview.php',
+        'add_review'       => __DIR__ . '/core/listReview/AddReview.php',
         'get_review'       => __DIR__ . '/core/listReview/GetReview.php',
         'update_review'    => __DIR__ . '/core/listReview/UpdateReview.php',
         'delete_review'    => __DIR__ . '/core/listReview/DeleteReview.php',

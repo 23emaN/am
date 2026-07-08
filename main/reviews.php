@@ -26,6 +26,7 @@
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
                     <h2 class="mb-0">รีวิวจากลูกค้า</h2>
+                    <button type="button" class="btn btn-primary" onclick="GetAddReview()"><span class="material-symbols-outlined align-middle" style="font-size:18px;" aria-hidden="true">add</span> เพิ่มรีวิว</button>
                 </div>
 
                 <div class="card-body p-4">
@@ -222,6 +223,22 @@
                 },
                 error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
             });
+        });
+    }
+
+    // เปิด modal เพิ่มรีวิว (โหลดฟอร์มจาก view/listReview/GetModalAdd.php)
+    function GetAddReview() {
+        $.ajax({
+            beforeSend: function () { ShowLoadingOverlay("#myModal"); },
+            type: "POST",
+            url: "view/listReview/GetModalAdd.php",
+            dataType: "html",
+            success: function (response) {
+                $("#showModal").html(response);
+                $("#myModal").modal("show");
+            },
+            complete: function () { HideLoadingOverlay("#myModal"); },
+            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
         });
     }
 </script>

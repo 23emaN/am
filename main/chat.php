@@ -26,6 +26,9 @@
     .chat-row.mine .chat-bubble { background: var(--brand-500); color: #fff; border-bottom-right-radius: 4px; }
     .chat-row.theirs .chat-bubble { background: #fff; color: var(--text-primary, #1a1a1a); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
     .chat-time { font-size: 11px; color: var(--text-muted, #98a2b3); margin-top: 3px; }
+    .chat-day-divider { align-self: stretch; display: flex; align-items: center; gap: 12px; margin: 4px 0; }
+    .chat-day-divider::before, .chat-day-divider::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--border, #e5e7eb); }
+    .chat-day-divider span { flex: 0 0 auto; font-size: 12px; color: var(--text-secondary, #6c757d); background: #eef0f3; padding: 2px 12px; border-radius: 999px; }
     .chat-input { padding: 14px 18px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
     .chat-input textarea { resize: none; max-height: 120px; }
     .chat-empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted, #98a2b3); gap: 8px; }
@@ -108,6 +111,7 @@
     var roomsCache = [];
     var lastRoomsSig = "";       // ลายเซ็นข้อมูลห้องล่าสุด -> ข้าม re-render ถ้าไม่เปลี่ยน (กันกระพริบ/ไม่หนัก)
     var lastMsgId = 0;           // messages_id ล่าสุดของห้องที่เปิด -> poll ดึงเฉพาะข้อความใหม่
+    var lastMsgDate = null;      // วันของข้อความล่าสุดที่ render -> ขึ้นเส้นกั้นเมื่อเปลี่ยนวัน
     var pollMsgTimer = null;
     var pollRoomsTimer = null;
 
@@ -188,6 +192,7 @@
         $("#threadBox").removeClass("d-none");
         $("#messagesBox").empty();
         lastMsgId = 0;
+        lastMsgDate = null;
         LoadMessages(true);   // true = โหลดเต็ม
         if (pollMsgTimer) { clearInterval(pollMsgTimer); }
         pollMsgTimer = setInterval(function () { LoadMessages(false); }, 8000);  // false = poll เฉพาะข้อความใหม่
@@ -232,10 +237,15 @@
         var html = "";
         messages.forEach(function (m) {
             if (m.messages_id > lastMsgId) { lastMsgId = m.messages_id; }
+            var dayKey = DayKey(m.created_at);
+            if (dayKey && dayKey !== lastMsgDate) {
+                html += '<div class="chat-day-divider"><span>' + EscapeHTML(FmtDayLabel(m.created_at)) + '</span></div>';
+                lastMsgDate = dayKey;
+            }
             var side = m.is_admin ? "mine" : "theirs";
             html += '<div class="chat-row ' + side + '">' +
                         '<div class="chat-bubble">' + EscapeHTML(m.message) + '</div>' +
-                        '<div class="chat-time">' + FmtTime(m.created_at) + '</div>' +
+                        '<div class="chat-time">' + FmtClock(m.created_at) + '</div>' +
                     '</div>';
         });
         box.append(html);
@@ -278,6 +288,35 @@
         if (d.toDateString() === now.toDateString()) { return hhmm; }
         return d.getDate() + "/" + (d.getMonth() + 1) + " " + hhmm;
     }
+    // เวลาบนบับเบิลข้อความ: แสดงแค่ HH:MM เสมอ (บอกวันด้วยเส้นกั้นแทน)
+    function ParseTs(ts) {
+        if (!ts) { return null; }
+        var d = new Date(String(ts).replace(" ", "T"));
+        return isNaN(d.getTime()) ? null : d;
+    }
+    function FmtClock(ts) {
+        var d = ParseTs(ts);
+        if (!d) { return ts || ""; }
+        return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+    }
+    // คีย์ของวัน (ตามเวลาเครื่องผู้ใช้) ใช้เทียบว่าเปลี่ยนวันหรือยัง
+    function DayKey(ts) {
+        var d = ParseTs(ts);
+        if (!d) { return ""; }
+        return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    }
+    // ป้ายบนเส้นกั้นวัน: วันนี้ / เมื่อวาน / '6 ก.ค. 2568' (พ.ศ.)
+    function FmtDayLabel(ts) {
+        var d = ParseTs(ts);
+        if (!d) { return ""; }
+        var today = new Date();
+        var yest = new Date(); yest.setDate(yest.getDate() - 1);
+        if (d.toDateString() === today.toDateString()) { return "วันนี้"; }
+        if (d.toDateString() === yest.toDateString()) { return "เมื่อวาน"; }
+        var TH = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        return d.getDate() + " " + TH[d.getMonth()] + " " + (d.getFullYear() + 543);
+    }
+
     function ToastResult(response) {
         Swal.fire({
             title: response.result == 1 ? "สำเร็จ" : "แจ้งเตือน",
