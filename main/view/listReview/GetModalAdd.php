@@ -67,6 +67,16 @@ $today = date('d/m/Y');
             </div>
 
             <div class="mb-3">
+                <label for="add_reviewer_image" class="form-label fw-medium">รูปผู้รีวิว</label>
+                <input type="file" class="form-control" id="add_reviewer_image" name="reviewer_image" accept="image/*" onchange="AddReviewPreviewImage(this)">
+                <div class="form-text">jpg, png, webp, gif · ไม่เกิน 5MB (ไม่บังคับ)</div>
+                <div class="mt-2" id="add_reviewer_image_wrap" style="display:none;">
+                    <img id="add_reviewer_image_preview" src="" alt="พรีวิวรูปผู้รีวิว"
+                         style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:1px solid #e5e7eb;">
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label for="add_rating" class="form-label fw-medium">คะแนน (1-5) <span class="text-danger">*</span></label>
                 <select class="form-select" id="add_rating" name="rating">
                     <?php for ($i = 5; $i >= 1; $i--): ?>
@@ -119,6 +129,15 @@ $today = date('d/m/Y');
         var isCustom = $('input[name="reviewer_type"]:checked').val() === "custom";
         $("#add_name_wrap").toggleClass("d-none", !isCustom);
         $("#add_user_wrap").toggleClass("d-none", isCustom);
+    }
+
+    // พรีวิวรูปผู้รีวิวก่อนอัปโหลด
+    function AddReviewPreviewImage(input) {
+        var f = input.files && input.files[0];
+        if (!f) { $("#add_reviewer_image_wrap").hide(); return; }
+        var r = new FileReader();
+        r.onload = function (e) { $("#add_reviewer_image_preview").attr("src", e.target.result); $("#add_reviewer_image_wrap").show(); };
+        r.readAsDataURL(f);
     }
 
     function AddReview() {

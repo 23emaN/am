@@ -73,13 +73,37 @@ if ($reviewer_type === 'user') {
     $insert_name    = $reviewer_name;
 }
 
+/* ---------- อัปโหลดรูปผู้รีวิว (ถ้ามี) — ลอก pattern จาก AddCourse ---------- */
+$reviewer_image = null;
+if (!empty($_FILES['reviewer_image']['name']) && ($_FILES['reviewer_image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+    $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif'];
+    $ext = strtolower(pathinfo($_FILES['reviewer_image']['name'], PATHINFO_EXTENSION));
+    if (!isset($allowed[$ext])) {
+        Response::json(0, 'รองรับเฉพาะไฟล์รูปภาพ (jpg, png, webp, gif)', null);
+    }
+    if ($_FILES['reviewer_image']['size'] > 5 * 1024 * 1024) {
+        Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
+    }
+    $uploadDir = dirname(__DIR__, 3) . '/upload/review/';   // .../backoffice/upload/review/
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    }
+    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
+    if (!move_uploaded_file($_FILES['reviewer_image']['tmp_name'], $uploadDir . $filename)) {
+        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
+    }
+    // เก็บ path อ้างอิงจาก root ของแอป (หน้าใน main/ เติม ../ ตอนแสดงผล)
+    $reviewer_image = 'upload/review/' . $filename;
+}
+
 try {
     $stmt = $pdo_connect->prepare(
-        "INSERT INTO tbl_reviews (user_id, reviewer_name, rating, comment, is_approved, created_at)
-         VALUES (:user_id, :reviewer_name, :rating, :comment, :is_approved, :created_at)"
+        "INSERT INTO tbl_reviews (user_id, reviewer_name, reviewer_image, rating, comment, is_approved, created_at)
+         VALUES (:user_id, :reviewer_name, :reviewer_image, :rating, :comment, :is_approved, :created_at)"
     );
     $stmt->bindValue(':user_id', $insert_user_id, $insert_user_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
     $stmt->bindValue(':reviewer_name', $insert_name, $insert_name === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':reviewer_image', $reviewer_image, $reviewer_image === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmt->bindValue(':rating', (string) $rating, PDO::PARAM_STR);
     $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
     $stmt->bindValue(':is_approved', $is_approved, PDO::PARAM_STR);
