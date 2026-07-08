@@ -66,11 +66,13 @@ function coupon_date($d): string {
                             <td><?php echo coupon_date($row['coupon_start'] ?? ''); ?></td>
                             <td><?php echo coupon_date($row['coupon_end'] ?? ''); ?></td>
                             <td class="text-center">
-                                <?php if ($is_active): ?>
-                                    <span class="badge bg-success">เปิดใช้งาน</span>
-                                <?php else: ?>
-                                    <span class="badge bg-secondary">ปิดใช้งาน</span>
-                                <?php endif; ?>
+                                <?php $next_status = $is_active ? '0' : '1'; ?>
+                                <span class="badge <?php echo $is_active ? 'bg-success' : 'bg-secondary'; ?>"
+                                      style="cursor:pointer; user-select:none;"
+                                      title="คลิกเพื่อ<?php echo $is_active ? 'ปิด' : 'เปิด'; ?>ใช้งาน"
+                                      onclick="ToggleCouponStatus('<?php echo $row['coupon_id']; ?>', '<?php echo $next_status; ?>');">
+                                    <?php echo $is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'; ?>
+                                </span>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center">

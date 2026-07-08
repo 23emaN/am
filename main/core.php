@@ -96,6 +96,7 @@ $routes = [
         'add_coupon'      => __DIR__ . '/core/listCoupon/AddCoupon.php',
         'get_coupon'      => __DIR__ . '/core/listCoupon/GetCoupon.php',
         'update_coupon'   => __DIR__ . '/core/listCoupon/UpdateCoupon.php',
+        'update_coupon_status' => __DIR__ . '/core/listCoupon/UpdateCouponStatus.php',
         'delete_coupon'   => __DIR__ . '/core/listCoupon/DeleteCoupon.php',
     ],
 
