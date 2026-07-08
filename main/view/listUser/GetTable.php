@@ -52,8 +52,16 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                             <td><?php echo $esc($cpd !== '' ? $cpd : '-'); ?></td>
                             <td><?php echo $esc($cpa !== '' ? $cpa : '-'); ?></td>
                             <td class="text-center">
-                                <!-- ยังไม่มีคอลัมน์สถานะการยืนยันในฐานข้อมูล (รอออกแบบเพิ่ม) -->
-                                <span class="text-muted">-</span>
+                                <?php
+                                    $iv = (string) ($row['identity_verified'] ?? '0');
+                                    if ($iv === '2') {
+                                        echo '<span class="badge bg-success">ยืนยันแล้ว</span>';
+                                    } elseif ($iv === '1') {
+                                        echo '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>';
+                                    } else {
+                                        echo '<span class="badge bg-secondary">ยังไม่ยืนยัน</span>';
+                                    }
+                                ?>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">

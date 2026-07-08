@@ -23,7 +23,7 @@ if (!$pdo_connect) {
 }
 
 $stmt = $pdo_connect->prepare(
-    "SELECT e.enroll_id, e.enroll_expiry_date, e.enroll_is_completed, c.course_name,
+    "SELECT e.enroll_id, e.enroll_expiry_date, e.enroll_is_completed, e.enroll_access, c.course_name,
             u.user_firstname, u.user_lastname
      FROM tbl_course_enrollment e
      LEFT JOIN tbl_course c ON e.enroll_course_id = c.course_id
@@ -40,6 +40,7 @@ if (!$row) {
 
 Response::json(1, 'Success', [
     'enroll_id'  => (int) $row['enroll_id'],
+    'status'     => (string) ($row['enroll_access'] ?? '1'),   // 1=ใช้งาน, 0=ยกเลิก
     'expiry'     => $row['enroll_expiry_date'] ? date('d/m/Y', strtotime($row['enroll_expiry_date'])) : '',
     'course'     => (string) ($row['course_name'] ?? '-'),
     'member'     => trim(($row['user_firstname'] ?? '') . ' ' . ($row['user_lastname'] ?? '')),

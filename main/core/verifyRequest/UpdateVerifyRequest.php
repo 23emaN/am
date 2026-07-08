@@ -52,22 +52,47 @@ if (!$exists) {
 // ปฏิเสธ -> กลับไปสถานะยังไม่ยืนยัน (identity_verified = 0) ให้ผู้ใช้ส่งใหม่ได้
 $identity_verified = ($result === '2') ? '2' : '0';
 
-$stmt = $pdo_connect->prepare(
-    "UPDATE tbl_user
-        SET identity_verified = :iv,
-            approver_citizen  = :ac,
-            remark            = :rm
-      WHERE user_id = :id AND delete_at IS NULL"
-);
-$ok = $stmt->execute([
-    ':iv' => $identity_verified,
-    ':ac' => $result,
-    ':rm' => $remark !== '' ? $remark : null,
-    ':id' => $target_id,
-]);
-$stmt->closeCursor();
+// log ประวัติการยืนยันตัวตน (action_type: 1 = ผ่าน/อนุมัติ, 2 = ยกเลิก/ปฏิเสธ)
+$action_type = ($result === '2') ? '1' : '2';
+$log_remark  = ($result === '2')
+    ? ($remark !== '' ? $remark : 'อนุมัติยืนยันตัวตนโดยตรวจสอบเอกสาร')
+    : $remark;   // ปฏิเสธ มีหมายเหตุเสมอ (ตรวจไว้ด้านบนแล้ว)
 
-if (!$ok) {
+try {
+    $pdo_connect->beginTransaction();
+
+    $stmt = $pdo_connect->prepare(
+        "UPDATE tbl_user
+            SET identity_verified = :iv,
+                approver_citizen  = :ac,
+                remark            = :rm
+          WHERE user_id = :id AND delete_at IS NULL"
+    );
+    $stmt->execute([
+        ':iv' => $identity_verified,
+        ':ac' => $result,
+        ':rm' => $remark !== '' ? $remark : null,
+        ':id' => $target_id,
+    ]);
+    $stmt->closeCursor();
+
+    // บันทึกประวัติ -> ให้แท็บ "ประวัติการยืนยันตัวตน" มีข้อมูล
+    $stmt_log = $pdo_connect->prepare(
+        "INSERT INTO tbl_identity_verification_log (user_id, create_user_id, action_type, remark)
+         VALUES (:uid, :admin, :act, :rm)"
+    );
+    $stmt_log->execute([
+        ':uid'   => $target_id,
+        ':admin' => (int) $admin_id,
+        ':act'   => $action_type,
+        ':rm'    => $log_remark !== '' ? $log_remark : null,
+    ]);
+    $stmt_log->closeCursor();
+
+    $pdo_connect->commit();
+} catch (\Throwable $e) {
+    if ($pdo_connect->inTransaction()) { $pdo_connect->rollBack(); }
+    error_log('UpdateVerifyRequest Error: ' . $e->getMessage());
     Response::json(0, 'บันทึกผลการตรวจสอบไม่สำเร็จ', null);
 }
 

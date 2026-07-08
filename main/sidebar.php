@@ -122,9 +122,7 @@
                 <a href="order_pending" class="menu-link <?php echo in_array($now_page, $order_pending_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">pending_actions</span>
                     <span class="title">คำสั่งซื้อรอยืนยัน</span>
-                    <?php if ($pending_transfer_orders > 0): ?>
-                        <span class="badge rounded-pill bg-danger ms-auto"><?php echo $pending_transfer_orders > 99 ? '99+' : $pending_transfer_orders; ?></span>
-                    <?php endif; ?>
+                    <span class="badge rounded-pill bg-danger ms-auto" id="sidebarOrderBadge" style="<?php echo $pending_transfer_orders > 0 ? '' : 'display:none;'; ?>"><?php echo $pending_transfer_orders > 99 ? '99+' : $pending_transfer_orders; ?></span>
                 </a>
             </li>
 
@@ -175,9 +173,7 @@
                 <a href="verify_request" class="menu-link <?php echo in_array($now_page, $verify_pages) ? 'active' : '' ?>">
                     <span class="material-symbols-outlined menu-icon">how_to_reg</span>
                     <span class="title">ยืนยันตัวตนผู้ใช้งาน</span>
-                    <?php if ($verify_pending > 0): ?>
-                        <span class="badge rounded-pill bg-danger ms-auto"><?php echo $verify_pending > 99 ? '99+' : $verify_pending; ?></span>
-                    <?php endif; ?>
+                    <span class="badge rounded-pill bg-danger ms-auto" id="sidebarVerifyBadge" style="<?php echo $verify_pending > 0 ? '' : 'display:none;'; ?>"><?php echo $verify_pending > 99 ? '99+' : $verify_pending; ?></span>
                 </a>
             </li>
 

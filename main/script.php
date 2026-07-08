@@ -34,3 +34,4 @@
         <script src="js/loading.js?ver=<?php echo @filemtime(__DIR__ . '/js/loading.js') ?: time(); ?>"></script>
         <script src="../js/upload.js"></script>
         <script src="js/core.js?ver=<?php echo @filemtime(__DIR__ . '/js/core.js') ?: time(); ?>"></script>
+        <script src="js/check.js?ver=<?php echo @filemtime(__DIR__ . '/js/check.js') ?: time(); ?>"></script>

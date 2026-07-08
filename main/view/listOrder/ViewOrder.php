@@ -14,6 +14,16 @@ $to   = min($page * $per_page, $total);
 
 $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 
+// วันที่แสดง 2 บรรทัด: บรรทัดบน = วันที่, บรรทัดล่าง = เวลา (เล็ก/จาง)
+$date2 = function ($v) use ($esc): string {
+    $v = trim((string) $v);
+    if ($v === '') { return '<span class="text-muted">-</span>'; }
+    $p = preg_split('/\s+/', $v, 2);
+    $out = $esc($p[0]);
+    if (isset($p[1]) && $p[1] !== '') { $out .= '<br><span class="text-secondary small">' . $esc($p[1]) . '</span>'; }
+    return $out;
+};
+
 // แปลงสถานะ -> badge (payment_status: 0=รอชำระ 1=สำเร็จ 2=ยกเลิก)
 $status_badge = function (string $s): string {
     if ($s === '1') { return '<span class="badge bg-success">สำเร็จแล้ว</span>'; }
@@ -59,10 +69,10 @@ $payment_badge = function (string $s): string {
                             <td><?= $ref !== '' ? $esc($ref) : '<span class="text-muted">ไม่มีข้อมูล</span>' ?></td>
                             <td class="fw-medium"><?= $esc($full !== '' ? $full : '-') ?></td>
                             <td class="text-secondary"><?= $course_html ?></td>
-                            <td class="text-end"><?= number_format((float) ($row['total'] ?? 0), 2) ?> บาท</td>
+                            <td class="text-end"><?= number_format((float) ($row['total'] ?? 0), 2) ?></td>
                             <td class="text-center"><?= $status_badge($status) ?></td>
                             <td class="text-center"><?= $payment_badge($status) ?></td>
-                            <td><?= ($row['created'] ?? '') !== '' ? $esc($row['created']) : '-' ?></td>
+                            <td class="text-nowrap"><?= $date2($row['created'] ?? '') ?></td>
                             <td class="text-center">
                                 <a href="order_detail.php?id=<?= $order_id ?>" class="btn btn-sm btn-info text-white">ดูรายละเอียด</a>
                             </td>

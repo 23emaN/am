@@ -54,8 +54,8 @@ $dup->closeCursor();
 
 try {
     $sql = "INSERT INTO tbl_course_enrollment
-                (enroll_user_id, enroll_course_id, enroll_payment_status, enroll_date, enroll_expiry_date, enroll_is_completed)
-            VALUES (:u, :c, 'paid', NOW(), :exp, '0')";
+                (enroll_user_id, enroll_course_id, enroll_payment_status, enroll_date, enroll_expiry_date, enroll_is_completed, enroll_access)
+            VALUES (:u, :c, 'paid', NOW(), :exp, '0', '1')";
     $stmt = $pdo_connect->prepare($sql);
     $stmt->execute([':u' => $user_id, ':c' => $course_id, ':exp' => $exp]);
     $stmt->closeCursor();

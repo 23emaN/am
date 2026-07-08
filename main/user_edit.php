@@ -24,7 +24,10 @@
                 <div class="card-body p-4">
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-                        <h4 class="mb-0">รายละเอียดผู้ใช้/ลูกค้า</h4>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h4 class="mb-0">รายละเอียดผู้ใช้/ลูกค้า</h4>
+                            <span id="userVerifyStatus"></span>
+                        </div>
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" class="btn btn-info text-white" onclick="LoginAsUser('<?php echo $user_id; ?>');">ล็อกอินเข้าเว็บไซต์</button>
                             <button type="button" class="btn btn-warning" onclick="OpenVerifyModal();">ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้</button>
@@ -182,7 +185,8 @@
                                         <tr>
                                             <th class="text-center" style="width: 60px;">#</th>
                                             <th>ผู้ดำเนินการ</th>
-                                            <th>รายละเอียด</th>
+                                            <th class="text-center">สถานะ</th>
+                                            <th>คำอธิบาย</th>
                                             <th>วันและเวลาที่ดำเนินการ</th>
                                         </tr>
                                     </thead>
@@ -215,6 +219,10 @@
                 <form id="FormVerify" autocomplete="off">
                     <input type="hidden" name="user_id" id="verify_user_id" value="">
 
+                    <div class="mb-3">
+                        <label class="form-label d-block">สถานะการยืนยันตัวตนปัจจุบัน</label>
+                        <span id="verifyModalStatus"></span>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">ประเภทเอกสาร</label>
                         <input type="text" class="form-control bg-light" value="ยืนยันด้วยบัตรประชาชน" readonly>
@@ -314,6 +322,7 @@
                     FillForm(response.data.user);
                     FillEnrollTab(response.data.enrollments || []);
                     FillExamTab(response.data.exams || []);
+                    FillVerifyTab(response.data.verify_history || []);
                 } else {
                     Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
                 }
@@ -326,8 +335,22 @@
     function FillForm(u) {
         if (!u) return;
         var f = $("#FormEditUser");
-        f.find('[name="user_prefix"]').val(u.user_prefix || "");
-        f.find('[name="user_firstname"]').val(u.user_firstname || "");
+        // ข้อมูลเก่า: user_prefix ว่าง แต่คำนำหน้าฝังอยู่ในชื่อ -> แยกออกมาใส่ dropdown
+        // (แยก นางสาว ก่อน นาง เพราะ "นางสาว" ขึ้นต้นด้วย "นาง")
+        var prefix = u.user_prefix ? String(u.user_prefix) : "";
+        var firstname = u.user_firstname || "";
+        if (!prefix) {
+            var pmap = [["นางสาว", "3"], ["นาย", "1"], ["นาง", "2"]];
+            for (var i = 0; i < pmap.length; i++) {
+                if (firstname.indexOf(pmap[i][0]) === 0) {
+                    prefix = pmap[i][1];
+                    firstname = firstname.substring(pmap[i][0].length).trim();
+                    break;
+                }
+            }
+        }
+        f.find('[name="user_prefix"]').val(prefix);
+        f.find('[name="user_firstname"]').val(firstname);
         f.find('[name="user_lastname"]').val(u.user_lastname || "");
         f.find('[name="user_email"]').val(u.user_email || "");
         f.find('[name="user_phone"]').val(u.user_phone || "");
@@ -336,6 +359,47 @@
         f.find('[name="user_cpa_no"]').val(u.user_cpa_no || "");
         f.find('[name="user_password"]').val("");
         f.find('[name="user_password_confirm"]').val("");
+        $("#userVerifyStatus").html(VerifyBadge(u.identity_verified));
+    }
+
+    // ป้ายสถานะการยืนยันตัวตน (0=ยังไม่ยืนยัน 1=รอตรวจสอบ 2=ยืนยันแล้ว)
+    function VerifyBadge(iv) {
+        iv = String(iv || '0');
+        if (iv === '2') { return '<span class="badge bg-success">ยืนยันตัวตนแล้ว</span>'; }
+        if (iv === '1') { return '<span class="badge bg-warning text-dark">รอตรวจสอบ</span>'; }
+        return '<span class="badge bg-secondary">ยังไม่ยืนยันตัวตน</span>';
+    }
+
+    // เติมแท็บ "ประวัติการยืนยันตัวตน" จาก tbl_identity_verification_log
+    function FillVerifyTab(rows) {
+        var html = '';
+        if (!rows || rows.length === 0) {
+            html = '<tr><td colspan="5" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+        } else {
+            rows.forEach(function (r, i) {
+                var act = String(r.action_type || '');
+                var badge = act === '1' ? '<span class="badge bg-success">อนุมัติยืนยันตัวตน</span>'
+                          : act === '2' ? '<span class="badge bg-danger">ยกเลิกการยืนยัน</span>'
+                          : '<span class="badge bg-secondary">-</span>';
+                var remark = r.remark ? EscapeHTML(r.remark) : '<span class="text-muted">-</span>';
+                html += '<tr>'
+                    + '<td class="text-center">' + (i + 1) + '</td>'
+                    + '<td>' + EscapeHTML(r.admin_name || '-') + '</td>'
+                    + '<td class="text-center">' + badge + '</td>'
+                    + '<td>' + remark + '</td>'
+                    + '<td class="text-nowrap">' + EscapeHTML(FormatDateTime(r.created_at)) + '</td>'
+                    + '</tr>';
+            });
+        }
+        $("#TableVerify tbody").html(html);
+    }
+
+    function FormatDateTime(ts) {
+        if (!ts) { return '-'; }
+        var d = new Date(String(ts).replace(' ', 'T'));
+        if (isNaN(d.getTime())) { return ts; }
+        var p = function (n) { return ('0' + n).slice(-2); };
+        return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
     }
 
     // เติมแท็บ "สิทธิ์เข้าคอร์สเรียน" (ตารางธรรมดา render ทุกแถวฝั่ง client)
@@ -507,6 +571,7 @@
 
     function FillVerifyModal(v) {
         if (!v) return;
+        $("#verifyModalStatus").html(VerifyBadge(v.identity_verified));
         $("#verify_user_id").val(v.user_id || "");
         $("#verify_citizen_id").val(v.user_citizen_id || "-");
         $("#verify_expiry").val(FormatExpiry(v.id_card_expiry_date));
@@ -552,7 +617,7 @@
             success: function (response) {
                 if (response.result == 1) {
                     verifyModal.hide();
-                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                    Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + response.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true, didClose: function () { LoadUser(); } });
                 } else {
                     Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + response.msg + '</span>', icon: "error", confirmButtonText: "ตกลง" });
                 }
