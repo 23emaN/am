@@ -3,16 +3,15 @@
 ?>
 <?php include "header.php"; ?>
 
+
 <style>
     /* ช่องกรอกพื้นหลังขาว (ธีมตั้ง .form-control เป็นเทา #F6F7F9) */
     #FormSetting .form-control,
     #FormSetting .form-select,
     #FormSetting .form-control:focus,
     #FormSetting .form-select:focus { background-color: #fff !important; }
-    /* Quill ต้องมี height ชัดเจน */
-    #editor_text_1, #editor_text_2 { height: 180px; background: #fff; }
-    #editor_about_us, #editor_contact_us { height: 160px; background: #fff; }
-    .ql-toolbar.ql-snow, .ql-container.ql-snow { border-color: #ced4da; }
+    /* TinyMCE Border Styling */
+    .tox-tinymce { border-color: #ced4da !important; border-radius: 8px; }
     .setting-section-title { letter-spacing: .02em; }
     /* ===== อัปโหลดรูป (ลากวาง/คลิก) + ปุ่ม X ลบ ===== */
     .img-dropzone {
@@ -118,7 +117,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">ข้อความแถวที่ 1</label>
-                                <div id="editor_text_1"></div>
+                                 <textarea id="editor_text_1"></textarea>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">รูปภาพหน้าแรก <small class="text-muted">(jpg, png, webp, gif · ไม่เกิน 5MB)</small></label>
@@ -139,7 +138,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">ข้อความแถวที่ 2</label>
-                                <div id="editor_text_2"></div>
+                                 <textarea id="editor_text_2"></textarea>
                             </div>
                         </div>
 
@@ -162,11 +161,11 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">เกี่ยวกับเรา</label>
-                                <div id="editor_about_us"></div>
+                                 <textarea id="editor_about_us"></textarea>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">ติดต่อเรา</label>
-                                <div id="editor_contact_us"></div>
+                                <textarea id="editor_contact_us"></textarea>
                             </div>
                         </div>
 
@@ -185,44 +184,62 @@
 </div>
 
 <?php include "script.php"; ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
 
 </body>
 
 </html>
 
 <script>
-    var quillText1 = null, quillText2 = null, quillAbout = null, quillContact = null;
-
     $(document).ready(function () {
-        InitQuills();
-        LoadSetting();
+        InitTinyMCEs();
         InitImgDrop();
     });
 
-    function InitQuills() {
-        if (typeof Quill === 'undefined') { return; }
-        var opts = {
-            theme: 'snow',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'script': 'sub'}, { 'script': 'super' }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    [{ 'align': [] }],
-                    ['blockquote', 'code-block'],
-                    ['link', 'image', 'video'],
-                    ['clean']
-                ]
+    function InitTinyMCEs() {
+        if (typeof tinymce === 'undefined') { return; }
+        
+        var initCount = 0;
+        function checkInit() {
+            initCount++;
+            if (initCount === 4) {
+                LoadSetting();
+            }
+        }
+
+        var commonConfig = {
+            menubar: false,
+            plugins: 'lists wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            setup: function (editor) {
+                editor.on('init', checkInit);
             }
         };
-        quillText1 = new Quill('#editor_text_1', opts);
-        quillText2 = new Quill('#editor_text_2', opts);
-        quillAbout = new Quill('#editor_about_us', opts);
-        quillContact = new Quill('#editor_contact_us', opts);
+
+        tinymce.init($.extend({}, commonConfig, {
+            selector: '#editor_text_1',
+            height: 220,
+            placeholder: 'เขียนข้อความแถวที่ 1 ตรงนี้...'
+        }));
+
+        tinymce.init($.extend({}, commonConfig, {
+            selector: '#editor_text_2',
+            height: 220,
+            placeholder: 'เขียนข้อความแถวที่ 2 ตรงนี้...'
+        }));
+
+        tinymce.init($.extend({}, commonConfig, {
+            selector: '#editor_about_us',
+            height: 180,
+            placeholder: 'เขียนข้อความเกี่ยวกับเรา...'
+        }));
+
+        tinymce.init($.extend({}, commonConfig, {
+            selector: '#editor_contact_us',
+            height: 180,
+            placeholder: 'เขียนข้อความติดต่อเรา...'
+        }));
     }
 
     function LoadSetting() {
@@ -261,8 +278,10 @@
 
         // หน้าแรก
         f.find('[name="youtube_id"]').val(s ? (s.youtube_id || "") : "");
-        if (quillText1) { quillText1.root.innerHTML = s ? (s.text_1 || "") : ""; }
-        if (quillText2) { quillText2.root.innerHTML = s ? (s.text_2 || "") : ""; }
+        if (typeof tinymce !== 'undefined') {
+            if (tinymce.get('editor_text_1')) { tinymce.get('editor_text_1').setContent(s ? (s.text_1 || "") : ""); }
+            if (tinymce.get('editor_text_2')) { tinymce.get('editor_text_2').setContent(s ? (s.text_2 || "") : ""); }
+        }
 
         // รูปภาพปัจจุบัน -> มีรูป: แสดงรูป+ปุ่มลบ, ไม่มี: โซนลากวาง
         $('#remove_image').val('0');
@@ -280,8 +299,10 @@
         f.find('[name="facebook_link"]').val(s ? (s.facebook_link || "") : "");
         f.find('[name="x_link"]').val(s ? (s.x_link || "") : "");
         f.find('[name="line_link"]').val(s ? (s.line_link || "") : "");
-        if (quillAbout) { quillAbout.root.innerHTML = s ? (s.about_us || "") : ""; }
-        if (quillContact) { quillContact.root.innerHTML = s ? (s.contact_us || "") : ""; }
+        if (typeof tinymce !== 'undefined') {
+            if (tinymce.get('editor_about_us')) { tinymce.get('editor_about_us').setContent(s ? (s.about_us || "") : ""); }
+            if (tinymce.get('editor_contact_us')) { tinymce.get('editor_contact_us').setContent(s ? (s.contact_us || "") : ""); }
+        }
     }
 
     // ===== อัปโหลดรูป (ลากวาง/คลิก) + พรีวิว + ลบ =====
@@ -336,11 +357,13 @@
         e.preventDefault();
 
         var fd = new FormData(this);
-        // Quill -> ฟิลด์
-        fd.set('text_1', quillText1 ? quillText1.root.innerHTML : '');
-        fd.set('text_2', quillText2 ? quillText2.root.innerHTML : '');
-        fd.set('about_us', quillAbout ? quillAbout.root.innerHTML : '');
-        fd.set('contact_us', quillContact ? quillContact.root.innerHTML : '');
+        // TinyMCE -> ฟิลด์
+        if (typeof tinymce !== 'undefined') {
+            fd.set('text_1', tinymce.get('editor_text_1') ? tinymce.get('editor_text_1').getContent() : '');
+            fd.set('text_2', tinymce.get('editor_text_2') ? tinymce.get('editor_text_2').getContent() : '');
+            fd.set('about_us', tinymce.get('editor_about_us') ? tinymce.get('editor_about_us').getContent() : '');
+            fd.set('contact_us', tinymce.get('editor_contact_us') ? tinymce.get('editor_contact_us').getContent() : '');
+        }
         // checkbox -> 0/1 (unchecked จะไม่ถูกส่งใน FormData จึงกำหนดเอง)
         fd.set('credit_card', $('#pm_credit').prop('checked') ? '1' : '0');
         fd.set('qr_promptpay', $('#pm_qr').prop('checked') ? '1' : '0');
