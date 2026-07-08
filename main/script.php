@@ -3,7 +3,7 @@
         <script src="../template/assets/js/sidebar-menu.js"></script>
         <script src="../template/assets/js/dragdrop.js"></script>
         <script src="../template/assets/js/rangeslider.min.js"></script>
-        <script src="../template/assets/js/quill.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
         <script src="../template/assets/js/data-table.js"></script>
         <script src="../template/assets/js/prism.js"></script>
         <script src="../template/assets/js/clipboard.min.js"></script>

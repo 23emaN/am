@@ -58,7 +58,7 @@
             processData: false,
             dataType: "html",
             success: function (response) {
-                // แทรกฟอร์ม — ตัวฟอร์ม (FormAddCourse.php) จะ init select2 + Quill ของตัวเอง
+                // แทรกฟอร์ม — ตัวฟอร์ม (FormAddCourse.php) จะ init select2 + TinyMCE ของตัวเอง
                 $("#GetFormAdd").html(response);
             },
             complete: function () { HideLoadingOverlay("#GetFormAdd"); },

@@ -30,7 +30,7 @@
 
         <link rel="stylesheet" href="../template/assets/css/rangeslider.css">
 
-        <link rel="stylesheet" href="../template/assets/css/quill.snow.css">
+        <!-- rich text editor = TinyMCE (โหลด global ใน script.php); quill.snow.css เอาออกแล้ว -->
 
         <link rel="stylesheet" href="../template/assets/css/google-icon.css">
 
