@@ -18,7 +18,7 @@ try {
     $pdo = (new Connection())->getPdo();
     if ($pdo && $review_id > 0) {
         $stmt = $pdo->prepare(
-            "SELECT r.review_id, r.reviewer_name, r.rating, r.comment, r.is_approved, r.created_at,
+            "SELECT r.review_id, r.reviewer_name, r.reviewer_image, r.rating, r.comment, r.is_approved, r.created_at,
                     u.user_firstname, u.user_lastname, u.user_email
              FROM tbl_reviews r
              LEFT JOIN tbl_user u ON u.user_id = r.user_id
@@ -37,6 +37,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 $reviewer_name = $review ? (trim(($review['user_firstname'] ?? '') . ' ' . ($review['user_lastname'] ?? '')) ?: (string) ($review['reviewer_name'] ?? '')) : '';
 $rating = $review ? (int) $review['rating'] : 0;
 $is_approved = $review ? (string) $review['is_approved'] : '1';
+$reviewer_image = $review ? (string) ($review['reviewer_image'] ?? '') : '';
 ?>
     <div class="modal-header">
         <h5 class="modal-title" id="myModalLabel">แก้ไขรีวิว</h5>
@@ -53,6 +54,24 @@ $is_approved = $review ? (string) $review['is_approved'] : '1';
                     <label class="form-label fw-medium text-secondary">ผู้รีวิว</label>
                     <div class="fw-medium"><?php echo $esc($reviewer_name !== '' ? $reviewer_name : '-'); ?></div>
                     <div class="text-secondary small"><?php echo $esc($review['user_email'] ?? ''); ?></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="edit_reviewer_image" class="form-label fw-medium">รูปผู้รีวิว</label>
+                    <?php if ($reviewer_image !== ''): ?>
+                        <div class="mb-2" id="edit_reviewer_image_current">
+                            <img src="../<?php echo $esc($reviewer_image); ?>" alt="รูปผู้รีวิว"
+                                 style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:1px solid #e5e7eb;">
+                            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="EditReviewRemoveImage()">ลบรูป</button>
+                        </div>
+                    <?php endif; ?>
+                    <input type="hidden" name="remove_image" id="edit_remove_image" value="0">
+                    <input type="file" class="form-control" id="edit_reviewer_image" name="reviewer_image" accept="image/*" onchange="EditReviewPreviewImage(this)">
+                    <div class="form-text">เลือกไฟล์ใหม่เพื่อเปลี่ยนรูป · jpg, png, webp, gif · ไม่เกิน 5MB</div>
+                    <div class="mt-2" id="edit_reviewer_image_wrap" style="display:none;">
+                        <img id="edit_reviewer_image_preview" src="" alt="พรีวิวรูปผู้รีวิว"
+                             style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:1px solid #e5e7eb;">
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -92,6 +111,22 @@ $is_approved = $review ? (string) $review['is_approved'] : '1';
     <?php endif; ?>
 
 <script>
+    // พรีวิว/เปลี่ยน/ลบ รูปผู้รีวิว (ให้เหมือนฟอร์มเพิ่มรีวิว)
+    function EditReviewPreviewImage(input) {
+        var f = input.files && input.files[0];
+        if (!f) { $("#edit_reviewer_image_wrap").hide(); return; }
+        $("#edit_remove_image").val("0");
+        var r = new FileReader();
+        r.onload = function (e) { $("#edit_reviewer_image_preview").attr("src", e.target.result); $("#edit_reviewer_image_wrap").show(); };
+        r.readAsDataURL(f);
+    }
+    function EditReviewRemoveImage() {
+        $("#edit_remove_image").val("1");
+        $("#edit_reviewer_image").val("");
+        $("#edit_reviewer_image_wrap").hide();
+        $("#edit_reviewer_image_current").hide();
+    }
+
     function UpdateReview() {
         var comment = $('#edit_comment').val().trim();
         if (comment === '') {
