@@ -19,6 +19,14 @@
                             <label for="f_search" class="form-label fw-medium">ค้นหา</label>
                             <input type="text" class="form-control" id="f_search" placeholder="ค้นหาจากโค้ด / รายละเอียดคูปอง">
                         </div>
+                        <div class="col-md-3 col-lg-2">
+                            <label for="f_status" class="form-label fw-medium">สถานะ</label>
+                            <select class="form-select" id="f_status" onchange="SearchData()">
+                                <option value="">ทั้งหมด</option>
+                                <option value="1">เปิดใช้งาน</option>
+                                <option value="0">ปิดใช้งาน</option>
+                            </select>
+                        </div>
                         <div class="col-md-2">
                             <button type="button" class="btn btn-primary w-100" onclick="SearchData()">ค้นหา</button>
                         </div>
@@ -63,6 +71,7 @@
                 request_state: "list_coupon",
                 request_function: "get_list_coupon",
                 search: $("#f_search").val(),
+                f_status: $("#f_status").val(),
                 page: page
             },
             dataType: "json",
@@ -101,5 +110,43 @@
     // ดูรายละเอียด/แก้ไข -> ไปหน้าแก้ไขคูปอง
     function GetEditCoupon(coupon_id) {
         window.location.href = "coupon_edit.php?id=" + coupon_id;
+    }
+
+    // สลับสถานะเปิด/ปิดใช้งานคูปอง (คลิกที่ป้ายสถานะในตาราง)
+    function ToggleCouponStatus(coupon_id, newStatus) {
+        var turnOn = String(newStatus) === '1';
+        Swal.fire({
+            title: turnOn ? 'เปิดใช้งานคูปองนี้?' : 'ปิดใช้งานคูปองนี้?',
+            html: turnOn
+                ? '<span class="text-secondary">ลูกค้าจะใช้คูปองนี้ได้</span>'
+                : '<span class="text-secondary">ลูกค้าจะใช้คูปองนี้ไม่ได้</span>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: turnOn ? '#198754' : '#6c757d'
+        }).then(function (res) {
+            if (!res.isConfirmed) { return; }
+            $.ajax({
+                type: "POST",
+                url: "core.php",
+                data: {
+                    request_state: "list_coupon",
+                    request_function: "update_coupon_status",
+                    coupon_id: coupon_id,
+                    status: newStatus
+                },
+                dataType: "json",
+                success: function (r) {
+                    if (r.result == 1) {
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                        GetData(currentPage);
+                    } else {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถอัปเดตสถานะได้') + '</span>', icon: "error" });
+                    }
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
+        });
     }
 </script>

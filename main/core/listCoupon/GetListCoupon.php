@@ -25,13 +25,18 @@ $page     = max(1, (int) ($_POST['page'] ?? 1));
 $per_page = 10;
 $offset   = ($page - 1) * $per_page;
 
-$search = trim((string) ($_POST['search'] ?? ''));   // ค้นหาจาก code / รายละเอียด
+$search   = trim((string) ($_POST['search'] ?? ''));     // ค้นหาจาก code / รายละเอียด
+$f_status = trim((string) ($_POST['f_status'] ?? ''));   // '1'=เปิดใช้งาน '0'=ปิดใช้งาน '' = ทั้งหมด
 
 $where  = ["delete_at IS NULL"];
 $params = [];
 if ($search !== '') {
     $where[] = "(CONCAT_WS(' ', coupon_code, coupon_detail) LIKE :search)";
     $params[':search'] = '%' . $search . '%';
+}
+if ($f_status === '1' || $f_status === '0') {
+    $where[] = "coupon_status = :f_status";
+    $params[':f_status'] = $f_status;
 }
 $where_sql = 'WHERE ' . implode(' AND ', $where);
 
