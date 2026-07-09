@@ -60,7 +60,7 @@ $reviewer_image = $review ? (string) ($review['reviewer_image'] ?? '') : '';
                     <label for="edit_reviewer_image" class="form-label fw-medium">รูปผู้รีวิว</label>
                     <?php if ($reviewer_image !== ''): ?>
                         <div class="mb-2" id="edit_reviewer_image_current">
-                            <img src="../<?php echo $esc($reviewer_image); ?>" alt="รูปผู้รีวิว"
+                            <img src="<?php echo (preg_match('~^https?://~i', $reviewer_image) ? '' : '../') . $esc($reviewer_image); ?>" alt="รูปผู้รีวิว"
                                  style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:1px solid #e5e7eb;">
                             <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="EditReviewRemoveImage()">ลบรูป</button>
                         </div>

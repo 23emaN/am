@@ -3,6 +3,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -70,24 +71,14 @@ if (!empty($_FILES['banner_image']['name']) && ($_FILES['banner_image']['error']
         Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
     }
 
-    $rootDir   = dirname(__DIR__, 3);
-    $uploadDir = $rootDir . '/upload/banner/';
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    // อัปโหลดขึ้น S3 แล้วเก็บ URL เต็ม; ไม่ลบรูปเก่าใน S3
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES['banner_image'], true, 'banner', $filename);
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
     }
 
-    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES['banner_image']['tmp_name'], $uploadDir . $filename)) {
-        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
-    }
-
-    // ลบรูปเก่า (ถ้ามี)
-    $old_path = $rootDir . '/' . $old['banner_image'];
-    if ($old['banner_image'] && file_exists($old_path)) {
-        @unlink($old_path);
-    }
-
-    $banner_image = 'upload/banner/' . $filename;
+    $banner_image = $s3Result['url'];
 }
 
 /* ---------- update ---------- */

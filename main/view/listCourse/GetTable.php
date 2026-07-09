@@ -57,7 +57,7 @@ function course_codes(array $row, string $type): array {
 
                             <td class="text-center">
                                 <?php if ($cover !== ''): ?>
-                                    <img src="../<?php echo htmlspecialchars($cover); ?>" alt="cover"
+                                    <img src="<?php echo (preg_match('~^https?://~i', $cover) ? '' : '../') . htmlspecialchars($cover); ?>" alt="cover"
                                          style="width:64px;height:48px;object-fit:cover;border-radius:8px;">
                                 <?php else: ?>
                                     <span class="d-inline-flex align-items-center justify-content-center text-muted"

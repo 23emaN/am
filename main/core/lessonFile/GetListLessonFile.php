@@ -25,7 +25,7 @@ if (!$pdo_connect) {
 }
 
 $stmt = $pdo_connect->prepare(
-    "SELECT f.lesson_file_id, f.lesson_id, f.lesson_file_name, f.lesson_file_type, l.lesson_name
+    "SELECT f.lesson_file_id, f.lesson_id, f.lesson_file_name, f.lesson_file_type, f.lesson_file_path, l.lesson_name
      FROM tbl_lesson_file f
      JOIN tbl_lesson l ON l.lesson_id = f.lesson_id
      WHERE l.course_id = :cid AND f.delete_at IS NULL AND l.delete_at IS NULL
@@ -35,13 +35,18 @@ $stmt->execute([':cid' => $course_id]);
 $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt->closeCursor();
 
-// หา path ไฟล์จริง (เก็บเป็น upload/lesson_file/{id}.{ext})
+// หา path ไฟล์: ใหม่ = URL บน S3 (lesson_file_path) / เก่า = ไฟล์ local upload/lesson_file/{id}.{ext}
 $rootDir = dirname(__DIR__, 3);
 foreach ($list as &$row) {
-    $row['file_path'] = null;
-    $matches = glob($rootDir . '/upload/lesson_file/' . (int)$row['lesson_file_id'] . '.*');
-    if ($matches) {
-        $row['file_path'] = 'upload/lesson_file/' . basename($matches[0]);
+    $stored = trim((string)($row['lesson_file_path'] ?? ''));
+    if ($stored !== '') {
+        $row['file_path'] = $stored;   // S3 URL
+    } else {
+        $row['file_path'] = null;
+        $matches = glob($rootDir . '/upload/lesson_file/' . (int)$row['lesson_file_id'] . '.*');
+        if ($matches) {
+            $row['file_path'] = 'upload/lesson_file/' . basename($matches[0]);
+        }
     }
 }
 unset($row);

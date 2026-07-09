@@ -3,6 +3,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -43,9 +44,8 @@ if (!$existing_row) {
 }
 $existing_image = (string) ($existing_row['reviewer_image'] ?? '');
 
-/* ---------- รูปผู้รีวิว: อัปใหม่ = แทนที่ / กดลบ = ล้าง / ไม่ทำอะไร = คงรูปเดิม (ลอก pattern จาก website_setting) ---------- */
+/* ---------- รูปผู้รีวิว: อัปใหม่ = แทนที่ / กดลบ = ล้าง / ไม่ทำอะไร = คงรูปเดิม (เก็บขึ้น S3) ---------- */
 $reviewer_image = $existing_image;
-$rootDir = dirname(__DIR__, 3);   // .../backoffice
 if (!empty($_FILES['reviewer_image']['name']) && (($_FILES['reviewer_image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK)) {
     $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     $ext = strtolower(pathinfo($_FILES['reviewer_image']['name'], PATHINFO_EXTENSION));
@@ -55,22 +55,14 @@ if (!empty($_FILES['reviewer_image']['name']) && (($_FILES['reviewer_image']['er
     if ($_FILES['reviewer_image']['size'] > 5 * 1024 * 1024) {
         Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
     }
-    $uploadDir = $rootDir . '/upload/review/';
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    // อัปโหลดขึ้น S3 (โฟลเดอร์เดียวกับ AddReview) แล้วเก็บ URL เต็ม; ไม่ลบรูปเก่าใน S3
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES['reviewer_image'], true, 'reviews/reviewer', $filename);
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
     }
-    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES['reviewer_image']['tmp_name'], $uploadDir . $filename)) {
-        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
-    }
-    if ($existing_image && file_exists($rootDir . '/' . $existing_image)) {
-        @unlink($rootDir . '/' . $existing_image);   // ลบรูปเก่า
-    }
-    $reviewer_image = 'upload/review/' . $filename;
+    $reviewer_image = $s3Result['url'];
 } elseif (($_POST['remove_image'] ?? '0') === '1') {
-    if ($existing_image && file_exists($rootDir . '/' . $existing_image)) {
-        @unlink($rootDir . '/' . $existing_image);
-    }
     $reviewer_image = '';
 }
 

@@ -4,6 +4,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -52,9 +53,7 @@ if (!$check->fetchColumn()) {
 $check->closeCursor();
 
 /* ---------- อัปโหลดไฟล์ใหม่ (ถ้ามี) ---------- */
-$rootDir   = dirname(__DIR__, 3);
-$uploadDir = $rootDir . '/upload/question/';
-$saveFile = function (string $field, array $allowExt) use ($uploadDir): ?string {
+$saveFile = function (string $field, array $allowExt): ?string {
     if (empty($_FILES[$field]['name']) || ($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         return null;
     }
@@ -62,14 +61,13 @@ $saveFile = function (string $field, array $allowExt) use ($uploadDir): ?string 
     if (!in_array($ext, $allowExt, true)) {
         Response::json(0, 'ชนิดไฟล์ไม่รองรับ (' . $field . ')', null);
     }
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    // อัปโหลดขึ้น S3 แล้วเก็บ URL เต็ม; ไม่ลบไฟล์เก่าใน S3
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES[$field], true, 'question', $filename);
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดไฟล์ขึ้น S3 ไม่สำเร็จ (' . $field . '): ' . $s3Result['error'], null);
     }
-    $name = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES[$field]['tmp_name'], $uploadDir . $name)) {
-        Response::json(0, 'อัปโหลดไฟล์ไม่สำเร็จ (' . $field . ')', null);
-    }
-    return 'upload/question/' . $name;
+    return $s3Result['url'];
 };
 $image_path = $saveFile('question_image', ['jpg', 'jpeg', 'png', 'webp', 'gif']);
 $file_path  = $saveFile('question_file', ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'jpg', 'jpeg', 'png']);

@@ -4,6 +4,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -53,27 +54,22 @@ $check->closeCursor();
 // mime type จริงของไฟล์ (fallback เป็น type ที่ browser ส่งมา)
 $mime = @mime_content_type($_FILES['lesson_file']['tmp_name']) ?: ($_FILES['lesson_file']['type'] ?? null);
 
-$rootDir   = dirname(__DIR__, 3);
-$uploadDir = $rootDir . '/upload/lesson_file/';
-if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-    Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+// อัปโหลดขึ้น S3 ก่อน insert (ถ้าอัปไม่สำเร็จก็หยุด ไม่ต้องกู้คืน row) แล้วเก็บ URL เต็มลง lesson_file_path
+$filename = bin2hex(random_bytes(8));
+$s3Result = AwsS3::uploadFileDirectly($_FILES['lesson_file'], true, 'lesson_file', $filename);
+if (isset($s3Result['error'])) {
+    Response::json(0, 'อัปโหลดไฟล์ขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
 }
+$file_url = $s3Result['url'];
 
 try {
     $stmt = $pdo_connect->prepare(
-        "INSERT INTO tbl_lesson_file (lesson_id, lesson_file_name, lesson_file_type)
-         VALUES (:lid, :name, :type)"
+        "INSERT INTO tbl_lesson_file (lesson_id, lesson_file_name, lesson_file_type, lesson_file_path)
+         VALUES (:lid, :name, :type, :path)"
     );
-    $stmt->execute([':lid' => $lesson_id, ':name' => $file_name, ':type' => $mime]);
+    $stmt->execute([':lid' => $lesson_id, ':name' => $file_name, ':type' => $mime, ':path' => $file_url]);
     $file_id = (int) $pdo_connect->lastInsertId();
     $stmt->closeCursor();
-
-    $dest = $uploadDir . $file_id . '.' . $ext;
-    if (!move_uploaded_file($_FILES['lesson_file']['tmp_name'], $dest)) {
-        // กู้คืน: ลบ row ที่เพิ่ง insert ออก (hard delete เพราะยังไม่มีไฟล์จริง)
-        $pdo_connect->prepare("DELETE FROM tbl_lesson_file WHERE lesson_file_id = :id")->execute([':id' => $file_id]);
-        Response::json(0, 'อัปโหลดไฟล์ไม่สำเร็จ', null);
-    }
 
     Response::json(1, 'เพิ่มเอกสารสำเร็จ', ['lesson_file_id' => $file_id]);
 } catch (Exception $e) {
