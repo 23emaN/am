@@ -211,4 +211,36 @@ class AwsS3
             return false;
         }
     }
+
+    // แปลง URL เต็ม (หรือ path) ให้เป็น S3 object key — logic เดียวกับ deleteFileByURL
+    public static function urlToKey($url)
+    {
+        $url = (string) $url;
+        if ($url === '') {
+            return '';
+        }
+        $path = parse_url($url, PHP_URL_PATH);
+        return $path === null ? '' : ltrim($path, '/');
+    }
+
+    // list object key ทั้งหมดใต้ prefix (มี pagination) — ใช้สำหรับสคริปต์กวาดล้าง
+    public static function listKeys($prefix = '')
+    {
+        $keys = [];
+        $s3Client = self::getClient();
+        $bucket = self::getBucket();
+        $token = null;
+        do {
+            $params = ['Bucket' => $bucket, 'Prefix' => $prefix];
+            if ($token !== null) {
+                $params['ContinuationToken'] = $token;
+            }
+            $result = $s3Client->listObjectsV2($params);
+            foreach (($result['Contents'] ?? []) as $obj) {
+                $keys[] = $obj['Key'];
+            }
+            $token = ($result['IsTruncated'] ?? false) ? ($result['NextContinuationToken'] ?? null) : null;
+        } while ($token !== null);
+        return $keys;
+    }
 }

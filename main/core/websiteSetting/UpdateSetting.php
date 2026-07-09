@@ -139,6 +139,13 @@ try {
     }
 
     $pdo_connect->commit();
+
+    // ลบรูปเก่าใน S3 หลังบันทึกสำเร็จ (ครอบทั้งเคสอัปทับและกดลบรูป)
+    $old_image = (string) ($existing['image_path'] ?? '');
+    if ($old_image !== '' && $old_image !== $image_path && stripos($old_image, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_image);
+    }
+
     Response::json(1, 'บันทึกการตั้งค่าสำเร็จ', null);
 } catch (Exception $e) {
     if ($pdo_connect->inTransaction()) {

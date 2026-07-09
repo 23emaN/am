@@ -99,6 +99,11 @@ try {
     ]);
     $stmt->closeCursor();
 
+    // ลบรูปแบนเนอร์เก่าใน S3 หลังบันทึกสำเร็จ (เฉพาะเมื่ออัปรูปใหม่และเป็นคนละไฟล์)
+    if ($old['banner_image'] && $old['banner_image'] !== $banner_image && stripos((string) $old['banner_image'], 'http') === 0) {
+        AwsS3::deleteFileByURL($old['banner_image']);
+    }
+
     Response::json(1, 'บันทึกข้อมูลแบนเนอร์สำเร็จ', ['banner_id' => $banner_id]);
 } catch (Exception $e) {
     error_log('Update Banner Error: ' . $e->getMessage());
