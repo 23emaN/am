@@ -29,6 +29,15 @@ $s = function (string $key): string {
 $flag = function (string $key): string {
     return (isset($_POST[$key]) && (string) $_POST[$key] === '1') ? '1' : '0';
 };
+// ดึง video id จากลิงก์ Youtube เต็ม (วางลิงก์เต็มได้เลย) — หรือคง id เดิมถ้าใส่มาเป็น id อยู่แล้ว
+$youtubeId = function (string $raw): string {
+    $raw = trim($raw);
+    if ($raw === '') return '';
+    if (preg_match('~^[A-Za-z0-9_-]{11}$~', $raw)) return $raw;                       // id ล้วน (11 ตัว)
+    if (preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?(?:.*&)?v=|embed/|shorts/|v/|live/))([A-Za-z0-9_-]{11})~i', $raw, $m)) return $m[1];
+    if (preg_match('~[?&]v=([A-Za-z0-9_-]{11})~', $raw, $m)) return $m[1];             // เผื่อ v= อยู่กลางสตริง
+    return $raw;                                                                       // ไม่รู้จักรูปแบบ -> เก็บตามที่กรอก
+};
 
 /* ---------- ค่าทั่วไป ---------- */
 $department_code = $s('department_code');   // ไม่บังคับกรอกแล้ว (บันทึก/อัปรูปได้เลย)
@@ -84,7 +93,7 @@ $fields = [
     'otp_enabled'      => $flag('otp_enabled'),
     'tax_enabled'      => $flag('tax_enabled'),
     'tax_id'           => $s('tax_id'),
-    'youtube_id'       => $s('youtube_id'),
+    'youtube_id'       => $youtubeId($s('youtube_id')),
     'text_1'           => isset($_POST['text_1']) ? trim((string) $_POST['text_1']) : '',
     'image_path'       => $image_path,
     'text_2'           => isset($_POST['text_2']) ? trim((string) $_POST['text_2']) : '',
