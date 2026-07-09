@@ -1,6 +1,7 @@
 {
     "require": {
         "php": "8.0.16",
+        "aws/aws-sdk-php": "^3.388",
         "firebase/php-jwt": "^6.0",
         "fpdf/fpdf": "^1.84",
         "mpdf/mpdf": "^8.3",

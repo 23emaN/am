@@ -8,6 +8,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $admin_id = $access_token->user_id ?? null;
@@ -73,7 +74,7 @@ if ($reviewer_type === 'user') {
     $insert_name    = $reviewer_name;
 }
 
-/* ---------- อัปโหลดรูปผู้รีวิว (ถ้ามี) — ลอก pattern จาก AddCourse ---------- */
+/* ---------- อัปโหลดรูปผู้รีวิวขึ้น Amazon S3 (ถ้ามี) ---------- */
 $reviewer_image = null;
 if (!empty($_FILES['reviewer_image']['name']) && ($_FILES['reviewer_image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
     $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif'];
@@ -84,16 +85,17 @@ if (!empty($_FILES['reviewer_image']['name']) && ($_FILES['reviewer_image']['err
     if ($_FILES['reviewer_image']['size'] > 5 * 1024 * 1024) {
         Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
     }
-    $uploadDir = dirname(__DIR__, 3) . '/upload/review/';   // .../backoffice/upload/review/
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+
+    // อัปโหลดขึ้น S3 โดยระบุโฟลเดอร์ปลายทางคือ 'reviews/reviewer' และสุ่มชื่อไฟล์ใหม่
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES['reviewer_image'], true, 'reviews/reviewer', $filename);
+
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
     }
-    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES['reviewer_image']['tmp_name'], $uploadDir . $filename)) {
-        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
-    }
-    // เก็บ path อ้างอิงจาก root ของแอป (หน้าใน main/ เติม ../ ตอนแสดงผล)
-    $reviewer_image = 'upload/review/' . $filename;
+
+    // เก็บ URL สาธารณะของ S3 ลงฐานข้อมูล
+    $reviewer_image = $s3Result['url'];
 }
 
 try {
