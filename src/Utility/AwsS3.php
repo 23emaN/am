@@ -60,9 +60,8 @@ class AwsS3
                 'ContentType' => $file['type'],
             ];
             
-            if ($is_public) {
-                $data['ACL'] = 'public-read';
-            }
+            // Removed ACL setting since Bucket Policy is used for public access
+
 
             $result = $s3Client->putObject($data);
 
@@ -99,9 +98,8 @@ class AwsS3
                 'SourceFile' => $path
             ];
             
-            if ($is_public) {
-                $data['ACL'] = 'public-read';
-            }
+            // Removed ACL setting since Bucket Policy is used for public access
+
             
             $result = $s3Client->putObject($data);
             
@@ -138,9 +136,8 @@ class AwsS3
                 'SourceFile' => $path
             ];
             
-            if ($is_public) {
-                $data['ACL'] = 'public-read';
-            }
+            // Removed ACL setting since Bucket Policy is used for public access
+
             
             $result = $s3Client->putObject($data);
             
@@ -166,7 +163,6 @@ class AwsS3
             $cmd = $s3Client->getCommand('GetObject', [
                 'Bucket' => self::getBucket(),
                 'Key' => $path,
-                'ACL' => 'public-read'
             ]);
             $request = $s3Client->createPresignedRequest($cmd, $expire_in);
             return (string)$request->getUri();
