@@ -33,23 +33,57 @@ if ($comment === '') {
     Response::json(0, 'กรุณากรอกข้อความรีวิว', null);
 }
 
-// ตรวจว่ารีวิวมีจริง
-$check = $pdo_connect->prepare("SELECT review_id FROM tbl_reviews WHERE review_id = :id LIMIT 1");
+// ตรวจว่ารีวิวมีจริง + ดึงรูปเดิม
+$check = $pdo_connect->prepare("SELECT reviewer_image FROM tbl_reviews WHERE review_id = :id LIMIT 1");
 $check->execute([':id' => $review_id]);
-if (!$check->fetchColumn()) {
+$existing_row = $check->fetch(PDO::FETCH_ASSOC);
+$check->closeCursor();
+if (!$existing_row) {
     Response::json(0, 'ไม่พบรีวิวนี้ หรือถูกลบไปแล้ว', null);
 }
-$check->closeCursor();
+$existing_image = (string) ($existing_row['reviewer_image'] ?? '');
+
+/* ---------- รูปผู้รีวิว: อัปใหม่ = แทนที่ / กดลบ = ล้าง / ไม่ทำอะไร = คงรูปเดิม (ลอก pattern จาก website_setting) ---------- */
+$reviewer_image = $existing_image;
+$rootDir = dirname(__DIR__, 3);   // .../backoffice
+if (!empty($_FILES['reviewer_image']['name']) && (($_FILES['reviewer_image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK)) {
+    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    $ext = strtolower(pathinfo($_FILES['reviewer_image']['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed, true)) {
+        Response::json(0, 'รองรับเฉพาะไฟล์รูปภาพ (jpg, png, webp, gif)', null);
+    }
+    if ($_FILES['reviewer_image']['size'] > 5 * 1024 * 1024) {
+        Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
+    }
+    $uploadDir = $rootDir . '/upload/review/';
+    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    }
+    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
+    if (!move_uploaded_file($_FILES['reviewer_image']['tmp_name'], $uploadDir . $filename)) {
+        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
+    }
+    if ($existing_image && file_exists($rootDir . '/' . $existing_image)) {
+        @unlink($rootDir . '/' . $existing_image);   // ลบรูปเก่า
+    }
+    $reviewer_image = 'upload/review/' . $filename;
+} elseif (($_POST['remove_image'] ?? '0') === '1') {
+    if ($existing_image && file_exists($rootDir . '/' . $existing_image)) {
+        @unlink($rootDir . '/' . $existing_image);
+    }
+    $reviewer_image = '';
+}
 
 try {
     $stmt = $pdo_connect->prepare(
-        "UPDATE tbl_reviews SET rating = :rating, comment = :comment, is_approved = :is_approved WHERE review_id = :id"
+        "UPDATE tbl_reviews SET rating = :rating, comment = :comment, is_approved = :is_approved, reviewer_image = :reviewer_image WHERE review_id = :id"
     );
     $stmt->execute([
-        ':rating'      => $rating,
-        ':comment'     => $comment,
-        ':is_approved' => $is_approved,
-        ':id'          => $review_id,
+        ':rating'         => $rating,
+        ':comment'        => $comment,
+        ':is_approved'    => $is_approved,
+        ':reviewer_image' => $reviewer_image !== '' ? $reviewer_image : null,
+        ':id'             => $review_id,
     ]);
     $stmt->closeCursor();
 
