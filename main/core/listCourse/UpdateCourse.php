@@ -53,6 +53,57 @@ if ($course_group === null) {
     Response::json(0, 'กรุณาเลือกหมวดหมู่', null);
 }
 
+// ---------- ตรวจฟิลด์บังคับให้ครบตามช่องที่ติดดาว * ในฟอร์ม ----------
+$course_type = $int('course_type');
+if ($course_type === null || $course_type <= 0) {
+    Response::json(0, 'กรุณาเลือกประเภท', null);
+}
+if ($str('course_instructor') === null) {
+    Response::json(0, 'กรุณากรอกผู้บรรยาย/ผู้สอน', null);
+}
+if ($str('course_overview') === null) {
+    Response::json(0, 'กรุณากรอกรายละเอียดโดยย่อ', null);
+}
+if ($str('course_detail') === null) {
+    Response::json(0, 'กรุณากรอกรายละเอียดแบบเต็ม', null);
+}
+
+// ตัวเลขบังคับ: ต้องกรอก + เป็นตัวเลข + ไม่ติดลบ
+$numeric_required = [
+    'course_exam_time'     => 'ระยะเวลาทำข้อสอบ',
+    'course_minimum_score' => 'คะแนนขั้นต่ำในการผ่านข้อสอบ',
+    'course_number_exam'   => 'จำนวนข้อสอบที่ต้องทำ',
+    'course_number_time'   => 'จำนวนครั้งที่ทำข้อสอบได้',
+    'course_cpd_hour'      => 'ชั่วโมง CPD บัญชี',
+    'course_cpd_ethics'    => 'ชั่วโมง CPD บัญชี (จรรยาบรรณ)',
+    'course_cpd_other'     => 'ชั่วโมง CPD (อื่น ๆ)',
+    'course_cpa_hour'      => 'ชั่วโมง CPA บัญชี',
+    'course_cpa_ethics'    => 'ชั่วโมง CPA บัญชี (จรรยาบรรณ)',
+    'course_cpa_other'     => 'ชั่วโมง CPA (อื่น ๆ)',
+    'course_price'         => 'ราคาปกติ',
+    'course_period'        => 'ระยะเวลาอบรม (วัน)',
+];
+foreach ($numeric_required as $nk => $nlabel) {
+    $nraw = isset($_POST[$nk]) ? trim((string) $_POST[$nk]) : '';
+    if ($nraw === '') {
+        Response::json(0, 'กรุณากรอก' . $nlabel, null);
+    }
+    if (!is_numeric($nraw) || (float) $nraw < 0) {
+        Response::json(0, $nlabel . ' ต้องเป็นตัวเลขไม่ติดลบ', null);
+    }
+}
+
+// ราคาโปรโมชั่น (ไม่บังคับ) — ถ้ากรอกต้องไม่ติดลบและไม่เกินราคาปกติ
+$promo_raw = isset($_POST['course_promotion']) ? trim((string) $_POST['course_promotion']) : '';
+if ($promo_raw !== '') {
+    if (!is_numeric($promo_raw) || (float) $promo_raw < 0) {
+        Response::json(0, 'ราคาโปรโมชั่นต้องเป็นตัวเลขไม่ติดลบ', null);
+    }
+    if ((float) $promo_raw > (float) ($_POST['course_price'] ?? 0)) {
+        Response::json(0, 'ราคาโปรโมชั่นต้องไม่เกินราคาปกติ', null);
+    }
+}
+
 // ตรวจว่าคอร์สมีจริงและยังไม่ถูกลบ
 $check = $pdo_connect->prepare("SELECT course_id FROM tbl_course WHERE course_id = :id AND delete_at IS NULL LIMIT 1");
 $check->execute([':id' => $course_id]);
