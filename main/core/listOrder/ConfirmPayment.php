@@ -83,13 +83,25 @@ try {
         Response::json(0, 'ไม่พบรายการคอร์สในคำสั่งซื้อนี้', null);
     }
 
-    // 4) สร้างสิทธิ์เข้าเรียน (enrollment) ต่อคอร์ส — expiry = วันนี้ + course_period วัน (ถ้า > 0)
+    // 4) ให้สิทธิ์เข้าเรียน (enrollment) ต่อคอร์ส — expiry = วันนี้ + course_period วัน (ถ้า > 0)
+    //    ปกติแถว enrollment ถูกสร้างไว้ตั้งแต่ตอนลูกค้าสั่งซื้อแล้ว (cpdth CreateOrder: payment_status='pending', enroll_access='0')
+    //    ยืนยันการชำระเงิน = UPDATE แถวเดิมให้ paid + เปิดสิทธิ์ (enroll_access='1') + เริ่มนับ expiry จากวันนี้
+    //    ถ้าไม่พบแถวเดิม (เช่นออเดอร์เก่า) ค่อย INSERT ใหม่ — และต้องใส่ enroll_access ให้ครบ (NOT NULL ไม่มี default; ล้มบน strict mode ถ้าไม่ส่ง)
     $now = date('Y-m-d H:i:s');
-    $enr = $pdo_connect->prepare(
+    $updEnr = $pdo_connect->prepare(
+        "UPDATE tbl_course_enrollment
+            SET enroll_payment_status = 'paid',
+                enroll_access         = '1',
+                enroll_expiry_date    = :expiry_date,
+                update_at             = :now
+          WHERE enroll_user_id = :uid AND enroll_course_id = :cid
+            AND enroll_payment_status = 'pending' AND delete_at IS NULL"
+    );
+    $insEnr = $pdo_connect->prepare(
         "INSERT INTO tbl_course_enrollment
             (enroll_user_id, enroll_course_id, enroll_payment_status,
-             enroll_date, enroll_expiry_date, enroll_is_completed)
-         VALUES (:uid, :cid, 'paid', :enroll_date, :expiry_date, '0')"
+             enroll_date, enroll_expiry_date, enroll_is_completed, enroll_access)
+         VALUES (:uid, :cid, 'paid', :enroll_date, :expiry_date, '0', '1')"
     );
     $course_names = [];
     foreach ($items as $item) {
@@ -97,15 +109,28 @@ try {
         $period    = isset($item['course_period']) ? (int) $item['course_period'] : 0;
         $expiry    = $period > 0 ? date('Y-m-d H:i:s', strtotime("$now +$period days")) : null;
 
-        $enr->execute([
+        // เปิดสิทธิ์แถวเดิมก่อน; ถ้าไม่มีแถว pending เดิม (0 rows) ค่อยสร้างใหม่ (กันแถวซ้ำ)
+        $updEnr->execute([
             ':uid'         => $user_id,
             ':cid'         => $course_id,
-            ':enroll_date' => $now,
             ':expiry_date' => $expiry,
+            ':now'         => $now,
         ]);
+        $affectedEnr = $updEnr->rowCount();
+        $updEnr->closeCursor();
+
+        if ($affectedEnr === 0) {
+            $insEnr->execute([
+                ':uid'         => $user_id,
+                ':cid'         => $course_id,
+                ':enroll_date' => $now,
+                ':expiry_date' => $expiry,
+            ]);
+            $insEnr->closeCursor();
+        }
+
         $course_names[] = (string) ($item['course_name'] ?? '');
     }
-    $enr->closeCursor();
 
     // 5) ดึงข้อมูลลูกค้าไว้ส่งอีเมล (ทำก่อน commit เพราะยังอยู่ใน transaction เดียวกัน)
     $u = $pdo_connect->prepare(
