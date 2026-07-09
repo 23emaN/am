@@ -111,9 +111,8 @@
                         <h6 class="fw-bold text-secondary text-uppercase mb-3 setting-section-title">หน้าแรก</h6>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-medium">Youtube ID</label>
-                                <input type="text" class="form-control" name="youtube_id" placeholder="เช่น b1E-mcxdtm4">
-                                <div class="form-text">ส่วนหลัง <code>watch?v=</code> ของลิงก์ Youtube</div>
+                                <label class="form-label fw-medium">ลิงก์ Youtube (หรือ Video ID)</label>
+                                <input type="text" class="form-control" name="youtube_id" placeholder="วางลิงก์ Youtube เต็ม หรือ video ID">
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium">ข้อความแถวที่ 1</label>
