@@ -664,12 +664,15 @@
     }
     function SubmitQuestion() {
         $('#q_text').val(GetQuestionHTML());
-        if ($('#q_text').val().trim() === '') {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกคำถาม</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
-            return;
-        }
-        if (!$('#correctSelect').val()) {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกคำตอบที่ถูกต้อง</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
+
+        // ===== ตรวจช่องบังคับ (คำถาม + คำตอบที่ถูก + ตัวเลือกอย่างน้อย 2 ข้อ) =====
+        var qChoices = $('#choiceList .choice-row textarea').map(function () { return $(this).val().trim(); }).get().filter(function (t) { return t !== ''; });
+        if (!ValidateRequired([
+            { sel: '#editor_question_text', label: 'คำถาม', type: 'tinymce', editorId: 'editor_question_text' },
+            { sel: '#correctSelect',        label: 'คำตอบที่ถูกต้อง', type: 'select' }
+        ])) { return; }
+        if (qChoices.length < 2) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกตัวเลือกอย่างน้อย 2 ข้อ</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
             return;
         }
         // โหมดเพิ่ม: พักคำถามไว้ใน buffer (ยังไม่มี lesson_id) แล้วบันทึกทีเดียวตอนกด "เพิ่มบทเรียน"

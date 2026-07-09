@@ -199,10 +199,18 @@
         var name = $("#etx_name").val().trim(), zip = $("#etx_zipcode").val().trim(),
             sub = $("#etx_subdistrict").val().trim(), dist = $("#etx_district").val().trim(),
             prov = $("#etx_province").val().trim(), detail = $("#etx_detail").val().trim();
-        if (!name || !detail || !zip || !sub || !dist || !prov) {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกข้อมูลที่จำเป็น (ชื่อ, ที่อยู่, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์)</span>', icon: "warning", showConfirmButton: false, timer: 2500 });
-            return;
-        }
+        // ===== ตรวจช่องบังคับให้ครบ (โชว์ทุกช่องที่ขาด + เลื่อนไปช่องแรก) =====
+        if (!ValidateRequired([
+            { sel: '#etx_type',        label: 'ประเภทลูกค้า', type: 'select' },
+            { sel: '#etx_name',        label: 'ชื่อ – นามสกุลลูกค้า' },
+            { sel: '#etx_tax_id',      label: 'หมายเลขผู้เสียภาษี' },
+            { sel: '#etx_detail',      label: 'ที่อยู่' },
+            { sel: '#etx_subdistrict', label: 'แขวง/ตำบล' },
+            { sel: '#etx_district',    label: 'เขต/อำเภอ' },
+            { sel: '#etx_province',    label: 'จังหวัด' },
+            { sel: '#etx_zipcode',     label: 'รหัสไปรษณีย์' },
+            { sel: '#etx_phone',       label: 'เบอร์โทรศัพท์' }
+        ])) { return; }
         $.ajax({
             beforeSend: function () { ShowLoadingButton('.BtnSaveEtax'); },
             type: "POST", url: "core.php",

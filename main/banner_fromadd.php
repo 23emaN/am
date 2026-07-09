@@ -108,6 +108,16 @@
         formData.append('request_state', 'list_banner');
         formData.append('request_function', 'add_banner');
 
+        // ===== ตรวจช่องบังคับ =====
+        if (!ValidateRequired([
+            { sel: '[name="banner_order"]', label: 'ลำดับการแสดง', type: 'number' },
+            { sel: '#banner_image_input',   label: 'รูปแบนเนอร์', type: 'file' }
+        ])) { return; }
+        if (Number($('[name="banner_order"]').val()) < 1) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">ลำดับการแสดงต้องมากกว่า 0</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
+            return;
+        }
+
         Swal.fire({
             title: "ยืนยันการบันทึกข้อมูล?",
             text: "คุณต้องการเพิ่มแบนเนอร์ใหม่ใช่หรือไม่",

@@ -122,6 +122,18 @@
 
     $(document).on('submit', '#FormAddCoupon', function (e) {
         e.preventDefault();
+
+        // ===== ตรวจช่องบังคับ =====
+        if (!ValidateRequired([
+            { sel: '#coupon_code',   label: 'Code' },
+            { sel: '#coupon_detail', label: 'รายละเอียดคูปอง' },
+            { sel: '#coupon_no',     label: 'จำนวนส่วนลด', type: 'number' }
+        ])) { return; }
+        if (Number($('#coupon_no').val()) < 0) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">จำนวนส่วนลดต้องไม่ติดลบ</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
+            return;
+        }
+
         $.ajax({
             beforeSend: function () { ShowLoadingOverlay("#FormAddCoupon"); },
             type: "POST",

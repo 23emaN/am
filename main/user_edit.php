@@ -446,6 +446,16 @@
     $(document).on('submit', '#FormEditUser', function (e) {
         e.preventDefault();
 
+        // ===== ตรวจช่องบังคับให้ครบ =====
+        if (!ValidateRequired([
+            { sel: '[name="user_prefix"]',     label: 'คำนำหน้า', type: 'select' },
+            { sel: '[name="user_firstname"]',  label: 'ชื่อ' },
+            { sel: '[name="user_lastname"]',   label: 'นามสกุล' },
+            { sel: '[name="user_email"]',      label: 'อีเมล' },
+            { sel: '[name="user_phone"]',      label: 'เบอร์โทรศัพท์' },
+            { sel: '[name="user_citizen_id"]', label: 'เลขบัตรประชาชน' }
+        ])) { return; }
+
         var pwd = $('[name="user_password"]').val();
         var pwd2 = $('[name="user_password_confirm"]').val();
         if (pwd !== pwd2) {

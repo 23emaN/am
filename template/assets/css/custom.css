@@ -175,3 +175,19 @@ table.dataTable thead .sorting_desc::after {
     top: 50% !important;
     transform: translateY(-50%);
 }
+
+/* ===== invalid-state ของ ValidateRequired (js/main.js) — ขอบแดงครอบทุกชนิด widget ===== */
+.form-control.is-invalid,
+.form-select.is-invalid { border-color: #dc3545 !important; }
+/* select2 (control จริงเป็น sibling ของ <select>) */
+select.is-invalid + .select2-container .select2-selection { border-color: #dc3545 !important; }
+/* TomSelect */
+select.is-invalid + .ts-wrapper .ts-control { border-color: #dc3545 !important; }
+/* TinyMCE */
+.tox-tinymce.is-invalid-widget { border-color: #dc3545 !important; }
+/* กลุ่ม radio */
+.is-invalid-group { outline: 1px solid #dc3545; outline-offset: 4px; border-radius: 6px; }
+/* ข้อความใต้ช่อง */
+.vr-feedback { display: block; }
+/* กัน bootstrap ซ่อน icon invalid บน select ที่มี widget ทับ */
+select.is-invalid { background-image: none !important; }

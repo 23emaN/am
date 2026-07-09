@@ -535,54 +535,36 @@
             $('#course_detail').val(html);
         }
 
-        // ===== ตรวจความถูกต้อง (บังคับให้ครบตามช่องที่ติดดาว *) =====
+        // ===== ตรวจช่องบังคับให้ครบ (โชว์ทุกช่องที่ขาดพร้อมกัน + เลื่อนไปช่องแรก + ขอบแดง) =====
         const courseWarn = function (msg) {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + msg + '</span>', icon: "warning", showConfirmButton: false, timer: 2000, timerProgressBar: true });
         };
 
-        const name       = $('#course_name').val().trim();
-        const type       = $('#course_type').val();
-        const group      = $('#course_group').val();
-        const instructor = $('#course_instructor').val().trim();
-        const overview   = $('#course_overview').val().trim();
-        const detail     = ($('#course_detail').val() || '').trim();
+        const numLabels = {
+            course_exam_time: 'ระยะเวลาทำข้อสอบ', course_minimum_score: 'คะแนนขั้นต่ำในการผ่านข้อสอบ',
+            course_number_exam: 'จำนวนข้อสอบที่ต้องทำ', course_number_time: 'จำนวนครั้งที่ทำข้อสอบได้',
+            course_cpd_hour: 'ชั่วโมง CPD บัญชี', course_cpd_ethics: 'ชั่วโมง CPD บัญชี (จรรยาบรรณ)', course_cpd_other: 'ชั่วโมง CPD (อื่น ๆ)',
+            course_cpa_hour: 'ชั่วโมง CPA บัญชี', course_cpa_ethics: 'ชั่วโมง CPA บัญชี (จรรยาบรรณ)', course_cpa_other: 'ชั่วโมง CPA (อื่น ๆ)',
+            course_price: 'ราคาปกติ', course_period: 'ระยะเวลาอบรม (วัน)'
+        };
+        const rules = [
+            { sel: '#course_cover_image', label: 'รูปหน้าปก', type: 'file', when: function () { return FORM_MODE !== 'edit'; } },
+            { sel: '#course_name',          label: 'ชื่อคอร์สเรียน' },
+            { sel: '#course_type',          label: 'ประเภท', type: 'select2' },
+            { sel: '#course_group',         label: 'หมวดหมู่', type: 'select2' },
+            { sel: '#course_instructor',    label: 'ผู้บรรยาย/ผู้สอน' },
+            { sel: '#course_overview',      label: 'รายละเอียดโดยย่อ' },
+            { sel: '#editor_course_detail', label: 'รายละเอียดแบบเต็ม', type: 'tinymce', editorId: 'editor_course_detail' }
+        ].concat(Object.keys(numLabels).map(function (k) {
+            return { sel: '[name="' + k + '"]', label: numLabels[k], type: 'number' };
+        }));
+        if (!ValidateRequired(rules)) { return; }
 
-        if (name === "")       { courseWarn('กรุณากรอกชื่อคอร์สเรียน'); return; }
-        if (!type)             { courseWarn('กรุณาเลือกประเภท'); return; }
-        if (!group)            { courseWarn('กรุณาเลือกหมวดหมู่'); return; }
-        if (instructor === "") { courseWarn('กรุณากรอกผู้บรรยาย/ผู้สอน'); return; }
-        if (overview === "")   { courseWarn('กรุณากรอกรายละเอียดโดยย่อ'); return; }
-        if (detail === "")     { courseWarn('กรุณากรอกรายละเอียดแบบเต็ม'); return; }
-
-        // รูปหน้าปก — บังคับเฉพาะโหมดเพิ่ม (โหมดแก้ไขใช้รูปเดิมได้)
-        if (FORM_MODE !== 'edit') {
-            const cov = $('#course_cover_image')[0];
-            if (!cov || !cov.files || cov.files.length === 0) { courseWarn('กรุณาเลือกรูปหน้าปก'); return; }
+        // ตัวเลขห้ามติดลบ + โปรโมชั่นไม่เกินราคาปกติ (ตรวจเพิ่มหลังกรอกครบ)
+        for (let k in numLabels) {
+            const v = Number(($('[name="' + k + '"]').val() || '').trim());
+            if (!isFinite(v) || v < 0) { courseWarn(numLabels[k] + ' ต้องเป็นตัวเลขไม่ติดลบ'); return; }
         }
-
-        // ตัวเลขบังคับ: ต้องกรอก + เป็นตัวเลข + ไม่ติดลบ
-        const numFields = [
-            { name: 'course_exam_time',     label: 'ระยะเวลาทำข้อสอบ' },
-            { name: 'course_minimum_score', label: 'คะแนนขั้นต่ำในการผ่านข้อสอบ' },
-            { name: 'course_number_exam',   label: 'จำนวนข้อสอบที่ต้องทำ' },
-            { name: 'course_number_time',   label: 'จำนวนครั้งที่ทำข้อสอบได้' },
-            { name: 'course_cpd_hour',      label: 'ชั่วโมง CPD บัญชี' },
-            { name: 'course_cpd_ethics',    label: 'ชั่วโมง CPD บัญชี (จรรยาบรรณ)' },
-            { name: 'course_cpd_other',     label: 'ชั่วโมง CPD (อื่น ๆ)' },
-            { name: 'course_cpa_hour',      label: 'ชั่วโมง CPA บัญชี' },
-            { name: 'course_cpa_ethics',    label: 'ชั่วโมง CPA บัญชี (จรรยาบรรณ)' },
-            { name: 'course_cpa_other',     label: 'ชั่วโมง CPA (อื่น ๆ)' },
-            { name: 'course_price',         label: 'ราคาปกติ' },
-            { name: 'course_period',        label: 'ระยะเวลาอบรม (วัน)' }
-        ];
-        for (let i = 0; i < numFields.length; i++) {
-            const raw = ($('[name="' + numFields[i].name + '"]').val() || '').trim();
-            if (raw === '') { courseWarn('กรุณากรอก' + numFields[i].label); return; }
-            const v = Number(raw);
-            if (!isFinite(v) || v < 0) { courseWarn(numFields[i].label + ' ต้องเป็นตัวเลขไม่ติดลบ'); return; }
-        }
-
-        // ราคาโปรโมชั่น (ไม่บังคับ) — ถ้ากรอกต้องไม่ติดลบ และไม่เกินราคาปกติ
         const promoRaw = ($('[name="course_promotion"]').val() || '').trim();
         if (promoRaw !== '') {
             const promo = Number(promoRaw);
