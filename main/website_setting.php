@@ -286,7 +286,7 @@
         $('#remove_image').val('0');
         var _imgInput = document.getElementById('image_file_input'); if (_imgInput) { _imgInput.value = ''; }
         if (s && s.image_path) {
-            $('#ImgPreview').attr('src', '../' + s.image_path);
+            $('#ImgPreview').attr('src', /^https?:\/\//.test(s.image_path) ? s.image_path : '../' + s.image_path);
             $('#imgDrop').addClass('d-none');
             $('#imgBox').removeClass('d-none');
         } else {

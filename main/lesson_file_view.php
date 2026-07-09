@@ -9,11 +9,19 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if ($id <= 0) { http_response_code(404); exit('ไม่พบไฟล์'); }
 
 $pdo = (new Connection())->getPdo();
-$stmt = $pdo->prepare("SELECT lesson_file_name, lesson_file_type FROM tbl_lesson_file WHERE lesson_file_id = :id AND delete_at IS NULL LIMIT 1");
+$stmt = $pdo->prepare("SELECT lesson_file_name, lesson_file_type, lesson_file_path FROM tbl_lesson_file WHERE lesson_file_id = :id AND delete_at IS NULL LIMIT 1");
 $stmt->execute([':id' => $id]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$row) { http_response_code(404); exit('ไม่พบไฟล์'); }
 
+// ไฟล์ใหม่เก็บบน S3 (public) -> redirect ไปที่ URL โดยตรง
+$s3Url = trim((string)($row['lesson_file_path'] ?? ''));
+if ($s3Url !== '') {
+    header('Location: ' . $s3Url);
+    exit;
+}
+
+// ไฟล์เก่ายังอยู่ local -> เสิร์ฟจากดิสก์เหมือนเดิม
 $matches = glob(dirname(__DIR__) . '/upload/lesson_file/' . $id . '.*');
 if (!$matches) { http_response_code(404); exit('ไม่พบไฟล์บนเซิร์ฟเวอร์'); }
 $path = $matches[0];

@@ -123,7 +123,7 @@
 
         // แสดงรูปปัจจุบัน
         if (b.banner_image) {
-            var imgSrc = "../" + b.banner_image;
+            var imgSrc = /^https?:\/\//.test(b.banner_image) ? b.banner_image : "../" + b.banner_image;
             $("#BannerPreviewEmpty").hide();
             $("#BannerPreviewImg").attr("src", imgSrc).show();
         } else {

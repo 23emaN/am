@@ -29,7 +29,7 @@ $to   = min($page * $per_page, $total);
                     <?php foreach ($list as $row): ?>
                         <?php
                             $is_active = (string)($row['banner_status'] ?? '0') === '1';
-                            $img_path  = !empty($row['banner_image']) ? '../' . htmlspecialchars($row['banner_image']) : '';
+                            $img_path  = !empty($row['banner_image']) ? (preg_match('~^https?://~i', (string)$row['banner_image']) ? htmlspecialchars($row['banner_image']) : '../' . htmlspecialchars($row['banner_image'])) : '';
                             $raw_url   = trim((string)($row['banner_url'] ?? ''));
                             // อนุญาตเฉพาะ http/https หรือ path แบบ root-relative — กัน javascript:/data: (XSS)
                             $url       = (preg_match('#^https?://#i', $raw_url) || (isset($raw_url[0]) && $raw_url[0] === '/')) ? htmlspecialchars($raw_url) : '-';

@@ -522,7 +522,7 @@
             }
             // รายละเอียดคอร์ส (TinyMCE) — เซ็ตค่าตอน editor init เสร็จแล้ว (ดู setup ด้านบน)
             // พรีวิวรูปหน้าปกเดิม
-            if (COURSE.course_cover_image) { showCoverPreview('../' + COURSE.course_cover_image); }
+            if (COURSE.course_cover_image) { showCoverPreview(/^https?:\/\//.test(COURSE.course_cover_image) ? COURSE.course_cover_image : '../' + COURSE.course_cover_image); }
         }
     })();
 

@@ -5,6 +5,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -47,10 +48,8 @@ $existing = $pdo_connect->query(
     "SELECT id, image_path FROM tbl_website_setting ORDER BY id ASC LIMIT 1"
 )->fetch(PDO::FETCH_ASSOC);
 
-$rootDir = dirname(__DIR__, 3);
-
-/* ---------- อัปโหลดรูป (ใช้ซ้ำได้ทุกช่อง) -> คืน path ใหม่ หรือคงรูปเดิมถ้าไม่ได้อัป ---------- */
-$saveImage = function (string $fileKey, string $existingPath) use ($rootDir): string {
+/* ---------- อัปโหลดรูปขึ้น S3 (ใช้ซ้ำได้ทุกช่อง) -> คืน URL ใหม่ หรือคงรูปเดิมถ้าไม่ได้อัป ---------- */
+$saveImage = function (string $fileKey, string $existingPath): string {
     if (empty($_FILES[$fileKey]['name']) || (($_FILES[$fileKey]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK)) {
         return $existingPath; // ไม่ได้อัปใหม่ -> คงรูปเดิม
     }
@@ -62,27 +61,19 @@ $saveImage = function (string $fileKey, string $existingPath) use ($rootDir): st
     if ($_FILES[$fileKey]['size'] > 5 * 1024 * 1024) {
         Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
     }
-    $uploadDir = $rootDir . '/upload/website/';
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    // อัปโหลดขึ้น S3 แล้วเก็บ URL เต็ม; ไม่ลบรูปเก่าใน S3
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES[$fileKey], true, 'website', $filename);
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
     }
-    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES[$fileKey]['tmp_name'], $uploadDir . $filename)) {
-        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
-    }
-    if ($existingPath && file_exists($rootDir . '/' . $existingPath)) {
-        @unlink($rootDir . '/' . $existingPath); // ลบรูปเก่า
-    }
-    return 'upload/website/' . $filename;
+    return $s3Result['url'];
 };
 
 $image_path = $saveImage('image_file', $existing['image_path'] ?? '');
 
-// กดปุ่ม X ลบรูป (และไม่ได้อัปรูปใหม่) -> ล้าง image_path + ลบไฟล์เดิม
+// กดปุ่ม X ลบรูป (และไม่ได้อัปรูปใหม่) -> ล้าง image_path (ไม่ลบไฟล์ใน S3)
 if (($_POST['remove_image'] ?? '0') === '1' && empty($_FILES['image_file']['name'])) {
-    if ($image_path && file_exists($rootDir . '/' . $image_path)) {
-        @unlink($rootDir . '/' . $image_path);
-    }
     $image_path = '';
 }
 

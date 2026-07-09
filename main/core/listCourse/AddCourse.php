@@ -3,6 +3,7 @@
 use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
+use App\Utility\AwsS3;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -47,7 +48,7 @@ if ($course_group === null) {
     Response::json(0, 'กรุณาเลือกหมวดหมู่', null);
 }
 
-/* ---------- อัปโหลดรูปหน้าปก (ถ้ามี) ---------- */
+/* ---------- อัปโหลดรูปหน้าปกขึ้น S3 (ถ้ามี) ---------- */
 $course_cover_image = null;
 if (!empty($_FILES['course_cover_image']['name']) && ($_FILES['course_cover_image']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
 
@@ -61,18 +62,13 @@ if (!empty($_FILES['course_cover_image']['name']) && ($_FILES['course_cover_imag
         Response::json(0, 'ขนาดรูปต้องไม่เกิน 5 MB', null);
     }
 
-    $rootDir   = dirname(__DIR__, 3);              // .../am
-    $uploadDir = $rootDir . '/upload/course/';
-    if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
-        Response::json(0, 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้', null);
+    // อัปโหลดขึ้น S3 แล้วเก็บ URL เต็ม
+    $filename = bin2hex(random_bytes(8));
+    $s3Result = AwsS3::uploadFileDirectly($_FILES['course_cover_image'], true, 'course', $filename);
+    if (isset($s3Result['error'])) {
+        Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);
     }
-
-    $filename = bin2hex(random_bytes(8)) . '.' . $ext;
-    if (!move_uploaded_file($_FILES['course_cover_image']['tmp_name'], $uploadDir . $filename)) {
-        Response::json(0, 'อัปโหลดรูปไม่สำเร็จ', null);
-    }
-    // เก็บ path แบบอ้างอิงจาก root ของแอป (หน้าใน main/ จะเติม ../ ตอนแสดงผล)
-    $course_cover_image = 'upload/course/' . $filename;
+    $course_cover_image = $s3Result['url'];
 }
 
 /* ---------- insert ---------- */

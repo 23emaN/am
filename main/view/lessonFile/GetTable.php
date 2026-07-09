@@ -39,7 +39,7 @@
                         <td class="text-center">
                             <div class="d-flex gap-2 justify-content-center align-items-center">
                                 <?php if ($path): ?>
-                                    <a href="lesson_file_preview.php?id=<?php echo $fid; ?>" class="btn btn-secondary table-action-btn"
+                                    <a href="lesson_file_view.php?id=<?php echo $fid; ?>" class="btn btn-secondary table-action-btn"
                                        target="_blank" rel="noopener">
                                         <span class="material-symbols-outlined" aria-hidden="true">visibility</span>เปิดดู
                                     </a>
