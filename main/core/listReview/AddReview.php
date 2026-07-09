@@ -101,7 +101,7 @@ if (!empty($_FILES['reviewer_image']['name']) && ($_FILES['reviewer_image']['err
 try {
     $stmt = $pdo_connect->prepare(
         "INSERT INTO tbl_reviews (user_id, reviewer_name, reviewer_image, rating, comment, is_approved, created_at)
-         VALUES (:user_id, :reviewer_name, :reviewer_image, :rating, :comment, :is_approved, :created_at)"
+                          VALUES (:user_id, :reviewer_name, :reviewer_image, :rating, :comment, :is_approved, :created_at)"
     );
     $stmt->bindValue(':user_id', $insert_user_id, $insert_user_id === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
     $stmt->bindValue(':reviewer_name', $insert_name, $insert_name === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
