@@ -50,7 +50,10 @@
 <?php else: ?>
 <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
     <div class="card-header bg-white d-flex justify-content-between align-items-center p-4 border-0">
-        <h2 class="mb-0">เพิ่มคอร์สเรียนใหม่</h2>
+        <div class="d-flex align-items-center gap-2">
+            <a href="course" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
+            <h2 class="mb-0">เพิ่มคอร์สเรียนใหม่</h2>
+        </div>
     </div>
     <div class="px-4 mb-3">
         <div class="alert alert-success mb-0" role="alert">

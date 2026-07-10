@@ -183,10 +183,21 @@
                     <div class="mb-3">
                         <label class="form-label fw-medium">ภาพ</label>
                         <input type="file" class="form-control" name="question_image" accept="image/*">
+                        <div id="q_image_current" class="mt-2" style="display:none;">
+                            <span class="text-muted small d-block mb-1">ภาพปัจจุบัน</span>
+                            <img id="q_image_preview" src="" alt="ภาพคำถาม"
+                                 style="max-height:160px; max-width:100%; border-radius:var(--radius-sm); border:1px solid var(--border);"
+                                 onerror="this.style.display='none'">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-medium">ไฟล์</label>
                         <input type="file" class="form-control" name="question_file">
+                        <div id="q_file_current" class="mt-2" style="display:none;">
+                            <a id="q_file_link" href="#" target="_blank" class="small text-primary d-inline-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined" style="font-size:16px;" aria-hidden="true">description</span>ไฟล์ปัจจุบัน
+                            </a>
+                        </div>
                     </div>
                     <div class="mb-2 d-flex justify-content-between align-items-center">
                         <label class="form-label fw-medium mb-0">ตัวเลือก <span class="text-danger">*</span></label>
@@ -611,12 +622,26 @@
         if (prev && prev <= n) { $('#correctSelect').val(prev); }
     }
 
+    // แก้ path รูป/ไฟล์ให้แสดงได้ (ถ้าไม่ใช่ URL เต็ม ให้เติม ../ เหมือนที่อื่น)
+    function ResolveQuestionUrl(v) {
+        if (!v) { return ''; }
+        return /^https?:\/\//i.test(v) ? v : '../' + v;
+    }
+    // แสดง/ซ่อน ภาพ+ไฟล์เดิมของคำถามในโหมดแก้ไข (ค่าว่าง = ซ่อน)
+    function SetQuestionMedia(imgUrl, fileUrl) {
+        if (imgUrl) { $('#q_image_preview').attr('src', imgUrl).show(); $('#q_image_current').show(); }
+        else { $('#q_image_preview').attr('src', ''); $('#q_image_current').hide(); }
+        if (fileUrl) { $('#q_file_link').attr('href', fileUrl); $('#q_file_current').show(); }
+        else { $('#q_file_link').attr('href', '#'); $('#q_file_current').hide(); }
+    }
+
     function OpenAddQuestion() {
         editingBufferIdx = -1;
         $('#modalQuestionTitle').text('สร้างคำถามใหม่');
         $('#formQuestion')[0].reset();
         $('#q_id').val('');
         SetQuestionHTML('');
+        SetQuestionMedia('', '');
         $('#choiceList').empty();
         AddChoiceRow(''); AddChoiceRow('');
         RefreshCorrectOptions();
@@ -632,6 +657,10 @@
             $('#formQuestion')[0].reset();
             $('#q_id').val('');
             SetQuestionHTML(q.text || '');
+            SetQuestionMedia(
+                q.imageFile ? URL.createObjectURL(q.imageFile) : '',
+                q.docFile ? URL.createObjectURL(q.docFile) : ''
+            );
             $('#choiceList').empty();
             (q.choices || []).forEach(function (c) { AddChoiceRow(c || ''); });
             RefreshCorrectOptions();
@@ -649,6 +678,10 @@
                 $('#formQuestion')[0].reset();
                 $('#q_id').val(qid);
                 SetQuestionHTML(response.data.question.question_text || '');
+                SetQuestionMedia(
+                    ResolveQuestionUrl(response.data.question.question_image),
+                    ResolveQuestionUrl(response.data.question.question_file)
+                );
                 $('#choiceList').empty();
                 var correctIdx = 0;
                 response.data.choices.forEach(function (c, i) {

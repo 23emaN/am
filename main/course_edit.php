@@ -29,7 +29,10 @@
         <div class="px-2">
             <div class="card app-card bg-white border-0 rounded-3 mb-3">
                 <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">ดู/แก้ไขคอร์สเรียน</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="course" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
+                        <h2 class="mb-0">ดู/แก้ไขคอร์สเรียน</h2>
+                    </div>
                     <button type="button" class="btn btn-danger BtnDeleteCourse d-inline-flex align-items-center gap-2" onclick="DeleteCourse()">
                         <span class="material-symbols-outlined" aria-hidden="true">delete</span>
                         ลบคอร์สเรียน
@@ -127,10 +130,21 @@
                     <div class="mb-3">
                         <label class="form-label fw-medium">ภาพ</label>
                         <input type="file" class="form-control" name="exam_image" accept="image/*">
+                        <div id="e_image_current" class="mt-2" style="display:none;">
+                            <span class="text-muted small d-block mb-1">ภาพปัจจุบัน</span>
+                            <img id="e_image_preview" src="" alt="ภาพคำถาม"
+                                 style="max-height:160px; max-width:100%; border-radius:var(--radius-sm); border:1px solid var(--border);"
+                                 onerror="this.style.display='none'">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-medium">ไฟล์</label>
                         <input type="file" class="form-control" name="exam_file">
+                        <div id="e_file_current" class="mt-2" style="display:none;">
+                            <a id="e_file_link" href="#" target="_blank" class="small text-primary d-inline-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined" style="font-size:16px;" aria-hidden="true">description</span>ไฟล์ปัจจุบัน
+                            </a>
+                        </div>
                     </div>
                     <div class="mb-2 d-flex justify-content-between align-items-center">
                         <label class="form-label fw-medium mb-0">ตัวเลือก <span class="text-danger">*</span></label>
@@ -554,11 +568,24 @@
         $('#examCorrectSelect').html(html);
         if (prev && prev <= n) { $('#examCorrectSelect').val(prev); }
     }
+    // แก้ path รูป/ไฟล์ให้แสดงได้ (ถ้าไม่ใช่ URL เต็ม ให้เติม ../ เหมือนที่อื่น)
+    function ResolveExamUrl(v) {
+        if (!v) { return ''; }
+        return /^https?:\/\//i.test(v) ? v : '../' + v;
+    }
+    // แสดง/ซ่อน ภาพ+ไฟล์เดิมของข้อสอบในโหมดแก้ไข (ค่าว่าง = ซ่อน)
+    function SetExamMedia(imgUrl, fileUrl) {
+        if (imgUrl) { $('#e_image_preview').attr('src', imgUrl).show(); $('#e_image_current').show(); }
+        else { $('#e_image_preview').attr('src', ''); $('#e_image_current').hide(); }
+        if (fileUrl) { $('#e_file_link').attr('href', fileUrl); $('#e_file_current').show(); }
+        else { $('#e_file_link').attr('href', '#'); $('#e_file_current').hide(); }
+    }
     function OpenAddExam() {
         $('#modalExamTitle').text('สร้างคำถามใหม่');
         $('#formExam')[0].reset();
         $('#e_id').val('');
         SetExamHTML('');
+        SetExamMedia('', '');
         $('#examChoiceList').empty();
         AddExamChoiceRow(''); AddExamChoiceRow('');
         new bootstrap.Modal(document.getElementById('modalExam')).show();
@@ -574,6 +601,10 @@
                 $('#formExam')[0].reset();
                 $('#e_id').val(eid);
                 SetExamHTML(response.data.exam.exam_text || '');
+                SetExamMedia(
+                    ResolveExamUrl(response.data.exam.exam_image),
+                    ResolveExamUrl(response.data.exam.exam_file)
+                );
                 $('#examChoiceList').empty();
                 var correctIdx = 0;
                 response.data.choices.forEach(function (c, i) {

@@ -25,12 +25,14 @@
 
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <a href="user" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
                             <h4 class="mb-0">รายละเอียดผู้ใช้/ลูกค้า</h4>
                             <span id="userVerifyStatus"></span>
+                            <span id="userAccountStatus"></span>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" class="btn btn-info text-white" onclick="LoginAsUser('<?php echo $user_id; ?>');">ล็อกอินเข้าเว็บไซต์</button>
-                            <button type="button" class="btn btn-warning" onclick="OpenVerifyModal();">ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้</button>
+                            <button type="button" id="btnVerify" class="btn btn-warning" onclick="OpenVerifyModal();">ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้</button>
                             <button type="button" class="btn btn-danger" onclick="DeleteUser('<?php echo $user_id; ?>');">ลบบัญชีผู้ใช้</button>
                         </div>
                     </div>
@@ -162,12 +164,9 @@
                                     <thead>
                                         <tr>
                                             <th class="text-center" style="width: 60px;">#</th>
-                                            <th>เลขที่ใบรับรอง</th>
                                             <th>คอร์สเรียน</th>
-                                            <th>ผู้สอบ</th>
                                             <th class="text-center">คะแนนที่ได้</th>
                                             <th class="text-center">สถานะ</th>
-                                            <th class="text-center">การอนุมัติ</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -360,6 +359,12 @@
         f.find('[name="user_password"]').val("");
         f.find('[name="user_password_confirm"]').val("");
         $("#userVerifyStatus").html(VerifyBadge(u.identity_verified));
+        // ยืนยันแล้ว (2) -> ปุ่มเปลี่ยนเป็น "อัพเดทข้อมูล", ยังไม่ยืนยัน -> ตรวจสอบเอกสาร
+        $("#btnVerify").text(String(u.identity_verified) === '2' ? 'อัพเดทข้อมูล' : 'ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้');
+        // สถานะบัญชี (1 = ใช้งาน, อื่น ๆ = ถูกระงับ)
+        $("#userAccountStatus").html(String(u.user_status) === '1'
+            ? '<span class="badge bg-success">บัญชีใช้งาน</span>'
+            : '<span class="badge bg-secondary">บัญชีถูกระงับ</span>');
     }
 
     // ป้ายสถานะการยืนยันตัวตน (0=ยังไม่ยืนยัน 1=รอตรวจสอบ 2=ยืนยันแล้ว)
@@ -422,7 +427,7 @@
     function FillExamTab(rows) {
         var html = '';
         if (!rows || rows.length === 0) {
-            html = '<tr><td colspan="7" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
+            html = '<tr><td colspan="4" class="text-center text-muted">ไม่มีข้อมูล</td></tr>';
         } else {
             rows.forEach(function (r, i) {
                 var status = (String(r.pass) === '1')
@@ -430,12 +435,9 @@
                     : '<span class="badge bg-danger">ไม่ผ่าน</span>';
                 html += '<tr>'
                     + '<td class="text-center">' + (i + 1) + '</td>'
-                    + '<td>-</td>'
                     + '<td>' + EscapeHTML(r.course_name || '-') + '</td>'
-                    + '<td>-</td>'
                     + '<td class="text-center">' + EscapeHTML(r.score != null ? String(r.score) : '-') + '</td>'
                     + '<td class="text-center">' + status + '</td>'
-                    + '<td class="text-center">-</td>'
                     + '</tr>';
             });
         }
@@ -585,9 +587,14 @@
         $("#verify_user_id").val(v.user_id || "");
         $("#verify_citizen_id").val(v.user_citizen_id || "-");
         $("#verify_expiry").val(FormatExpiry(v.id_card_expiry_date));
+        // prefill ผลตรวจ/หมายเหตุเดิม (ถ้าเคยตัดสินแล้ว) เพื่อให้เห็นผลปัจจุบันตอนเปิดซ้ำ
+        var prevResult = String(v.approver_citizen || '');
         $('input[name="approver_citizen"]').prop("checked", false);
-        $("#verify_remark").val("");
-        $("#remark_wrap").addClass("d-none");
+        if (prevResult === '1' || prevResult === '2') {
+            $('input[name="approver_citizen"][value="' + prevResult + '"]').prop("checked", true);
+        }
+        $("#verify_remark").val(v.remark || "");
+        $("#remark_wrap").toggleClass("d-none", prevResult !== '1');   // ปฏิเสธ -> โชว์ช่องหมายเหตุ
 
         SetVerifyImage("#verify_id_image", "#verify_id_image_empty", v.id_card_image);
         SetVerifyImage("#verify_photo", "#verify_photo_empty", v.current_photo);

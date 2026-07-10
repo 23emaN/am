@@ -12,6 +12,7 @@
                     <h2 class="mb-0">หมวดหมู่ของคอร์สเรียน</h2>
 
                     <div class="d-flex gap-2">
+                        <a href="course.php" class="btn btn-outline-secondary">กลับไปคอร์สเรียน</a>
                         <button class="btn btn-primary" type="button" onclick="GetModalAdd()">
                             เพิ่มหมวดหมู่ใหม่
                         </button>

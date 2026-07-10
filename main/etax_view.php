@@ -22,7 +22,10 @@
         <div class="px-2">
             <div class="card app-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
-                    <h4 class="mb-4">ดูข้อมูลใบกำกับภาษี (E-TAX)</h4>
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <a href="etax" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
+                        <h4 class="mb-0">ดูข้อมูลใบกำกับภาษี (E-TAX)</h4>
+                    </div>
 
                     <!-- ปุ่มจัดการ (เปลี่ยนตามสถานะ; ไม่มี "ดูข้อผิดพลาด" ตามที่กำหนด) -->
                     <div class="d-flex flex-wrap justify-content-end gap-2 mb-4" id="EtxButtons"></div>
@@ -33,12 +36,15 @@
                             <div class="etx-row"><div class="etx-label">เลขที่เอกสาร:</div><div class="etx-value"><?php echo htmlspecialchars($doc_no); ?></div></div>
                             <div class="etx-row"><div class="etx-label">ประเภทลูกค้า:</div><div class="etx-value" id="EtxType">-</div></div>
                             <div class="etx-row"><div class="etx-label">หมายเลขผู้เสียภาษี:</div><div class="etx-value" id="EtxTaxId">-</div></div>
+                            <div class="etx-row"><div class="etx-label">สาขา:</div><div class="etx-value" id="EtxBranch">-</div></div>
                             <div class="etx-row"><div class="etx-label">สถานะ:</div><div class="etx-value" id="EtxStatus">-</div></div>
                         </div>
                         <div class="col-lg-6">
                             <div class="etx-row"><div class="etx-label">วันที่ในเอกสาร:</div><div class="etx-value"><?php echo date('d/m/Y'); ?></div></div>
                             <div class="etx-row"><div class="etx-label">ชื่อลูกค้า:</div><div class="etx-value" id="EtxName">-</div></div>
                             <div class="etx-row"><div class="etx-label">ที่อยู่:</div><div class="etx-value" id="EtxAddress">-</div></div>
+                            <div class="etx-row"><div class="etx-label">เบอร์โทร:</div><div class="etx-value" id="EtxPhone">-</div></div>
+                            <div class="etx-row"><div class="etx-label">อีเมล:</div><div class="etx-value" id="EtxEmail">-</div></div>
                         </div>
                     </div>
 
@@ -110,8 +116,11 @@
 
         $("#EtxType").text(rc.type);
         $("#EtxTaxId").text(rc.tax_id);
+        $("#EtxBranch").text(rc.branch || "-");
         $("#EtxName").text(rc.name);
         $("#EtxAddress").text(rc.address);
+        $("#EtxPhone").text(rc.phone || "-");
+        $("#EtxEmail").text((d.receipt_raw && d.receipt_raw.email) ? d.receipt_raw.email : "-");
 
         // ออกสำเร็จ = ลูกค้ามีเลขผู้เสียภาษี (ข้อมูลใบกำกับครบ)
         var success = rc.tax_id && rc.tax_id !== "-";

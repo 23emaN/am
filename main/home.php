@@ -138,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- กราฟยอดขายรายวัน (ข้อมูล mock) -->
+            <!-- กราฟยอดขายรายวัน (ข้อมูลจริงจาก get_dashboard) -->
             <div class="card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white border-0 p-4 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div>

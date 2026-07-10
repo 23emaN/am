@@ -48,6 +48,10 @@ function coupon_date($d): string {
                             $min       = (float)($row['coupon_min'] ?? 0);
                             $max       = (float)($row['coupon_max'] ?? 0);
                             $is_active = (string)($row['coupon_status'] ?? '0') === '1';
+                            // หมดอายุ = มีวันสิ้นสุด และเลยวันไปแล้ว
+                            $end_raw    = trim((string)($row['coupon_end'] ?? ''));
+                            $end_ts     = ($end_raw !== '' && $end_raw !== '0000-00-00') ? strtotime($end_raw) : false;
+                            $is_expired = $end_ts !== false && $end_ts < strtotime(date('Y-m-d'));
                         ?>
                         <tr>
                             <td class="text-center"><?php echo $n++; ?></td>
@@ -73,6 +77,9 @@ function coupon_date($d): string {
                                       onclick="ToggleCouponStatus('<?php echo $row['coupon_id']; ?>', '<?php echo $next_status; ?>');">
                                     <?php echo $is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน'; ?>
                                 </span>
+                                <?php if ($is_expired): ?>
+                                    <span class="badge bg-danger ms-1" title="เลยวันสิ้นสุดแล้ว">หมดอายุ</span>
+                                <?php endif; ?>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center">
