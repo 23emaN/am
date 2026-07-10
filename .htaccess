@@ -9,6 +9,8 @@ RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
+# only rewrite extensionless URLs -> missing static files (.png/.css) return real 404, not 500
+RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]+$
 RewriteRule (.*) $1.php [L]
 
 # --- Security: disable directory listing ---

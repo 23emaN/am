@@ -49,6 +49,11 @@ if ($row_login) {
 
     if (password_verify($password, $row_login['user_password'])) {
 
+        // เฉพาะผู้ดูแลระบบ (admin_status=1) เท่านั้นที่เข้าใช้งานระบบหลังบ้านได้
+        if ((string)($row_login['admin_status'] ?? '0') !== '1') {
+            Response::json(0, 'บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบผู้ดูแล', null);
+        }
+
         if ($row_login['user_status'] == 1) {
 
             $now = time();
