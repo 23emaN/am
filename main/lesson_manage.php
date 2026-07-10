@@ -137,9 +137,11 @@
                                                     <span class="material-symbols-outlined" aria-hidden="true">close</span>
                                                 </button>
                                             </div>
-                                            <button type="button" class="btn btn-primary w-100 mt-2 BtnUploadVideo d-none" onclick="SubmitUploadVideo()">
-                                                อัพโหลดขึ้น Vimeo
-                                            </button>
+                                            <!-- ไฟล์ใหม่ที่ยังไม่อัป: แจ้งเตือนว่าจะอัปตอนกดบันทึก (ปุ่มอัปแยกถูกยุบเป็นปุ่มเดียว) -->
+                                            <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small d-none" id="videoPendingNote">
+                                                <span class="material-symbols-outlined align-middle" style="font-size:16px;" aria-hidden="true">info</span>
+                                                วิดีโอนี้จะถูกอัปโหลดขึ้น Vimeo เมื่อกด<b>บันทึก</b>
+                                            </div>
                                         </div>
                                     </form>
 
@@ -318,9 +320,8 @@
         $('#videoPreview').html(html);
         $('#videoDropZone').addClass('d-none');
         $('#videoBox').removeClass('d-none');
-        // ปุ่มอัปขึ้น Vimeo: เฉพาะโหมดจัดการ + ไฟล์ใหม่ (โหมดเพิ่มจะอัปตอนกด "เพิ่มบทเรียน")
-        if (!IS_ADD && isNew) { $('.BtnUploadVideo').removeClass('d-none'); }
-        else { $('.BtnUploadVideo').addClass('d-none'); }
+        // ไฟล์ใหม่ที่ยังไม่อัป -> โชว์โน้ตว่าจะอัปตอนกดบันทึก; วิดีโอเดิม (จาก DB) -> ซ่อน
+        $('#videoPendingNote').toggleClass('d-none', !isNew);
     }
 
     // ลบวิดีโอ/เลือกใหม่ -> กลับไปโชว์โซนลากวาง
@@ -330,8 +331,35 @@
         if (_pickedVideoURL) { try { URL.revokeObjectURL(_pickedVideoURL); } catch (e) {} _pickedVideoURL = null; }
         $('#videoPreview').empty();
         $('#videoBox').addClass('d-none');
-        $('.BtnUploadVideo').addClass('d-none');
+        $('#videoPendingNote').addClass('d-none');
         $('#videoDropZone').removeClass('d-none');
+    }
+
+    // สร้าง iframe วิดีโอ Vimeo ตามอัตราส่วนจริง (กันแถบดำเมื่อวิดีโอไม่ใช่ 16:9)
+    // แนวตั้ง -> อิงความสูง (กว้างหด), แนวนอน -> เต็มกว้าง; จำกัดสูงสุด 60vh
+    function VideoFrameHTML(url, w, h) {
+        w = parseInt(w, 10) || 16;
+        h = parseInt(h, 10) || 9;
+        var portrait = h > w;
+        return '<div class="rounded-3 overflow-hidden" style="aspect-ratio:' + w + '/' + h + ';max-width:100%;max-height:60vh;'
+            + (portrait ? 'height:60vh;width:auto;' : 'width:100%;height:auto;')
+            + 'margin:0 auto;background:#000;">'
+            + '<iframe src="' + EscapeHTML(url) + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen '
+            + 'style="width:100%;height:100%;border:0;display:block;"></iframe></div>';
+    }
+
+    // ฝังวิดีโอบทเรียน: โชว์ 16:9 ไปก่อน แล้วปรับอัตราส่วนตามขนาดจริงจาก Vimeo เมื่อได้ค่า
+    function EmbedLessonVideo(url) {
+        ShowVideo(VideoFrameHTML(url, 16, 9), false);
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
+            dataType: "json"
+        }).done(function (r) {
+            if (r && r.result == 1 && r.data && r.data.width && r.data.height) {
+                ShowVideo(VideoFrameHTML(url, r.data.width, r.data.height), false);
+            }
+        });
     }
 
     // ===== โหลดข้อมูลบทเรียน (เติมฟอร์มตั้งค่า + วีดีโอ) =====
@@ -355,7 +383,7 @@
                 $('#formLesson [name="lesson_overview"]').val(L.lesson_overview || '');
                 $('#formVideo [name="lesson_video"]').val(L.lesson_video || '');
                 if (L.lesson_video) {
-                    ShowVideo('<div class="ratio ratio-16x9 rounded-3 overflow-hidden"><iframe src="' + EscapeHTML(L.lesson_video) + '" allowfullscreen></iframe></div>', false);
+                    EmbedLessonVideo(L.lesson_video);
                 } else {
                     RemoveVideo();
                 }
@@ -364,62 +392,89 @@
         });
     }
 
-    // ===== บันทึกบทเรียน (เพิ่มใหม่ หรือ แก้ไข) =====
+    // ===== บันทึกบทเรียน (เพิ่มใหม่ หรือ แก้ไข) — ปุ่มเดียว: อัปวิดีโอ (ถ้ามีไฟล์ใหม่) แล้วบันทึก =====
     function SubmitLesson() {
         var name = $('#formLesson [name="lesson_name"]').val().trim();
         if (name === "") {
             Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกชื่อบทเรียน</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
             return;
         }
-        // โหมดเพิ่ม: บังคับต้องเลือกวิดีโอก่อน (ระบบจะอัปขึ้น Vimeo ให้หลังสร้างบทเรียน)
-        if (IS_ADD) {
-            var vf = document.getElementById('videoFileInput');
-            if (!vf || !vf.files || !vf.files.length) {
-                Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกวิดีโอก่อนเพิ่มบทเรียน</span>', icon: "warning", showConfirmButton: false, timer: 2200 });
-                return;
-            }
-        }
-        var data = $('#formLesson').serializeArray();
-        data.push({ name: "request_state", value: "lesson" });
-        if (IS_ADD) {
-            data.push({ name: "request_function", value: "add_lesson" });
-            data.push({ name: "course_id", value: COURSE_ID });
-        } else {
-            data.push({ name: "request_function", value: "update_lesson" });
-            data.push({ name: "lesson_id", value: LESSON_ID });
-        }
-        $.ajax({
-            beforeSend: function () { ShowLoadingButton('.BtnSaveLesson'); },
-            type: "POST", url: "core.php", data: $.param(data), dataType: "json",
-            success: function (response) {
-                if (IS_ADD && response.result == 1) {
-                    // เพิ่มบทเรียนแล้ว -> อัปวิดีโอขึ้น Vimeo -> บันทึกคำถามที่พักไว้ -> เด้งเข้าหน้าจัดการ
-                    var newId = response.data.lesson_id;
-                    var vf = document.getElementById('videoFileInput');
-                    var file = (vf && vf.files && vf.files.length) ? vf.files[0] : null;
-                    var gotoManage = function () {
-                        window.location.href = "lesson_manage.php?course_id=" + COURSE_ID + "&lesson_id=" + newId;
-                    };
-                    var afterVideo = function () { FlushQuestionBuffer(newId, gotoManage); };
-                    if (file) { RunVimeoUpload(newId, file, afterVideo); }
-                    else { afterVideo(); }
-                    return;
-                }
-                ToastResult(response);
-            },
-            complete: function () { HideLoadingButton('.BtnSaveLesson'); },
-            error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
-        });
-    }
+        var vf = document.getElementById('videoFileInput');
+        var newFile = (vf && vf.files && vf.files.length) ? vf.files[0] : null;
 
-    // ปุ่มอัปโหลดวิดีโอ (โหมดจัดการ) -> อัปแล้วรีเฟรชพรีวิว
-    function SubmitUploadVideo() {
-        var fileInput = document.getElementById('videoFileInput');
-        if (!fileInput || !fileInput.files || !fileInput.files.length) {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกไฟล์วิดีโอ</span>', icon: "warning", showConfirmButton: false, timer: 2000 });
+        // โหมดเพิ่ม: บังคับต้องเลือกวิดีโอก่อน (ระบบจะอัปขึ้น Vimeo ให้หลังสร้างบทเรียน)
+        if (IS_ADD && !newFile) {
+            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณาเลือกวิดีโอก่อนเพิ่มบทเรียน</span>', icon: "warning", showConfirmButton: false, timer: 2200 });
             return;
         }
-        RunVimeoUpload(LESSON_ID, fileInput.files[0], function (ok) { if (ok) { LoadLesson(); } });
+
+        // บันทึกข้อมูลบทเรียน (ข้อความ) -> callback(response)
+        function saveLessonData(onSaved) {
+            var data = $('#formLesson').serializeArray();
+            data.push({ name: "request_state", value: "lesson" });
+            if (IS_ADD) {
+                data.push({ name: "request_function", value: "add_lesson" });
+                data.push({ name: "course_id", value: COURSE_ID });
+            } else {
+                data.push({ name: "request_function", value: "update_lesson" });
+                data.push({ name: "lesson_id", value: LESSON_ID });
+            }
+            $.ajax({
+                beforeSend: function () { ShowLoadingButton('.BtnSaveLesson'); },
+                type: "POST", url: "core.php", data: $.param(data), dataType: "json",
+                success: function (response) { onSaved(response); },
+                complete: function () { HideLoadingButton('.BtnSaveLesson'); },
+                error: function (jqXHR, exception) { ShowErrorAjax(jqXHR, exception); }
+            });
+        }
+
+        if (IS_ADD) {
+            // เพิ่มบทเรียนก่อน (ได้ lesson_id) -> อัปวิดีโอขึ้น Vimeo -> บันทึกคำถามที่พักไว้ -> เด้งเข้าหน้าจัดการ
+            saveLessonData(function (response) {
+                if (response.result != 1) { ToastResult(response); return; }
+                var newId = response.data.lesson_id;
+                var gotoManage = function () {
+                    window.location.href = "lesson_manage.php?course_id=" + COURSE_ID + "&lesson_id=" + newId;
+                };
+                var afterVideo = function () { FlushQuestionBuffer(newId, gotoManage); };
+                if (newFile) { RunVimeoUpload(newId, newFile, afterVideo); }
+                else { afterVideo(); }
+            });
+            return;
+        }
+
+        // โหมดแก้ไข (ปุ่มเดียว): มีวิดีโอใหม่ -> อัปขึ้น Vimeo ก่อน แล้วบันทึก; ไม่มี -> บันทึกอย่างเดียว (คงวิดีโอเดิม)
+        if (newFile) {
+            RunVimeoUpload(LESSON_ID, newFile, function (ok) {
+                if (!ok) { return; }   // อัปไม่สำเร็จ -> ไม่บันทึกต่อ (แจ้งเตือนใน RunVimeoUpload แล้ว)
+                saveLessonData(function (response) {
+                    ToastResult(response);
+                    if (response.result == 1) { LoadLesson(); }   // รีเฟรชพรีวิวเป็นวิดีโอใหม่
+                });
+            });
+        } else {
+            saveLessonData(function (response) { ToastResult(response); });
+        }
+    }
+
+    // poll สถานะ transcode ของ Vimeo จนเล่นได้ (is_playable) หรือครบเวลา -> onReady(true=พร้อม / false=หมดเวลา)
+    function PollVideoStatus(lessonId, onReady) {
+        var startTs = Date.now();
+        var MAX_MS = 3 * 60 * 1000;   // สูงสุด 3 นาที กันค้างเมื่อไฟล์ใหญ่มาก
+        (function tick() {
+            $.ajax({
+                type: "POST", url: "core.php",
+                data: { request_state: "lesson", request_function: "get_video_status", lesson_id: lessonId },
+                dataType: "json"
+            }).done(function (r) {
+                if (r && r.result == 1 && r.data && r.data.is_playable) { onReady(true); return; }
+                if (Date.now() - startTs > MAX_MS) { onReady(false); return; }
+                setTimeout(tick, 4000);
+            }).fail(function () {
+                if (Date.now() - startTs > MAX_MS) { onReady(false); return; }
+                setTimeout(tick, 4000);
+            });
+        })();
     }
 
     // อัปโหลดไฟล์วิดีโอขึ้น Vimeo สำหรับ lessonId ที่ระบุ -> เรียก onDone(ok) เมื่อจบ (ใช้ได้ทั้งเพิ่ม/จัดการ)
@@ -475,8 +530,19 @@
                         data: { request_state: "lesson", request_function: "finish_upload", lesson_id: lessonId, video_uri: videoUri },
                         dataType: "json"
                     }).done(function (fin) {
-                        Swal.close(); ToastResult(fin);
-                        if (onDone) { onDone(fin.result == 1); }
+                        if (fin.result != 1) { Swal.close(); ToastResult(fin); if (onDone) { onDone(false); } return; }
+                        // 4) รอ Vimeo ประมวลผล (encoding) จนเล่นได้ ค่อยถือว่าเสร็จ — กันฝัง iframe แล้ว error
+                        $("#upPhase").text("Vimeo กำลังประมวลผลวิดีโอ… (อาจใช้เวลาสักครู่)");
+                        $("#upBar").css("width", "100%").text("ประมวลผล…");
+                        PollVideoStatus(lessonId, function (ready) {
+                            Swal.close();
+                            if (ready) {
+                                ToastResult(fin);
+                            } else {
+                                Swal.fire({ title: "อัปโหลดสำเร็จ", html: '<span class="text-secondary">Vimeo กำลังประมวลผลวิดีโออยู่ เมื่อประมวลผลเสร็จวิดีโอจะเล่นได้เอง</span>', icon: "success", timer: 3500, showConfirmButton: false });
+                            }
+                            if (onDone) { onDone(true); }
+                        });
                     }).fail(function (j, e) { Swal.close(); ShowErrorAjax(j, e); if (onDone) { onDone(false); } });
                 }
             });
