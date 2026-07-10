@@ -5,6 +5,7 @@ use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
 use App\Utility\AwsS3;
+use App\Utility\ImageOptimizer;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -70,6 +71,7 @@ $saveFile = function (string $field, array $allowExt): ?string {
     }
     return $s3Result['url'];
 };
+ImageOptimizer::toWebp('exam_image'); // แปลงรูปเป็น WebP ก่อนอัปขึ้น S3
 $image_path = $saveFile('exam_image', ['jpg', 'jpeg', 'png', 'webp', 'gif']);
 $file_path  = $saveFile('exam_file', ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'jpg', 'jpeg', 'png']);
 
