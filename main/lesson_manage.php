@@ -137,18 +137,13 @@
                                                     <span class="material-symbols-outlined" aria-hidden="true">close</span>
                                                 </button>
                                             </div>
-                                            <!-- ไฟล์ใหม่ที่ยังไม่อัป: แจ้งเตือนว่าจะอัปตอนกดบันทึก (ปุ่มอัปแยกถูกยุบเป็นปุ่มเดียว) -->
-                                            <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small d-none" id="videoPendingNote">
-                                                <span class="material-symbols-outlined align-middle" style="font-size:16px;" aria-hidden="true">info</span>
-                                                วิดีโอนี้จะถูกอัปโหลดขึ้น Vimeo เมื่อกด<b>บันทึก</b>
-                                            </div>
                                         </div>
                                     </form>
 
                                     <button type="button" class="btn btn-primary w-100 mt-3 BtnSaveLesson" onclick="SubmitLesson()">
-                                        <?php echo $is_add ? 'เพิ่มบทเรียน' : 'แก้ไขข้อมูล'; ?>
+                                        <?php echo $is_add ? 'เพิ่มบทเรียน' : 'บันทึกการแก้ไข'; ?>
                                     </button>
-                                </div>
+                                </div> 
                             </div>
                         </div>
 
@@ -447,14 +442,23 @@
         if (newFile) {
             RunVimeoUpload(LESSON_ID, newFile, function (ok) {
                 if (!ok) { return; }   // อัปไม่สำเร็จ -> ไม่บันทึกต่อ (แจ้งเตือนใน RunVimeoUpload แล้ว)
-                saveLessonData(function (response) {
-                    ToastResult(response);
-                    if (response.result == 1) { LoadLesson(); }   // รีเฟรชพรีวิวเป็นวิดีโอใหม่
-                });
+                saveLessonData(AfterEditSaved);
             });
         } else {
-            saveLessonData(function (response) { ToastResult(response); });
+            saveLessonData(AfterEditSaved);
         }
+    }
+
+    // โหมดแก้ไข: บันทึกสำเร็จ -> แจ้งเตือนสั้น ๆ แล้วเด้งกลับหน้าบทเรียน (course_edit) ; ล้มเหลว -> แค่แจ้งเตือน
+    function AfterEditSaved(response) {
+        if (response.result != 1) { ToastResult(response); return; }
+        Swal.fire({
+            title: "สำเร็จ",
+            html: '<span class="fw-bold text-success">' + response.msg + '</span>',
+            icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true
+        }).then(function () {
+            window.location.href = "course_edit.php?id=" + COURSE_ID + "#tab-lesson";
+        });
     }
 
     // poll สถานะ transcode ของ Vimeo จนเล่นได้ (is_playable) หรือครบเวลา -> onReady(true=พร้อม / false=หมดเวลา)
