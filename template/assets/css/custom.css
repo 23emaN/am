@@ -47,8 +47,9 @@ input, button, select, textarea {
    -> Bootstrap ที่ล็อกสกอลล์ตอนเปิด modal ด้วย overflow:hidden ที่ <body> จะล็อกไม่ถึง
    -> พื้นหลังยังเลื่อนได้. ใส่ที่ body อย่างเดียวยังกันแนวนอนได้ผ่าน scroll propagation */
 body { overflow-x: hidden; max-width: 100%; }
-/* กันเผื่อ: ล็อก <html> ด้วยตอนเปิด modal (Bootstrap ใส่คลาส .modal-open ที่ body) */
-html:has(> body.modal-open) { overflow: hidden; }
+/* ล็อกสกอลล์พื้นหลังตอนเปิด modal — ครอบทั้ง <html> และ <body> (Bootstrap ใส่ .modal-open ที่ body) */
+html:has(> body.modal-open),
+body.modal-open { overflow: hidden !important; }
 
 /* #5 user profile pinned at the bottom of the sidebar
    (.sidebar-area already has position:fixed from the theme = containing block) */
