@@ -42,7 +42,13 @@ input, button, select, textarea {
     border: 0 !important;
     white-space: nowrap !important;
 }
-html, body { overflow-x: hidden; max-width: 100%; }
+/* กันสกอลล์แนวนอน — ใส่ที่ body เท่านั้น (อย่าใส่ที่ html)
+   เพราะ overflow-x:hidden ที่ <html> จะทำให้ <html> กลายเป็น scroll container เอง
+   -> Bootstrap ที่ล็อกสกอลล์ตอนเปิด modal ด้วย overflow:hidden ที่ <body> จะล็อกไม่ถึง
+   -> พื้นหลังยังเลื่อนได้. ใส่ที่ body อย่างเดียวยังกันแนวนอนได้ผ่าน scroll propagation */
+body { overflow-x: hidden; max-width: 100%; }
+/* กันเผื่อ: ล็อก <html> ด้วยตอนเปิด modal (Bootstrap ใส่คลาส .modal-open ที่ body) */
+html:has(> body.modal-open) { overflow: hidden; }
 
 /* #5 user profile pinned at the bottom of the sidebar
    (.sidebar-area already has position:fixed from the theme = containing block) */
