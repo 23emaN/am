@@ -105,13 +105,14 @@ if ($promo_raw !== '') {
 }
 
 // ตรวจว่าคอร์สมีจริงและยังไม่ถูกลบ
-$check = $pdo_connect->prepare("SELECT course_id FROM tbl_course WHERE course_id = :id AND delete_at IS NULL LIMIT 1");
+$check = $pdo_connect->prepare("SELECT course_id, course_cover_image FROM tbl_course WHERE course_id = :id AND delete_at IS NULL LIMIT 1");
 $check->execute([':id' => $course_id]);
-$exists = $check->fetchColumn();
+$existing_course = $check->fetch(PDO::FETCH_ASSOC);
 $check->closeCursor();
-if (!$exists) {
+if (!$existing_course) {
     Response::json(0, 'ไม่พบคอร์สเรียนนี้', null);
 }
+$old_cover = (string) ($existing_course['course_cover_image'] ?? '');
 
 /* ---------- อัปโหลดรูปหน้าปกใหม่ขึ้น S3 (ถ้ามี) ---------- */
 $new_cover = null;
@@ -195,6 +196,11 @@ try {
 
     if (!$ok) {
         throw new Exception('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+    }
+
+    // ลบรูปหน้าปกเก่าใน S3 หลังบันทึกสำเร็จ (เฉพาะเมื่ออัปรูปใหม่และเป็นคนละไฟล์)
+    if ($new_cover !== null && $old_cover !== '' && $old_cover !== $new_cover && stripos($old_cover, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_cover);
     }
 
     Response::json(1, 'บันทึกการแก้ไขสำเร็จ', ['course_id' => $course_id]);

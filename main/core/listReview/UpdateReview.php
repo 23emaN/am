@@ -79,6 +79,11 @@ try {
     ]);
     $stmt->closeCursor();
 
+    // ลบรูปผู้รีวิวเก่าใน S3 หลังบันทึกสำเร็จ (ครอบทั้งเคสอัปทับและกดลบรูป)
+    if ($existing_image !== '' && $existing_image !== $reviewer_image && stripos($existing_image, 'http') === 0) {
+        AwsS3::deleteFileByURL($existing_image);
+    }
+
     Response::json(1, 'บันทึกข้อมูลรีวิวสำเร็จ', ['review_id' => $review_id]);
 } catch (Exception $e) {
     error_log('Update Review Error: ' . $e->getMessage());

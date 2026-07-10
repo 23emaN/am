@@ -44,13 +44,15 @@ if (!$pdo_connect) {
     Response::json(0, 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', null);
 }
 
-$check = $pdo_connect->prepare("SELECT exam_id FROM tbl_exam WHERE exam_id = :id AND delete_at IS NULL LIMIT 1");
+$check = $pdo_connect->prepare("SELECT exam_id, exam_image, exam_file FROM tbl_exam WHERE exam_id = :id AND delete_at IS NULL LIMIT 1");
 $check->execute([':id' => $exam_id]);
-if (!$check->fetchColumn()) {
-    $check->closeCursor();
+$existing_e = $check->fetch(PDO::FETCH_ASSOC);
+$check->closeCursor();
+if (!$existing_e) {
     Response::json(0, 'ไม่พบข้อสอบนี้', null);
 }
-$check->closeCursor();
+$old_image = (string) ($existing_e['exam_image'] ?? '');
+$old_file  = (string) ($existing_e['exam_file'] ?? '');
 
 $saveFile = function (string $field, array $allowExt): ?string {
     if (empty($_FILES[$field]['name']) || ($_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -97,6 +99,15 @@ try {
     $cstmt->closeCursor();
 
     $pdo_connect->commit();
+
+    // ลบไฟล์เก่าใน S3 หลังบันทึกสำเร็จ (เฉพาะช่องที่อัปไฟล์ใหม่และเป็นคนละไฟล์)
+    if ($image_path !== null && $old_image !== '' && $old_image !== $image_path && stripos($old_image, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_image);
+    }
+    if ($file_path !== null && $old_file !== '' && $old_file !== $file_path && stripos($old_file, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_file);
+    }
+
     Response::json(1, 'บันทึกการแก้ไขข้อสอบสำเร็จ', ['exam_id' => $exam_id]);
 } catch (Exception $e) {
     if ($pdo_connect->inTransaction()) { $pdo_connect->rollBack(); }

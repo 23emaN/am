@@ -44,13 +44,15 @@ if (!$pdo_connect) {
     Response::json(0, 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', null);
 }
 
-$check = $pdo_connect->prepare("SELECT question_id FROM tbl_question WHERE question_id = :id AND delete_at IS NULL LIMIT 1");
+$check = $pdo_connect->prepare("SELECT question_id, question_image, question_file FROM tbl_question WHERE question_id = :id AND delete_at IS NULL LIMIT 1");
 $check->execute([':id' => $question_id]);
-if (!$check->fetchColumn()) {
-    $check->closeCursor();
+$existing_q = $check->fetch(PDO::FETCH_ASSOC);
+$check->closeCursor();
+if (!$existing_q) {
     Response::json(0, 'ไม่พบคำถามนี้', null);
 }
-$check->closeCursor();
+$old_image = (string) ($existing_q['question_image'] ?? '');
+$old_file  = (string) ($existing_q['question_file'] ?? '');
 
 /* ---------- อัปโหลดไฟล์ใหม่ (ถ้ามี) ---------- */
 $saveFile = function (string $field, array $allowExt): ?string {
@@ -104,6 +106,15 @@ try {
     $cstmt->closeCursor();
 
     $pdo_connect->commit();
+
+    // ลบไฟล์เก่าใน S3 หลังบันทึกสำเร็จ (เฉพาะช่องที่อัปไฟล์ใหม่และเป็นคนละไฟล์)
+    if ($image_path !== null && $old_image !== '' && $old_image !== $image_path && stripos($old_image, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_image);
+    }
+    if ($file_path !== null && $old_file !== '' && $old_file !== $file_path && stripos($old_file, 'http') === 0) {
+        AwsS3::deleteFileByURL($old_file);
+    }
+
     Response::json(1, 'บันทึกการแก้ไขคำถามสำเร็จ', ['question_id' => $question_id]);
 } catch (Exception $e) {
     if ($pdo_connect->inTransaction()) { $pdo_connect->rollBack(); }
