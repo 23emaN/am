@@ -4,6 +4,7 @@ use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
 use App\Utility\AwsS3;
+use App\Utility\ImageOptimizer;
 
 $access_token = Auth::requireUserToken();
 $user_id = $access_token->user_id ?? null;
@@ -73,6 +74,7 @@ if (!empty($_FILES['banner_image']['name']) && ($_FILES['banner_image']['error']
 
     // อัปโหลดขึ้น S3 แล้วเก็บ URL เต็ม; ไม่ลบรูปเก่าใน S3
     $filename = bin2hex(random_bytes(8));
+    ImageOptimizer::toWebp('banner_image'); // แปลงรูปเป็น WebP ก่อนอัปขึ้น S3
     $s3Result = AwsS3::uploadFileDirectly($_FILES['banner_image'], true, 'banner', $filename);
     if (isset($s3Result['error'])) {
         Response::json(0, 'อัปโหลดรูปขึ้น S3 ไม่สำเร็จ: ' . $s3Result['error'], null);

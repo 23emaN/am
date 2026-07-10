@@ -9,6 +9,7 @@ use App\Utility\Auth;
 use App\Utility\Response;
 use App\Database\Connection;
 use App\Utility\AwsS3;
+use App\Utility\ImageOptimizer;
 
 $access_token = Auth::requireUserToken();
 $admin_id = $access_token->user_id ?? null;
@@ -88,6 +89,7 @@ if (!empty($_FILES['reviewer_image']['name']) && ($_FILES['reviewer_image']['err
 
     // อัปโหลดขึ้น S3 โดยระบุโฟลเดอร์ปลายทางคือ 'reviews/reviewer' และสุ่มชื่อไฟล์ใหม่
     $filename = bin2hex(random_bytes(8));
+    ImageOptimizer::toWebp('reviewer_image'); // แปลงรูปเป็น WebP ก่อนอัปขึ้น S3
     $s3Result = AwsS3::uploadFileDirectly($_FILES['reviewer_image'], true, 'reviews/reviewer', $filename);
 
     if (isset($s3Result['error'])) {
