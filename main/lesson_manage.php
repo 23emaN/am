@@ -343,26 +343,28 @@
             + 'style="width:100%;height:100%;border:0;display:block;"></iframe></div>';
     }
 
-    // ฝังวิดีโอบทเรียน: เช็คสถานะก่อน — ถ้ายัง transcode ไม่เสร็จ (is_playable=false) วิดีโอ Vimeo
-    // จะขึ้น "This video does not exist" จึงโชว์ placeholder "กำลังประมวลผล" แล้ว poll จนพร้อมค่อยฝังจริง
+    // ฝังวิดีโอบทเรียน: เช็คสถานะก่อน — ถ้ายัง transcode ไม่เสร็จวิดีโอ Vimeo จะขึ้น "does not exist"
+    // จึงโชว์ placeholder "กำลังประมวลผล" แล้ว poll เงียบ ๆ (ไม่โชว์ spinner กลางจอ) จนพร้อมค่อยฝังจริง
     function EmbedLessonVideo(url) {
         ShowVideo(VideoProcessingHTML(), false);   // โชว์ placeholder ทันที (กันฝัง iframe ตอนยังไม่พร้อม)
-        var polls = 0, MAX_POLLS = 150;            // poll สูงสุด ~10 นาที (150 * 4s)
+        var polls = 0, MAX_POLLS = 200;            // poll สูงสุด ~15 นาที
         (function check() {
             if ($('#videoBox').hasClass('d-none')) { return; }   // วิดีโอถูกลบ/ปิดไปแล้ว -> เลิก poll
             $.ajax({
                 type: "POST", url: "core.php",
                 data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
-                dataType: "json"
+                dataType: "json",
+                global: false,      // ไม่ trigger spinner กลางจอ (poll ถี่)
+                timeout: 15000      // กัน request ค้าง -> ให้ fail แล้ว retry แทนที่จะหยุด poll ค้าง
             }).done(function (r) {
                 var d = (r && r.result == 1) ? r.data : null;
-                if (d && d.is_playable) {
+                if (d && (d.is_playable || d.status === 'available')) {
                     ShowVideo(VideoFrameHTML(url, d.width || 16, d.height || 9), false);   // พร้อมแล้ว -> ฝังจริง
                     return;
                 }
-                if (++polls < MAX_POLLS) { setTimeout(check, 4000); }                       // ยังไม่พร้อม -> รอแล้วเช็คใหม่
+                if (++polls < MAX_POLLS) { setTimeout(check, 4000); }   // ยังไม่พร้อม -> รอแล้วเช็คใหม่
             }).fail(function () {
-                ShowVideo(VideoFrameHTML(url, 16, 9), false);   // เช็คสถานะไม่ได้ -> ฝังไปเลย (fallback ให้ยังพอดูได้)
+                if (++polls < MAX_POLLS) { setTimeout(check, 4000); }   // เช็คพลาด (เน็ต/timeout) -> retry ต่อ (ไม่ฝัง iframe กันโชว์ "sorry")
             });
         })();
     }
