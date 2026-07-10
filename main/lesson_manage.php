@@ -343,18 +343,37 @@
             + 'style="width:100%;height:100%;border:0;display:block;"></iframe></div>';
     }
 
-    // ฝังวิดีโอบทเรียน: โชว์ 16:9 ไปก่อน แล้วปรับอัตราส่วนตามขนาดจริงจาก Vimeo เมื่อได้ค่า
+    // ฝังวิดีโอบทเรียน: เช็คสถานะก่อน — ถ้ายัง transcode ไม่เสร็จ (is_playable=false) วิดีโอ Vimeo
+    // จะขึ้น "This video does not exist" จึงโชว์ placeholder "กำลังประมวลผล" แล้ว poll จนพร้อมค่อยฝังจริง
     function EmbedLessonVideo(url) {
-        ShowVideo(VideoFrameHTML(url, 16, 9), false);
-        $.ajax({
-            type: "POST", url: "core.php",
-            data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
-            dataType: "json"
-        }).done(function (r) {
-            if (r && r.result == 1 && r.data && r.data.width && r.data.height) {
-                ShowVideo(VideoFrameHTML(url, r.data.width, r.data.height), false);
-            }
-        });
+        ShowVideo(VideoProcessingHTML(), false);   // โชว์ placeholder ทันที (กันฝัง iframe ตอนยังไม่พร้อม)
+        var polls = 0, MAX_POLLS = 150;            // poll สูงสุด ~10 นาที (150 * 4s)
+        (function check() {
+            if ($('#videoBox').hasClass('d-none')) { return; }   // วิดีโอถูกลบ/ปิดไปแล้ว -> เลิก poll
+            $.ajax({
+                type: "POST", url: "core.php",
+                data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
+                dataType: "json"
+            }).done(function (r) {
+                var d = (r && r.result == 1) ? r.data : null;
+                if (d && d.is_playable) {
+                    ShowVideo(VideoFrameHTML(url, d.width || 16, d.height || 9), false);   // พร้อมแล้ว -> ฝังจริง
+                    return;
+                }
+                if (++polls < MAX_POLLS) { setTimeout(check, 4000); }                       // ยังไม่พร้อม -> รอแล้วเช็คใหม่
+            }).fail(function () {
+                ShowVideo(VideoFrameHTML(url, 16, 9), false);   // เช็คสถานะไม่ได้ -> ฝังไปเลย (fallback ให้ยังพอดูได้)
+            });
+        })();
+    }
+
+    // กล่องแสดงระหว่าง Vimeo ประมวลผลวิดีโอ (แทน iframe ที่จะขึ้น "does not exist" ตอนยัง transcode)
+    function VideoProcessingHTML() {
+        return '<div class="rounded-3 d-flex flex-column justify-content-center align-items-center text-center" '
+            + 'style="aspect-ratio:16/9;max-height:60vh;background:#f1f2f7;color:#6b7280;padding:24px;">'
+            + '<div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>'
+            + '<div class="fw-semibold">Vimeo กำลังประมวลผลวิดีโอ…</div>'
+            + '<div class="small mt-1">วิดีโอจะเล่นได้เองเมื่อประมวลผลเสร็จ (ไม่ต้องรีเฟรช)</div></div>';
     }
 
     // ===== โหลดข้อมูลบทเรียน (เติมฟอร์มตั้งค่า + วีดีโอ) =====
