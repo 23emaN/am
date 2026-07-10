@@ -128,11 +128,11 @@ $reviewer_image = $review ? (string) ($review['reviewer_image'] ?? '') : '';
     }
 
     function UpdateReview() {
-        var comment = $('#edit_comment').val().trim();
-        if (comment === '') {
-            Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">กรุณากรอกข้อความรีวิว</span>', icon: "error", showConfirmButton: false, allowOutsideClick: false, timer: 2000, timerProgressBar: true });
-            return;
-        }
+        // ===== ตรวจช่องบังคับ =====
+        if (!ValidateRequired([
+            { sel: '#edit_rating',  label: 'คะแนน', type: 'select' },
+            { sel: '#edit_comment', label: 'ความคิดเห็น' }
+        ])) { return; }
 
         var formData = new FormData($('#formEditReview')[0]);
         formData.append('request_state', 'list_review');

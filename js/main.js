@@ -413,3 +413,144 @@ function InitThaiDatepicker(selector) {
     });
     return fp;
 }
+
+
+/**
+ * ValidateRequired(rules) — ตรวจช่องบังคับหลายช่องในครั้งเดียว (UX: โชว์ครบทุกช่องที่ขาด)
+ * -----------------------------
+ * rules: array เรียงตามลำดับความสำคัญ (บน→ล่าง) ของ object:
+ *   sel        : selector หรือ jQuery ของช่อง (radio: ใช้ชื่อกลุ่มก็ได้ผ่าน name)
+ *   label      : ชื่อช่องภาษาไทย (โชว์ใน popup + ใต้ช่อง)
+ *   type       : 'text'|'number'|'select'|'select2'|'tomselect'|'tinymce'|'radio'|'file' (ดีฟอลต์ 'text')
+ *   name       : (radio) ชื่อ group ถ้าไม่ได้ส่ง sel
+ *   editorId   : (tinymce) id ของ textarea ถ้าไม่ได้ส่ง sel
+ *   when       : (optional) function()->bool ตรวจเฉพาะเมื่อคืน true (ช่องบังคับแบบมีเงื่อนไข)
+ * คืน true ถ้าครบ / false ถ้าขาด (โชว์ popup รายการช่องที่ขาด + เลื่อนไปช่องแรก + ขอบแดง + ข้อความใต้ช่อง)
+ */
+function ValidateRequired(rules) {
+    var missing = [];
+    var firstEl = null;
+
+    // เคลียร์สถานะเดิม + ผูก auto-clear (แดงหายเมื่อผู้ใช้แก้)
+    rules.forEach(function (r) { VrClear(r); });
+
+    rules.forEach(function (r) {
+        if (typeof r.when === 'function' && !r.when()) { return; }   // ข้ามถ้าเงื่อนไขไม่เข้า
+        if (VrIsEmpty(r)) {
+            VrMark(r);
+            missing.push(r.label || '');
+            if (!firstEl) { firstEl = VrFocusEl(r); }
+        }
+    });
+
+    if (missing.length === 0) { return true; }
+
+    var items = missing.map(function (m) { return '<li>' + EscapeHTML(m) + '</li>'; }).join('');
+    Swal.fire({
+        title: 'กรอกข้อมูลไม่ครบ',
+        html: '<div class="text-start"><div class="mb-2 fw-bold text-danger">กรุณากรอก/เลือกให้ครบ:</div>'
+            + '<ul class="mb-0 ps-3 text-danger">' + items + '</ul></div>',
+        icon: 'warning',
+        confirmButtonText: 'ตกลง'
+    });
+
+    if (firstEl && firstEl.length) {
+        var node = firstEl[0];
+        if (node.scrollIntoView) { node.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        setTimeout(function () { try { firstEl.trigger('focus'); } catch (e) {} }, 200);
+    }
+    return false;
+}
+
+function VrEl(r) { return (typeof jQuery !== 'undefined' && r.sel instanceof jQuery) ? r.sel : $(r.sel); }
+
+function VrIsEmpty(r) {
+    var type = r.type || 'text';
+    if (type === 'radio') {
+        var name = r.name || VrEl(r).attr('name');
+        return $('input[name="' + name + '"]:checked').length === 0;
+    }
+    if (type === 'file') {
+        var el = VrEl(r)[0];
+        return !el || !el.files || el.files.length === 0;
+    }
+    if (type === 'tinymce') {
+        var id = r.editorId || VrEl(r).attr('id');
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get(id) : null;
+        var txt = ed ? ed.getContent({ format: 'text' }) : (VrEl(r).val() || '');
+        return String(txt).replace(/ /g, ' ').trim() === '';
+    }
+    var v = VrEl(r).val();
+    if (Array.isArray(v)) { return v.length === 0; }
+    return String(v == null ? '' : v).trim() === '';
+}
+
+// หา element ที่ผู้ใช้เห็นจริง (สำหรับใส่ขอบแดง/วางข้อความ/เลื่อนไป)
+function VrWidget(r) {
+    var type = r.type || 'text';
+    var $el = VrEl(r);
+    if (type === 'select2')  { var c = $el.next('.select2-container'); if (c.length) return c; }
+    if (type === 'tomselect'){ var w = $el.next('.ts-wrapper');       if (w.length) return w; }
+    return $el;
+}
+
+function VrFeedbackAfter($anchor, r) {
+    if (!r.label || $anchor.next('.vr-feedback').length) { return; }
+    $('<div class="vr-feedback text-danger small mt-1">' + EscapeHTML('กรุณากรอก/เลือก' + r.label) + '</div>').insertAfter($anchor);
+}
+
+function VrMark(r) {
+    var type = r.type || 'text';
+    var $el = VrEl(r);
+    if (type === 'tinymce') {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get(r.editorId || $el.attr('id')) : null;
+        if (ed && ed.getContainer()) { var $c = $(ed.getContainer()); $c.addClass('is-invalid-widget'); VrFeedbackAfter($c, r); }
+        return;
+    }
+    if (type === 'radio') {
+        var name = r.name || $el.attr('name');
+        var $grp = $('input[name="' + name + '"]').first().closest('.col-md-4, .col-md-3, .col, .mb-3, .form-group');
+        $grp.addClass('is-invalid-group'); VrFeedbackAfter($grp, r);
+        return;
+    }
+    $el.addClass('is-invalid');
+    VrFeedbackAfter(VrWidget(r), r);
+}
+
+function VrClear(r) {
+    var type = r.type || 'text';
+    var $el = VrEl(r);
+    if (type === 'tinymce') {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get(r.editorId || $el.attr('id')) : null;
+        if (ed && ed.getContainer()) {
+            var $c = $(ed.getContainer());
+            $c.removeClass('is-invalid-widget'); $c.next('.vr-feedback').remove();
+            ed.on('input keyup change', function () { $c.removeClass('is-invalid-widget'); $c.next('.vr-feedback').remove(); });
+        }
+        return;
+    }
+    if (type === 'radio') {
+        var name = r.name || $el.attr('name');
+        var $inputs = $('input[name="' + name + '"]');
+        var $grp = $inputs.first().closest('.col-md-4, .col-md-3, .col, .mb-3, .form-group');
+        $grp.removeClass('is-invalid-group'); $grp.next('.vr-feedback').remove();
+        $inputs.off('change.vr').on('change.vr', function () { $grp.removeClass('is-invalid-group'); $grp.next('.vr-feedback').remove(); });
+        return;
+    }
+    $el.removeClass('is-invalid');
+    VrWidget(r).next('.vr-feedback').remove();
+    var textLike = (type === 'text' || type === 'number' || !r.type);
+    var ev = textLike ? 'input.vr change.vr' : 'change.vr';
+    $el.off('input.vr change.vr').on(ev, function () { $el.removeClass('is-invalid'); VrWidget(r).next('.vr-feedback').remove(); });
+}
+
+function VrFocusEl(r) {
+    var type = r.type || 'text';
+    var $el = VrEl(r);
+    if (type === 'tinymce') {
+        var ed = (typeof tinymce !== 'undefined') ? tinymce.get(r.editorId || $el.attr('id')) : null;
+        if (ed && ed.getContainer()) { return $(ed.getContainer()); }
+    }
+    if (type === 'radio') { return $('input[name="' + (r.name || $el.attr('name')) + '"]').first(); }
+    return VrWidget(r);
+}

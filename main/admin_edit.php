@@ -134,6 +134,12 @@
     $(document).on('submit', '#FormEditAdmin', function (e) {
         e.preventDefault();
 
+        // ===== ตรวจช่องบังคับให้ครบ =====
+        if (!ValidateRequired([
+            { sel: '#admin_name', label: 'ชื่อ-นามสกุล' },
+            { sel: '#user_email', label: 'อีเมล' }
+        ])) { return; }
+
         var pwd  = $('[name="user_password"]').val();
         var pwd2 = $('[name="user_password_confirm"]').val();
         if (pwd !== pwd2) {
