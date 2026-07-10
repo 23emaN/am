@@ -461,26 +461,6 @@
         });
     }
 
-    // poll สถานะ transcode ของ Vimeo จนเล่นได้ (is_playable) หรือครบเวลา -> onReady(true=พร้อม / false=หมดเวลา)
-    function PollVideoStatus(lessonId, onReady) {
-        var startTs = Date.now();
-        var MAX_MS = 3 * 60 * 1000;   // สูงสุด 3 นาที กันค้างเมื่อไฟล์ใหญ่มาก
-        (function tick() {
-            $.ajax({
-                type: "POST", url: "core.php",
-                data: { request_state: "lesson", request_function: "get_video_status", lesson_id: lessonId },
-                dataType: "json"
-            }).done(function (r) {
-                if (r && r.result == 1 && r.data && r.data.is_playable) { onReady(true); return; }
-                if (Date.now() - startTs > MAX_MS) { onReady(false); return; }
-                setTimeout(tick, 4000);
-            }).fail(function () {
-                if (Date.now() - startTs > MAX_MS) { onReady(false); return; }
-                setTimeout(tick, 4000);
-            });
-        })();
-    }
-
     // อัปโหลดไฟล์วิดีโอขึ้น Vimeo สำหรับ lessonId ที่ระบุ -> เรียก onDone(ok) เมื่อจบ (ใช้ได้ทั้งเพิ่ม/จัดการ)
     function RunVimeoUpload(lessonId, file, onDone) {
         if (typeof tus === "undefined") {
@@ -535,18 +515,11 @@
                         dataType: "json"
                     }).done(function (fin) {
                         if (fin.result != 1) { Swal.close(); ToastResult(fin); if (onDone) { onDone(false); } return; }
-                        // 4) รอ Vimeo ประมวลผล (encoding) จนเล่นได้ ค่อยถือว่าเสร็จ — กันฝัง iframe แล้ว error
-                        $("#upPhase").text("Vimeo กำลังประมวลผลวิดีโอ… (อาจใช้เวลาสักครู่)");
-                        $("#upBar").css("width", "100%").text("ประมวลผล…");
-                        PollVideoStatus(lessonId, function (ready) {
-                            Swal.close();
-                            if (ready) {
-                                ToastResult(fin);
-                            } else {
-                                Swal.fire({ title: "อัปโหลดสำเร็จ", html: '<span class="text-secondary">Vimeo กำลังประมวลผลวิดีโออยู่ เมื่อประมวลผลเสร็จวิดีโอจะเล่นได้เอง</span>', icon: "success", timer: 3500, showConfirmButton: false });
-                            }
-                            if (onDone) { onDone(true); }
-                        });
+                        // อัปโหลด + บันทึกลิงก์เสร็จแล้ว -> ปิด modal ทันที ไม่บล็อกรอ Vimeo transcode
+                        // (Vimeo ประมวลผลต่อเบื้องหลัง; ลิงก์ public ไม่มี hash แล้ว วิดีโอจะเล่นได้เองเมื่อ transcode เสร็จ)
+                        Swal.close();
+                        Swal.fire({ title: "อัปโหลดสำเร็จ", html: '<span class="text-secondary">Vimeo กำลังประมวลผลวิดีโอเบื้องหลัง วิดีโอจะเล่นได้เองเมื่อประมวลผลเสร็จ (สักครู่)</span>', icon: "success", timer: 3000, showConfirmButton: false });
+                        if (onDone) { onDone(true); }
                     }).fail(function (j, e) { Swal.close(); ShowErrorAjax(j, e); if (onDone) { onDone(false); } });
                 }
             });
