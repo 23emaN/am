@@ -335,6 +335,33 @@
         $('#videoDropZone').removeClass('d-none');
     }
 
+    // สร้าง iframe วิดีโอ Vimeo ตามอัตราส่วนจริง (กันแถบดำเมื่อวิดีโอไม่ใช่ 16:9)
+    // แนวตั้ง -> อิงความสูง (กว้างหด), แนวนอน -> เต็มกว้าง; จำกัดสูงสุด 60vh
+    function VideoFrameHTML(url, w, h) {
+        w = parseInt(w, 10) || 16;
+        h = parseInt(h, 10) || 9;
+        var portrait = h > w;
+        return '<div class="rounded-3 overflow-hidden" style="aspect-ratio:' + w + '/' + h + ';max-width:100%;max-height:60vh;'
+            + (portrait ? 'height:60vh;width:auto;' : 'width:100%;height:auto;')
+            + 'margin:0 auto;background:#000;">'
+            + '<iframe src="' + EscapeHTML(url) + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen '
+            + 'style="width:100%;height:100%;border:0;display:block;"></iframe></div>';
+    }
+
+    // ฝังวิดีโอบทเรียน: โชว์ 16:9 ไปก่อน แล้วปรับอัตราส่วนตามขนาดจริงจาก Vimeo เมื่อได้ค่า
+    function EmbedLessonVideo(url) {
+        ShowVideo(VideoFrameHTML(url, 16, 9), false);
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
+            dataType: "json"
+        }).done(function (r) {
+            if (r && r.result == 1 && r.data && r.data.width && r.data.height) {
+                ShowVideo(VideoFrameHTML(url, r.data.width, r.data.height), false);
+            }
+        });
+    }
+
     // ===== โหลดข้อมูลบทเรียน (เติมฟอร์มตั้งค่า + วีดีโอ) =====
     function LoadLesson() {
         $.ajax({
@@ -356,7 +383,7 @@
                 $('#formLesson [name="lesson_overview"]').val(L.lesson_overview || '');
                 $('#formVideo [name="lesson_video"]').val(L.lesson_video || '');
                 if (L.lesson_video) {
-                    ShowVideo('<div class="ratio ratio-16x9 rounded-3 overflow-hidden"><iframe src="' + EscapeHTML(L.lesson_video) + '" allowfullscreen></iframe></div>', false);
+                    EmbedLessonVideo(L.lesson_video);
                 } else {
                     RemoveVideo();
                 }

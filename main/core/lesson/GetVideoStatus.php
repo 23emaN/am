@@ -38,13 +38,15 @@ $token = trim($_ENV['VIMEO_ACCESS_TOKEN'] ?? '');
 
 try {
     $lib  = new Vimeo($_ENV['VIMEO_CLIENT_ID'] ?? '', $_ENV['VIMEO_CLIENT_SECRET'] ?? '', $token);
-    $info = $lib->request('/videos/' . $video_id, ['fields' => 'status,is_playable,transcode.status'], 'GET');
+    $info = $lib->request('/videos/' . $video_id, ['fields' => 'status,is_playable,transcode.status,width,height'], 'GET');
     $b = $info['body'] ?? [];
 
     Response::json(1, 'Success', [
         'status'      => $b['status'] ?? 'unknown',
         'is_playable' => !empty($b['is_playable']),
         'transcode'   => $b['transcode']['status'] ?? 'unknown',
+        'width'       => (int) ($b['width'] ?? 0),   // ขนาดจริงของวิดีโอ -> ใช้ตั้งอัตราส่วนกรอบ (กันแถบดำ)
+        'height'      => (int) ($b['height'] ?? 0),
     ]);
 } catch (Exception $e) {
     error_log('GetVideoStatus Error: ' . $e->getMessage());
