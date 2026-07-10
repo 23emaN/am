@@ -15,6 +15,9 @@ if (!$user_id) {
 
 $lesson_id = isset($_POST['lesson_id']) ? (int) $_POST['lesson_id'] : 0;
 $size      = isset($_POST['size']) ? (int) $_POST['size'] : 0;
+// ชื่อวิดีโอบน Vimeo = ชื่อบทเรียนที่ผู้ใช้พิมพ์ (ถ้าไม่ส่งมา fallback เป็น lesson-{id})
+$lesson_name = isset($_POST['lesson_name']) ? trim((string) $_POST['lesson_name']) : '';
+$video_name  = $lesson_name !== '' ? $lesson_name : ('lesson-' . $lesson_id);
 if ($lesson_id <= 0) {
     Response::json(0, 'ไม่พบรหัสบทเรียน', null);
 }
@@ -48,7 +51,7 @@ try {
     // สร้างวิดีโอแบบ tus (ยังไม่ส่งไฟล์) -> Vimeo คืน upload_link สำหรับ PATCH ไฟล์เข้าไป
     $res = $lib->request('/me/videos', [
         'upload'  => ['approach' => 'tus', 'size' => $size],
-        'name'    => 'lesson-' . $lesson_id,
+        'name'    => $video_name,
         'privacy' => ['embed' => 'public', 'view' => 'anybody'],
     ], 'POST');
 

@@ -143,7 +143,7 @@
                                     <button type="button" class="btn btn-primary w-100 mt-3 BtnSaveLesson" onclick="SubmitLesson()">
                                         <?php echo $is_add ? 'เพิ่มบทเรียน' : 'บันทึกการแก้ไข'; ?>
                                     </button>
-                                </div> 
+                                </div>              
                             </div>
                         </div>
 
@@ -503,7 +503,7 @@
         // 1) สร้างงานอัปโหลดบน Vimeo (ขอ upload_link)
         $.ajax({
             type: "POST", url: "core.php",
-            data: { request_state: "lesson", request_function: "create_upload", lesson_id: lessonId, size: file.size },
+            data: { request_state: "lesson", request_function: "create_upload", lesson_id: lessonId, size: file.size, lesson_name: ($('#formLesson [name="lesson_name"]').val() || '').trim() },
             dataType: "json"
         }).done(function (res) {
             if (res.result != 1) { Swal.close(); ToastResult(res); if (onDone) { onDone(false); } return; }
