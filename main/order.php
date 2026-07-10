@@ -37,15 +37,6 @@
                             </select>
                         </div>
                         <div class="col-md-6 col-lg">
-                            <label for="f_payment" class="form-label fw-medium">สถานะการชำระเงิน</label>
-                            <select class="form-select" id="f_payment">
-                                <option value="">ทั้งหมด</option>
-                                <option value="1">ชำระแล้ว</option>
-                                <option value="0">ยังไม่ได้ชำระ</option>
-                                <option value="2">ยกเลิก</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 col-lg">
                             <label for="f_date" class="form-label fw-medium">วันที่สั่งซื้อ</label>
                             <input type="text" class="form-control" id="f_date" placeholder="วัน/เดือน/ปี" autocomplete="off">
                         </div>
@@ -124,7 +115,6 @@
                 f_order: $("#f_order").val(),
                 f_customer: $("#f_customer").val(),
                 f_status: $("#f_status").val(),
-                f_payment: $("#f_payment").val(),
                 f_date: $("#f_date").val(),
                 page: page
             },

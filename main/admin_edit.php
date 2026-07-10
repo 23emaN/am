@@ -15,7 +15,8 @@
 
         <div class="px-2">
             <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
-                <div class="card-header bg-white p-4">
+                <div class="card-header bg-white d-flex align-items-center gap-2 p-4">
+                    <a href="admin" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
                     <h2 class="mb-0">รายละเอียดผู้ดูแลระบบ</h2>
                 </div>
 

@@ -159,7 +159,6 @@
                 new TomSelect(el, { create: false, allowEmptyOption: true });
             });
         }
-        $('#f_search').on('keypress', function (e) { if (e.which === 13) { SearchData(); } });
         GetData(1);
     });
 
@@ -179,7 +178,6 @@
                 f_member: $("#f_member").val(),
                 f_status: $("#f_status").val(),
                 f_approve: $("#f_approve").val(),
-                search: $("#f_search").val(),
                 page: page
             },
             dataType: "json",

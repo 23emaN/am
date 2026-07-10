@@ -15,7 +15,10 @@
         <div class="px-2">
             <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
-                    <h2 class="mb-0">รายละเอียดคูปองส่วนลด</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="coupon" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
+                        <h2 class="mb-0">รายละเอียดคูปองส่วนลด</h2>
+                    </div>
                     <button type="button" class="btn btn-danger" onclick="DeleteCoupon('<?php echo $coupon_id; ?>');">ลบคูปอง</button>
                 </div>
 

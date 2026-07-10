@@ -86,7 +86,6 @@
                             </div>
                             <div class="od-row"><div class="od-label">หมายเลขคำสั่งซื้อ</div><div class="od-value" id="OrdRef">-</div></div>
                             <div class="od-row"><div class="od-label">ชื่อลูกค้า</div><div class="od-value" id="OrdCustomer">-</div></div>
-                            <div class="od-row"><div class="od-label">หมายเหตุ</div><div class="od-value text-muted" id="OrdNote">ไม่มีข้อมูล</div></div>
                             <div class="od-row"><div class="od-label">หมายเหตุภายใน</div><div class="od-value" id="OrdNoteInternal"><span class="text-muted">ไม่มีข้อมูล</span></div></div>
                         </div>
                     </div>

@@ -16,7 +16,10 @@
         <div class="px-2">
             <div class="card app-card form-card bg-white border-0 rounded-3 mb-4">
                 <div class="card-body p-4">
-                    <h4 class="mb-4">แก้ไขใบกำกับภาษีอิเล็กทรอนิกส์ (E-TAX INVOICE)</h4>
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <a href="etax_view.php?id=<?php echo $order_id; ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1"><span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_back</span> กลับ</a>
+                        <h4 class="mb-0">แก้ไขใบกำกับภาษีอิเล็กทรอนิกส์ (E-TAX INVOICE)</h4>
+                    </div>
 
                     <h6 class="mb-3">ข้อมูลในใบกำกับภาษี</h6>
                     <form id="formEtax">

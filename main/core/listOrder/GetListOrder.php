@@ -25,8 +25,7 @@ $offset   = ($page - 1) * $per_page;
 // ฟิลเตอร์จากฟอร์มด้านบน (ส่งมากับ ajax data)
 $f_order    = trim((string) ($_POST['f_order'] ?? ''));     // หมายเลขคำสั่งซื้อ (transaction_ref)
 $f_customer = trim((string) ($_POST['f_customer'] ?? ''));  // ชื่อลูกค้า
-$f_status   = trim((string) ($_POST['f_status'] ?? ''));    // สถานะ: 0/1/2
-$f_payment  = trim((string) ($_POST['f_payment'] ?? ''));   // สถานะชำระเงิน: 0/1/2
+$f_status   = trim((string) ($_POST['f_status'] ?? ''));    // สถานะ/การชำระเงิน: 0/1/2 (tbl_orders มีคอลัมน์ payment_status เดียว)
 $f_date     = trim((string) ($_POST['f_date'] ?? ''));      // วันที่สั่งซื้อ (Y-m-d หรือ d/m/Y)
 
 $joins = "FROM tbl_orders o
@@ -46,10 +45,6 @@ if ($f_customer !== '') {
 if ($f_status !== '' && in_array($f_status, ['0', '1', '2'], true)) {
     $where[] = "o.payment_status = :f_status";
     $params[':f_status'] = $f_status;
-}
-if ($f_payment !== '' && in_array($f_payment, ['0', '1', '2'], true)) {
-    $where[] = "o.payment_status = :f_payment";
-    $params[':f_payment'] = $f_payment;
 }
 if ($f_date !== '') {
     // รองรับ d/m/Y -> Y-m-d

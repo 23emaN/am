@@ -45,7 +45,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                                 <?php if ($act === '1'): ?>
                                     <span class="badge bg-success">ผ่านแล้ว</span>
                                 <?php elseif ($act === '2'): ?>
-                                    <span class="badge bg-danger">ยกเลิกการยืนยัน</span>
+                                    <span class="badge bg-danger">ไม่อนุมัติ</span>
                                 <?php else: ?>
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>
