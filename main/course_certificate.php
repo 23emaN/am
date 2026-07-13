@@ -212,9 +212,22 @@
         });
     }
 
-    // ดูใบรับรอง -> เปิดหน้าพรีวิว PDF ในแท็บใหม่
+    // ดูใบรับรอง -> เลือกประเภทใบ (ผู้ทำบัญชี/ผู้สอบบัญชี) แล้วเปิดหน้าพรีวิว PDF ในแท็บใหม่
+    // ประเภทที่เลือกจะเปลี่ยนคำในใบรับรอง (เลขทะเบียน/รหัสหลักสูตร/ข้อความ "สำหรับผู้ทำบัญชี/ผู้สอบบัญชี")
     function DownloadCert(id) {
-        window.open("pdf_preview.php?type=certificate&id=" + id, "_blank");
+        Swal.fire({
+            title: "เลือกประเภทใบรับรอง",
+            input: "select",
+            inputOptions: { cpd: "ผู้ทำบัญชี", cpa: "ผู้สอบบัญชี" },
+            inputValue: "cpd",
+            showCancelButton: true,
+            confirmButtonText: "ออกใบรับรอง",
+            cancelButtonText: "ยกเลิก",
+            inputValidator: function (v) { if (!v) { return "กรุณาเลือกประเภทใบรับรอง"; } }
+        }).then(function (res) {
+            if (!res.isConfirmed) { return; }
+            window.open("pdf_preview.php?type=certificate&id=" + id + "&cert_type=" + res.value, "_blank");
+        });
     }
 
     // ดำเนินการ: ดึงข้อมูลแล้วเลือกโมดัลตามสถานะอนุมัติ
