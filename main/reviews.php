@@ -4,17 +4,6 @@
 <style>
     /* สีดาวคะแนน (เฉพาะหน้านี้) */
     .review-stars .material-symbols-outlined { color: #f5a623; }
-    /* การ์ดภาพรวมคะแนน: ขนาดพอดี ไม่ยืดเต็มความกว้าง + จัดกึ่งกลาง */
-    #review_stats .review-stats-inner { max-width: 640px; margin: 0 auto; }
-    .review-avg-score { font-size: 2.75rem; font-weight: 700; line-height: 1; }
-    .review-avg-stars .material-symbols-outlined { font-size: 22px; color: #f5a623; }
-    .review-bar-row { display: flex; align-items: center; gap: .6rem; font-size: .875rem; }
-    .review-bar-row .review-bar-label { width: 46px; flex-shrink: 0; color: var(--text-muted); display: flex; align-items: center; gap: 2px; }
-    .review-bar-row .review-bar-label .material-symbols-outlined { font-size: 15px; color: #f5a623; }
-    /* display:block จำเป็น เพราะเป็น <span> (inline) โดยดีฟอลต์ -> width/height ไม่มีผลถ้าไม่ตั้ง display */
-    .review-bar-track { display: block; flex: 1 1 auto; height: 8px; border-radius: 999px; background: #eef0f3; overflow: hidden; }
-    .review-bar-fill { display: block; height: 100%; background: #f5a623; border-radius: 999px; }
-    .review-bar-count { width: 84px; flex-shrink: 0; text-align: right; color: var(--text-muted); }
 </style>
 
 <div class="container-fluid">
@@ -30,9 +19,6 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <!-- ภาพรวมคะแนนรีวิว (เฉลี่ย + สัดส่วนจำนวนดาว ไม่ขึ้นกับตัวกรองค้นหา) -->
-                    <div id="review_stats" class="mb-4"></div>
-
                     <div class="row g-3 align-items-end mb-4">
                         <div class="col-md-5">
                             <label for="f_search" class="form-label fw-medium">ค้นหา</label>
@@ -85,43 +71,6 @@
 
     function SearchData() { GetData(1); }
 
-    // การ์ดภาพรวมคะแนน: คะแนนเฉลี่ย + ดาว + สัดส่วนแต่ละระดับดาว (คำนวณจากทุกรีวิว ไม่ขึ้นกับตัวกรอง)
-    function RenderStats(stats) {
-        var box = $("#review_stats");
-        if (!stats || !stats.total) {
-            box.html('<div class="text-secondary small">ยังไม่มีรีวิวจากลูกค้า</div>');
-            return;
-        }
-
-        var nf = function (v) { return (typeof NumberFormat === "function") ? NumberFormat(v) : v; };
-        var rounded = Math.round(stats.average);
-        var starsHtml = '<div class="review-avg-stars">';
-        for (var i = 1; i <= 5; i++) {
-            starsHtml += '<span class="material-symbols-outlined" aria-hidden="true">' + (i <= rounded ? 'star' : 'star_outline') + '</span>';
-        }
-        starsHtml += '</div>';
-
-        var barsHtml = '';
-        stats.breakdown.forEach(function (b) {
-            barsHtml += '<div class="review-bar-row mb-1">' +
-                '<span class="review-bar-label">' + b.star + ' <span class="material-symbols-outlined" aria-hidden="true">star</span></span>' +
-                '<span class="review-bar-track"><span class="review-bar-fill" style="width:' + b.percent + '%"></span></span>' +
-                '<span class="review-bar-count">' + nf(b.count) + ' (' + b.percent + '%)</span>' +
-                '</div>';
-        });
-
-        box.html(
-            '<div class="review-stats-inner d-flex flex-wrap justify-content-center gap-4 align-items-center">' +
-                '<div class="text-center flex-shrink-0" style="min-width:120px;">' +
-                    '<div class="review-avg-score">' + stats.average.toFixed(1) + '</div>' +
-                    starsHtml +
-                    '<div class="text-secondary small mt-1">จาก ' + nf(stats.total) + ' รีวิว</div>' +
-                '</div>' +
-                '<div class="flex-grow-1" style="min-width:260px;">' + barsHtml + '</div>' +
-            '</div>'
-        );
-    }
-
     // สเต็ป 1: ดึงข้อมูล (JSON) จาก handler
     function GetData(page) {
         page = page || 1;
@@ -140,7 +89,6 @@
             dataType: "json",
             success: function (r) {
                 if (r.result == 1) {
-                    RenderStats(r.data.stats);
                     view_data(r.data);
                 } else {
                     $("#result_box").html('');

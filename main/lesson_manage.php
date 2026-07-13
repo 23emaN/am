@@ -354,7 +354,8 @@
                 type: "POST", url: "core.php",
                 data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
                 dataType: "json",
-                global: false,      // ไม่ trigger spinner กลางจอ (poll ถี่)
+                global: false,      // ไม่ trigger spinner กลางจอ (poll ถี่) — หมายเหตุ: global:false ทำให้ ajaxSend (แนบ token) ไม่ทำงาน จึงต้องแนบ Authorization เองด้านล่าง
+                headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") },
                 timeout: 15000      // กัน request ค้าง -> ให้ fail แล้ว retry แทนที่จะหยุด poll ค้าง
             }).done(function (r) {
                 var d = (r && r.result == 1) ? r.data : null;
