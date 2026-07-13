@@ -30,5 +30,11 @@
         }
     }
 
+    // web-cron: เช็ค/ส่งเมลแจ้งเตือนบัตรประชาชนหมดอายุ วันละครั้ง (เฉพาะ session ที่ใช้งานได้)
+    // เช็ค marker ก่อน ถ้าวันนี้รันแล้วจะจบเร็ว ไม่ต่อ DB; ไม่โยน error ออกมา (กันพัง keepalive)
+    if ($result === 1) {
+        \App\Utility\ExpiredIdCardNotifier::runDailyIfDue($projectRoot . '/upload');
+    }
+
     Response::json($result, $result === 1 ? 'OK' : 'Session expired', ['result' => $result]);
 ?>
