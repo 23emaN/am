@@ -21,6 +21,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                 <thead>
                     <tr>
                         <th scope="col" class="text-center" style="width: 60px;">#</th>
+
                         <th scope="col">ชื่อ</th>
                         <th scope="col">อีเมล</th>
                         <th scope="col">เบอร์โทรศัพท์</th>
@@ -29,6 +30,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         <th scope="col">เลขที่ผู้สอบบัญชี</th>
                         <th scope="col" class="text-center">สถานะการยืนยัน</th>
                         <th scope="col" class="text-center">สถานะการใช้งาน</th>
+
                         <th scope="col" class="text-center" style="width: 110px;">จัดการ</th>
                     </tr>
                 </thead>
@@ -51,7 +53,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                     ?>
                         <tr>
                             <td class="text-center"><?php echo $n++; ?></td>
-                            <td>
+                            <td class="text-nowrap" style="min-width: 200px;">
                                 <div class="d-flex align-items-center">
                                     <span class="avatar-initial" aria-hidden="true"><?php echo $esc($initial); ?></span>
                                     <div class="ms-2">
@@ -65,11 +67,11 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-secondary"><?php echo $esc(($row['user_email'] ?? '') !== '' ? $row['user_email'] : '-'); ?></td>
-                            <td><?php echo $esc(($row['user_phone'] ?? '') !== '' ? $row['user_phone'] : '-'); ?></td>
-                            <td><?php echo $esc(($row['user_citizen_id'] ?? '') !== '' ? $row['user_citizen_id'] : '-'); ?></td>
-                            <td><?php echo $esc($cpd !== '' ? $cpd : '-'); ?></td>
-                            <td><?php echo $esc($cpa !== '' ? $cpa : '-'); ?></td>
+                            <td class="text-secondary text-nowrap"><?php echo $esc(($row['user_email'] ?? '') !== '' ? $row['user_email'] : '-'); ?></td>
+                            <td class="text-nowrap"><?php echo $esc(($row['user_phone'] ?? '') !== '' ? $row['user_phone'] : '-'); ?></td>
+                            <td class="text-nowrap"><?php echo $esc(($row['user_citizen_id'] ?? '') !== '' ? $row['user_citizen_id'] : '-'); ?></td>
+                            <td class="text-nowrap"><?php echo $esc($cpd !== '' ? $cpd : '-'); ?></td>
+                            <td class="text-nowrap"><?php echo $esc($cpa !== '' ? $cpa : '-'); ?></td>
                             <td class="text-center">
                                 <?php
                                     $iv = (string) ($row['identity_verified'] ?? '0');

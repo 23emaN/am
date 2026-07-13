@@ -5,6 +5,8 @@
     // query: ?type=certificate|etax & id=<id>
     $type = isset($_GET['type']) ? preg_replace('/[^a-z_]/', '', strtolower($_GET['type'])) : '';
     $id   = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+    // ประเภทใบรับรอง (เฉพาะ certificate): cpd=ผู้ทำบัญชี, cpa=ผู้สอบบัญชี
+    $cert_type = isset($_GET['cert_type']) ? preg_replace('/[^a-z]/', '', strtolower($_GET['cert_type'])) : '';
 
     // map ชนิดเอกสาร -> route + ชื่อพารามิเตอร์ id
     $map = [
@@ -37,6 +39,7 @@
     <script>
         var CFG = <?php echo $cfg ? json_encode($cfg, JSON_UNESCAPED_UNICODE) : 'null'; ?>;
         var DOC_ID = <?php echo $id; ?>;
+        var CERT_TYPE = <?php echo json_encode($cert_type, JSON_UNESCAPED_UNICODE); ?>;
 
         function showError(msg) {
             document.getElementById("pvMsg").innerHTML = '<div style="color:#ff8a80;">' + (msg || "เกิดข้อผิดพลาด") + '</div>';
@@ -59,6 +62,7 @@
             body.append(CFG.idkey, DOC_ID);
             body.append("mode", "base64");
             body.append("access_token", token);
+            if (CERT_TYPE) { body.append("cert_type", CERT_TYPE); }
 
             fetch("core.php", { method: "POST", headers: { "Authorization": "Bearer " + token }, body: body })
                 .then(function (res) { return res.json(); })
