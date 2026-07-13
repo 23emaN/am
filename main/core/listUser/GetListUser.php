@@ -53,7 +53,8 @@ try {
                     u.user_cpd_no,
                     u.user_cpa_no,
                     u.user_status,
-                    u.identity_verified
+                    u.identity_verified,
+                    u.id_card_expiry_date
                 FROM tbl_user u
                 $where_sql
                 ORDER BY u.user_id DESC
@@ -80,6 +81,7 @@ try {
             "user_cpa_no"     => $row["user_cpa_no"] ?? null,
             "user_status"     => $row["user_status"] ?? null,
             "identity_verified" => (string) ($row["identity_verified"] ?? '0'),  // 0=ยังไม่ยืนยัน 1=รอตรวจสอบ 2=ยืนยันแล้ว
+            "id_card_expiry_date" => $row["id_card_expiry_date"] ?? null,        // วันหมดอายุบัตรประชาชน (Y-m-d)
         ];
     }
 
