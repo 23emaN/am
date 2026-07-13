@@ -37,13 +37,31 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         $cpd = trim((string) ($row['user_cpd_no'] ?? ''));
                         $cpa = trim((string) ($row['user_cpa_no'] ?? ''));
                         $initial = mb_substr($full_name !== '' ? $full_name : '?', 0, 1, 'UTF-8');
+
+                        // เช็คว่าบัตรประชาชนหมดอายุหรือยัง (id_card_expiry_date เก็บเป็น Y-m-d)
+                        $id_expiry = trim((string) ($row['id_card_expiry_date'] ?? ''));
+                        $id_expired = false;
+                        if ($id_expiry !== '' && $id_expiry !== '0000-00-00') {
+                            $exp_ts = strtotime($id_expiry);
+                            if ($exp_ts !== false) {
+                                $id_expired = $exp_ts < strtotime(date('Y-m-d'));
+                            }
+                        }
                     ?>
                         <tr>
                             <td class="text-center"><?php echo $n++; ?></td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <span class="avatar-initial" aria-hidden="true"><?php echo $esc($initial); ?></span>
-                                    <span class="ms-2 fw-medium"><?php echo $esc($full_name !== '' ? $full_name : '-'); ?></span>
+                                    <div class="ms-2">
+                                        <span class="fw-medium"><?php echo $esc($full_name !== '' ? $full_name : '-'); ?></span>
+                                        <?php if ($id_expired): ?>
+                                            <div class="text-danger small fw-medium">
+                                                <span class="material-symbols-outlined align-middle" style="font-size: 1rem;" aria-hidden="true">warning</span>
+                                                บัตรประชาชนหมดอายุ
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </td>
                             <td class="text-secondary"><?php echo $esc(($row['user_email'] ?? '') !== '' ? $row['user_email'] : '-'); ?></td>
