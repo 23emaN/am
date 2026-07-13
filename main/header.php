@@ -16,7 +16,7 @@
 
 
 
-        <link rel="icon" type="image/png" href="../template/assets/images/favicon.png">
+        <link rel="icon" type="image/png" href="../assets/images/am-group-logo.png">
 
         <link rel="stylesheet" href="../template/assets/css/font.css">
 

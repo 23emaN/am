@@ -67,7 +67,7 @@
 
     <div class="logo position-relative">
         <a href="home" class="d-block text-decoration-none position-relative">
-            <img src="../template/assets/images/logo-icon.png" alt="logo-icon">
+            <img src="../assets/images/am-group-logo.png" alt="AM GROUP" style="height:40px; width:auto;">
             <span class="logo-text fw-bold text-dark">CPDTH</span>
         </a>
     </div>
