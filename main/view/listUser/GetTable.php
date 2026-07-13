@@ -21,15 +21,14 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                 <thead>
                     <tr>
                         <th scope="col" class="text-center" style="width: 60px;">#</th>
-
-                        <th scope="col">ชื่อ</th>
-                        <th scope="col">อีเมล</th>
-                        <th scope="col">เบอร์โทรศัพท์</th>
-                        <th scope="col">เลขบัตรประชาชน</th>
-                        <th scope="col">เลขที่ผู้ทำบัญชี</th>
-                        <th scope="col">เลขที่ผู้สอบบัญชี</th>
-                        <th scope="col" class="text-center">สถานะการยืนยัน</th>
-                        <th scope="col" class="text-center">สถานะการใช้งาน</th>
+                        <th scope="col" style="min-width: 200px;">ชื่อ</th>
+                        <th scope="col" class="text-nowrap">อีเมล</th>
+                        <th scope="col" class="text-nowrap">เบอร์โทรศัพท์</th>
+                        <th scope="col" class="text-nowrap">เลขบัตรประชาชน</th>
+                        <th scope="col" class="text-nowrap">เลขที่ผู้ทำบัญชี</th>
+                        <th scope="col" class="text-nowrap">เลขที่ผู้สอบบัญชี</th>
+                        <th scope="col" class="text-center text-nowrap">สถานะการยืนยัน</th>
+                        <th scope="col" class="text-center text-nowrap">สถานะการใช้งาน</th>
 
                         <th scope="col" class="text-center" style="width: 110px;">จัดการ</th>
                     </tr>

@@ -39,7 +39,18 @@ $token = trim($_ENV['VIMEO_ACCESS_TOKEN'] ?? '');
 try {
     $lib  = new Vimeo($_ENV['VIMEO_CLIENT_ID'] ?? '', $_ENV['VIMEO_CLIENT_SECRET'] ?? '', $token);
     $info = $lib->request('/videos/' . $video_id, ['fields' => 'status,is_playable,transcode.status,width,height'], 'GET');
+    $http = (int) ($info['status'] ?? 0);
     $b = $info['body'] ?? [];
+
+    // วิดีโอถูกลบ/ไม่พบบน Vimeo (404) -> บอก frontend ให้หยุด poll แล้วโชว์ว่า "ไม่พบวิดีโอ"
+    // (ไม่งั้น poll จะเข้าใจว่ายัง transcode ไม่เสร็จ แล้ววนไม่จบ)
+    if ($http === 404) {
+        Response::json(1, 'ไม่พบวิดีโอ (อาจถูกลบจาก Vimeo)', [
+            'status'      => 'not_found',
+            'is_playable' => false,
+            'missing'     => true,
+        ]);
+    }
 
     Response::json(1, 'Success', [
         'status'      => $b['status'] ?? 'unknown',

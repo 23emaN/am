@@ -45,11 +45,11 @@ if (!$pdo) {
     exit(1);
 }
 
-/* ---------- รันผ่านตรรกะกลาง ---------- */
+/* ---------- รันผ่าน Logic กลาง ---------- */
 try {
     $r = ExpiredIdCardNotifier::run($pdo, $do_send, $limit);
 } catch (\Throwable $e) {
-    fwrite(STDERR, 'Run failed (คอลัมน์ id_card_expiry_notified ยังไม่ถูกสร้าง? รัน migration ก่อน): ' . $e->getMessage() . "\n");
+    fwrite(STDERR, 'Run failed (คอลัมน์ id_card_expiry_notified ยังไม่ถูกสร้าง? ): ' . $e->getMessage() . "\n");
     exit(1);
 }
 

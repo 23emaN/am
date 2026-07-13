@@ -496,6 +496,41 @@
             });
 
             render();
+
+            // API ให้ช่องอื่นดึง/เซ็ต segments (ใช้ตอนกดปุ่มคัดลอก)
+            root._cb = {
+                getSegs: function () {
+                    syncFromDom();
+                    return segs.map(function (s) { return { type: s.type, value: s.value }; });
+                },
+                setSegs: function (newSegs) {
+                    // ก็อป segments มา แต่ "ไตรมาส" ใช้ค่าของช่องปลายทางเอง (รันเป็น 02/03/04 อัตโนมัติ) ; ปีก็อปเหมือนเดิม
+                    segs = newSegs.map(function (s) {
+                        return { type: s.type, value: (s.type === 'quarter') ? quarter : s.value };
+                    });
+                    if (!segs.length || segs[segs.length - 1].type !== 'text') { segs.push({ type: 'text', value: '' }); }
+                    cbYear.checked    = segs.some(function (s) { return s.type === 'year'; });
+                    cbQuarter.checked = segs.some(function (s) { return s.type === 'quarter'; });
+                    render();
+                }
+            };
+
+            // ปุ่มคัดลอก: แสดงเฉพาะช่องไตรมาสแรก (data-quarter=01) -> เติมช่อง Q2-4 ตามช่องนี้
+            if (quarter === '01') {
+                const copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.className = 'btn btn-sm btn-outline-primary py-0 px-2 ms-2';
+                copyBtn.innerHTML = '<span class="material-symbols-outlined align-middle" style="font-size:15px;">content_copy</span> คัดลอก';
+                copyBtn.addEventListener('click', function () {
+                    const prefix = root.dataset.name.slice(0, -1);   // course_code_cpd_ / course_code_cpa_
+                    const srcSegs = root._cb.getSegs();
+                    [2, 3, 4].forEach(function (q) {
+                        const t = document.querySelector('.code-builder[data-name="' + prefix + q + '"]');
+                        if (t && t._cb) { t._cb.setSegs(srcSegs); }
+                    });
+                });
+                root.querySelector('.cb-toggles').appendChild(copyBtn);
+            }
         }
         document.querySelectorAll('.code-builder').forEach(initCodeBuilder);
 

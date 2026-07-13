@@ -34,8 +34,9 @@
     .vdz-icon { font-size: 48px; color: var(--brand-500); }
     .vdz-title { font-weight: 500; margin-top: 6px; }
     /* ===== พรีวิววิดีโอ (เต็มพื้นที่คอลัมน์ขวา) ===== */
-    #videoPreview .ratio { width: 100%; }
-    #videoPreview iframe, #videoPreview video { width: 100% !important; height: 100% !important; border: 0; background: #000; }
+    #videoPreview iframe { width: 100% !important; height: 100% !important; border: 0; background: #000; }
+    /* พรีวิว local <video>: ปรับขนาดตามอัตราส่วนจริง (กันช่องว่างเมื่อวิดีโอแนวตั้ง) สูงสุด 60vh + จัดกึ่งกลาง */
+    #videoPreview video { display: block; max-width: 100%; max-height: 60vh; margin: 0 auto; border: 0; background: #000; }
     /* ปุ่มลบวิดีโอ (X มุมขวาบนของวิดีโอ) */
     .video-preview-wrap { position: relative; }
     .video-remove-x {
@@ -307,7 +308,7 @@
         var f = files[0];
         if (_pickedVideoURL) { try { URL.revokeObjectURL(_pickedVideoURL); } catch (e) {} }
         _pickedVideoURL = URL.createObjectURL(f);
-        ShowVideo('<div class="ratio ratio-16x9 rounded-3 overflow-hidden"><video src="' + _pickedVideoURL + '" controls></video></div>', true);
+        ShowVideo('<div class="rounded-3 overflow-hidden" style="background:#000;"><video src="' + _pickedVideoURL + '" controls></video></div>', true);
     }
 
     // แสดงวิดีโอเต็มพื้นที่ + ปุ่มลบ (ซ่อนโซนลากวาง). isNew=true = ไฟล์ใหม่ที่ยังไม่อัป
@@ -354,10 +355,15 @@
                 type: "POST", url: "core.php",
                 data: { request_state: "lesson", request_function: "get_video_status", lesson_id: LESSON_ID },
                 dataType: "json",
-                global: false,      // ไม่ trigger spinner กลางจอ (poll ถี่)
+                global: false,      // ไม่ trigger spinner กลางจอ (poll ถี่) — หมายเหตุ: global:false ทำให้ ajaxSend (แนบ token) ไม่ทำงาน จึงต้องแนบ Authorization เองด้านล่าง
+                headers: { "Authorization": "Bearer " + (localStorage.getItem("bo_access_token") || "") },
                 timeout: 15000      // กัน request ค้าง -> ให้ fail แล้ว retry แทนที่จะหยุด poll ค้าง
             }).done(function (r) {
                 var d = (r && r.result == 1) ? r.data : null;
+                if (d && d.missing) {
+                    ShowVideo(VideoMissingHTML(), false);   // วิดีโอถูกลบ/ไม่พบบน Vimeo -> หยุด poll
+                    return;
+                }
                 if (d && (d.is_playable || d.status === 'available')) {
                     ShowVideo(VideoFrameHTML(url, d.width || 16, d.height || 9), false);   // พร้อมแล้ว -> ฝังจริง
                     return;
@@ -376,6 +382,15 @@
             + '<div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>'
             + '<div class="fw-semibold">Vimeo กำลังประมวลผลวิดีโอ…</div>'
             + '<div class="small mt-1">วิดีโอจะเล่นได้เองเมื่อประมวลผลเสร็จ (ไม่ต้องรีเฟรช)</div></div>';
+    }
+
+    // กล่องแสดงเมื่อวิดีโอถูกลบ/ไม่พบบน Vimeo (404) — หยุด poll แล้วให้อัปโหลดใหม่
+    function VideoMissingHTML() {
+        return '<div class="rounded-3 d-flex flex-column justify-content-center align-items-center text-center" '
+            + 'style="aspect-ratio:16/9;max-height:60vh;background:#fdf1f1;color:#c0392b;padding:24px;">'
+            + '<span class="material-symbols-outlined mb-2" style="font-size:40px;" aria-hidden="true">error</span>'
+            + '<div class="fw-semibold">ไม่พบวิดีโอ</div>'
+            + '<div class="small mt-1 text-secondary">วิดีโออาจถูกลบจาก Vimeo — กรุณาอัปโหลดวิดีโอใหม่แล้วกดบันทึก</div></div>';
     }
 
     // ===== โหลดข้อมูลบทเรียน (เติมฟอร์มตั้งค่า + วีดีโอ) =====
