@@ -81,11 +81,19 @@
                                 <input type="text" class="form-control" name="user_cpa_no" value="">
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label">สถานะการใช้งาน</label>
+                                <select class="form-select" name="user_status">
+                                    <option value="1">ใช้งาน</option>
+                                    <option value="0">ไม่ใช้งาน</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
                                 <label class="form-label">รหัสผ่าน (กรอกหากต้องการเปลี่ยน)</label>
                                 <input type="password" class="form-control" name="user_password" value="" autocomplete="new-password">
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label">ยืนยันรหัสผ่าน (กรอกหากต้องการเปลี่ยน)</label>
                                 <input type="password" class="form-control" name="user_password_confirm" value="" autocomplete="new-password">
                             </div>
@@ -288,6 +296,13 @@
     $(document).ready(function () {
         verifyModal = new bootstrap.Modal(document.getElementById('VerifyModal'));
 
+        // เปลี่ยน select สถานะการใช้งาน -> อัปเดต badge ที่หัวข้อให้ตรงกันทันที
+        $(document).on('change', '[name="user_status"]', function () {
+            $("#userAccountStatus").html(String($(this).val()) === '1'
+                ? '<span class="badge bg-success">บัญชีใช้งาน</span>'
+                : '<span class="badge bg-secondary">บัญชีถูกระงับ</span>');
+        });
+
         // เลือก "ไม่อนุมัติ" -> โชว์ช่องหมายเหตุ (บังคับกรอก) ; "อนุมัติ" -> ซ่อน + ล้างค่า
         $('input[name="approver_citizen"]').on('change', function () {
             if ($(this).val() === '1') {
@@ -358,6 +373,8 @@
         f.find('[name="user_cpa_no"]').val(u.user_cpa_no || "");
         f.find('[name="user_password"]').val("");
         f.find('[name="user_password_confirm"]').val("");
+        // สถานะการใช้งาน (1 = ใช้งาน, 0 = ไม่ใช้งาน)
+        f.find('[name="user_status"]').val(String(u.user_status) === '0' ? '0' : '1');
         $("#userVerifyStatus").html(VerifyBadge(u.identity_verified));
         // ยืนยันแล้ว (2) -> ปุ่มเปลี่ยนเป็น "อัพเดทข้อมูล", ยังไม่ยืนยัน -> ตรวจสอบเอกสาร
         $("#btnVerify").text(String(u.identity_verified) === '2' ? 'อัพเดทข้อมูล' : 'ตรวจสอบเอกสารยืนยันตัวตนผู้ใช้');

@@ -40,6 +40,8 @@ $cpd_no     = $str('user_cpd_no');
 $cpa_no     = $str('user_cpa_no');
 $password         = $str('user_password');
 $password_confirm = $str('user_password_confirm');
+// สถานะการใช้งาน: 1 = ใช้งาน, 0 = ไม่ใช้งาน (ค่าอื่นถือเป็น 1)
+$user_status = isset($_POST['user_status']) && (string) $_POST['user_status'] === '0' ? '0' : '1';
 
 if ($firstname === null) {
     Response::json(0, 'กรุณากรอกชื่อ', null);
@@ -96,7 +98,8 @@ try {
                 user_phone = :phone,
                 user_citizen_id = :citizen_id,
                 user_cpd_no = :cpd_no,
-                user_cpa_no = :cpa_no";
+                user_cpa_no = :cpa_no,
+                user_status = :user_status";
     $params = [
         ':prefix'     => $prefix,
         ':firstname'  => $firstname,
@@ -106,6 +109,7 @@ try {
         ':citizen_id' => $citizen_id,
         ':cpd_no'     => $cpd_no,
         ':cpa_no'     => $cpa_no,
+        ':user_status' => $user_status,
         ':id'         => $target_id,
     ];
 
