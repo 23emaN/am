@@ -29,6 +29,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         <th scope="col" class="text-nowrap">เลขที่ผู้สอบบัญชี</th>
                         <th scope="col" class="text-center text-nowrap">สถานะการยืนยัน</th>
                         <th scope="col" class="text-center text-nowrap">สถานะการใช้งาน</th>
+
                         <th scope="col" class="text-center" style="width: 110px;">จัดการ</th>
                     </tr>
                 </thead>
