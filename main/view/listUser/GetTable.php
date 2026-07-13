@@ -28,6 +28,7 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                         <th scope="col" class="text-nowrap">เลขที่ผู้ทำบัญชี</th>
                         <th scope="col" class="text-nowrap">เลขที่ผู้สอบบัญชี</th>
                         <th scope="col" class="text-center text-nowrap">สถานะการยืนยัน</th>
+                        <th scope="col" class="text-center text-nowrap">สถานะการใช้งาน</th>
                         <th scope="col" class="text-center" style="width: 110px;">จัดการ</th>
                     </tr>
                 </thead>
@@ -80,6 +81,18 @@ $esc = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
                                         echo '<span class="badge bg-secondary">ยังไม่ยืนยัน</span>';
                                     }
                                 ?>
+                            </td>
+                            <td class="text-center">
+                                <?php
+                                    $u_active = (string) ($row['user_status'] ?? '1') === '1';
+                                    $u_next   = $u_active ? '0' : '1';
+                                ?>
+                                <span class="badge <?php echo $u_active ? 'bg-success' : 'bg-secondary'; ?>"
+                                      style="cursor:pointer; user-select:none;"
+                                      title="คลิกเพื่อ<?php echo $u_active ? 'ปิด' : 'เปิด'; ?>ใช้งาน"
+                                      onclick="ToggleUserStatus('<?php echo $esc($row['user_id']); ?>', '<?php echo $u_next; ?>');">
+                                    <?php echo $u_active ? 'ใช้งาน' : 'ไม่ใช้งาน'; ?>
+                                </span>
                             </td>
                             <td class="text-center">
                                 <div class="d-flex gap-2 justify-content-center">

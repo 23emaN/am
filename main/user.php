@@ -102,6 +102,44 @@
         window.location.href = "user_edit.php?id=" + user_id;
     }
 
+    // สลับสถานะใช้งาน/ไม่ใช้งานของผู้ใช้ (คลิกที่ป้ายสถานะในตาราง) -> update user_status
+    function ToggleUserStatus(user_id, newStatus) {
+        var turnOn = String(newStatus) === '1';
+        Swal.fire({
+            title: turnOn ? 'เปิดใช้งานผู้ใช้นี้?' : 'ปิดใช้งานผู้ใช้นี้?',
+            html: turnOn
+                ? '<span class="text-secondary">ผู้ใช้จะกลับมาใช้งานระบบได้</span>'
+                : '<span class="text-secondary">ผู้ใช้จะถูกระงับการใช้งาน</span>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ตกลง',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: turnOn ? '#198754' : '#6c757d'
+        }).then(function (res) {
+            if (!res.isConfirmed) { return; }
+            $.ajax({
+                type: "POST",
+                url: "core.php",
+                data: {
+                    request_state: "list_user",
+                    request_function: "update_user_status",
+                    user_id: user_id,
+                    status: newStatus
+                },
+                dataType: "json",
+                success: function (r) {
+                    if (r.result == 1) {
+                        Swal.fire({ title: "สำเร็จ", html: '<span class="fw-bold text-success">' + r.msg + '</span>', icon: "success", showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                        GetData(currentPage);
+                    } else {
+                        Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถอัปเดตสถานะได้') + '</span>', icon: "error" });
+                    }
+                },
+                error: function (j, e) { ShowErrorAjax(j, e); }
+            });
+        });
+    }
+
     // ล็อกอินเข้าเว็บไซต์ (cpdth) แทนผู้ใช้ — มินต์ token แล้วเปิดเว็บไซต์เป็นผู้ใช้นั้น
     function LoginAsUser(user_id) {
         Swal.fire({
