@@ -20,6 +20,7 @@ $routes = [
         'get_list_user'  => __DIR__ . '/core/listUser/GetListUser.php',
         'get_user'       => __DIR__ . '/core/listUser/GetUser.php',
         'update_user'    => __DIR__ . '/core/listUser/UpdateUser.php',
+        'update_user_status' => __DIR__ . '/core/listUser/UpdateUserStatus.php',
         'delete_user'    => __DIR__ . '/core/listUser/DeleteUser.php',
         'login_as_user'  => __DIR__ . '/core/listUser/LoginAsUser.php',
     ],
