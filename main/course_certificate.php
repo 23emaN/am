@@ -212,22 +212,52 @@
         });
     }
 
-    // ดูใบรับรอง -> เลือกประเภทใบ (ผู้ทำบัญชี/ผู้สอบบัญชี) แล้วเปิดหน้าพรีวิว PDF ในแท็บใหม่
+    // ดูใบรับรอง -> ดึงเลขทะเบียนของผู้ใช้ก่อน แล้วให้เลือกเฉพาะประเภทที่ "มีเลข"
+    //   ผู้ทำบัญชี (cpd) = user_cpd_no, ผู้สอบบัญชี (cpa) = user_cpa_no
+    //   ถ้าคอลัมน์ไหนว่าง จะไม่โชว์ประเภทนั้นใน dropdown
     // ประเภทที่เลือกจะเปลี่ยนคำในใบรับรอง (เลขทะเบียน/รหัสหลักสูตร/ข้อความ "สำหรับผู้ทำบัญชี/ผู้สอบบัญชี")
     function DownloadCert(id) {
-        Swal.fire({
-            title: "เลือกประเภทใบรับรอง",
-            input: "select",
-            inputOptions: { cpd: "ผู้ทำบัญชี", cpa: "ผู้สอบบัญชี" },
-            inputValue: "cpd",
-            showCancelButton: true,
-            confirmButtonText: "ออกใบรับรอง",
-            cancelButtonText: "ยกเลิก",
-            inputValidator: function (v) { if (!v) { return "กรุณาเลือกประเภทใบรับรอง"; } }
-        }).then(function (res) {
-            if (!res.isConfirmed) { return; }
-            window.open("pdf_preview.php?type=certificate&id=" + id + "&cert_type=" + res.value, "_blank");
+        $.ajax({
+            type: "POST", url: "core.php",
+            data: { request_state: "list_certificate", request_function: "get_certificate", enroll_id: id },
+            dataType: "json",
+            success: function (r) {
+                if (r.result != 1) {
+                    Swal.fire({ title: "แจ้งเตือน", html: '<span class="fw-bold text-danger">' + (r.msg || 'ไม่สามารถโหลดข้อมูลได้') + '</span>', icon: "error" });
+                    return;
+                }
+                // สร้างตัวเลือกเฉพาะประเภทที่ผู้ใช้มีเลขทะเบียน
+                var opts = {};
+                if (String(r.data.cpd_no || '').trim() !== '') { opts.cpd = "ผู้ทำบัญชี"; }
+                if (String(r.data.cpa_no || '').trim() !== '') { opts.cpa = "ผู้สอบบัญชี"; }
+                var keys = Object.keys(opts);
+
+                if (keys.length === 0) {
+                    Swal.fire({ title: "ไม่สามารถออกใบรับรองได้", html: '<span class="text-secondary">ผู้ใช้นี้ยังไม่มีเลขที่ผู้ทำบัญชีหรือเลขที่ผู้สอบบัญชี</span>', icon: "warning" });
+                    return;
+                }
+                // แสดง modal ให้เลือกเสมอ (แม้มีประเภทเดียว) — โชว์เฉพาะตัวเลือกที่มีเลข
+                Swal.fire({
+                    title: "เลือกประเภทใบรับรอง",
+                    input: "select",
+                    inputOptions: opts,
+                    inputValue: keys[0],
+                    showCancelButton: true,
+                    confirmButtonText: "ออกใบรับรอง",
+                    cancelButtonText: "ยกเลิก",
+                    inputValidator: function (v) { if (!v) { return "กรุณาเลือกประเภทใบรับรอง"; } }
+                }).then(function (res) {
+                    if (!res.isConfirmed) { return; }
+                    OpenCertPreview(id, res.value);
+                });
+            },
+            error: function (j, e) { ShowErrorAjax(j, e); }
         });
+    }
+
+    // เปิดหน้าพรีวิว PDF ใบรับรองตามประเภทที่เลือก
+    function OpenCertPreview(id, certType) {
+        window.open("pdf_preview.php?type=certificate&id=" + id + "&cert_type=" + certType, "_blank");
     }
 
     // ดำเนินการ: ดึงข้อมูลแล้วเลือกโมดัลตามสถานะอนุมัติ
